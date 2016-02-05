@@ -1,0 +1,67 @@
+<!--settings toggles-->
+    <button class="btn btn-primary" 
+            ng-class="{'btn-success': portchecked}"
+            ng-model="portchecked" 
+            uib-btn-checkbox 
+            uib-btn-checkbox-true="1" 
+            uib-btn-checkbox-false="0"
+            popover-placement="bottom" 
+            popover-trigger="mouseenter" 
+            popover="Portraits On/Off" 
+            popover-append-to-body='true'>
+       Portraits <i class="fa fa-user"></i>
+    </button><br>
+    <button class="btn btn-primary" 
+           ng-class="{'btn-success': chattimestamp}"
+           ng-model="chattimestamp" 
+           uib-btn-checkbox 
+           uib-btn-checkbox-true="1" 
+           uib-btn-checkbox-false="0"
+            popover-placement="bottom" 
+            popover-trigger="mouseenter" 
+            popover="Timestamps On/Off" 
+            popover-append-to-body='true'>
+       Timestamps <i class="fa fa-hourglass-half"></i>
+    </button><br>
+    <button class="btn btn-primary" 
+           ng-class="{'btn-success': bell}"
+           ng-model="bell" 
+           uib-btn-checkbox 
+           uib-btn-checkbox-true="1" 
+           uib-btn-checkbox-false="0"
+            popover-placement="bottom" 
+            popover-trigger="mouseenter" 
+            popover="PM Bell On/Off" 
+            popover-append-to-body='true'>
+       PM Bell <i class="fa fa-bell-o"></i>
+    </button><br>
+    <button class="btn btn-primary" 
+           disabled="disabled" 
+           ng-class="{'btn-success': notifyPermission}"
+           ng-model="notifyPermission" 
+           uib-btn-checkbox 
+           uib-btn-checkbox-true="1" 
+           uib-btn-checkbox-false="0"
+            popover-placement="bottom" 
+            popover-trigger="mouseenter" 
+            popover="Notifications On/Off" 
+            popover-append-to-body='true'>
+       Notifications <i class="fa fa-paper-plane-o"></i>
+    </button><br>
+    <button style="cursor: pointer;" 
+           class="btn btn-primary" 
+           ng-click="exportChatlog()" 
+            popover-placement="bottom" 
+            popover-trigger="mouseenter" 
+            popover="Save chat Log" 
+            popover-append-to-body='true'>
+       Export Chat Log <i class="fa fa-file-archive-o"></i>
+    </button>
+<br>
+<!--channel mute-->
+<ui-select multiple ng-model="channels.muted" theme="select2" ng-disabled="disabled" style="width: 15em;">
+    <ui-select-match placeholder="Select channels to ignore...">{{$item.channel}}</ui-select-match>
+    <ui-select-choices repeat="channel.code as channel in channels.full">
+        <div ng-bind-html="channel.channel"></div>
+    </ui-select-choices>
+</ui-select>

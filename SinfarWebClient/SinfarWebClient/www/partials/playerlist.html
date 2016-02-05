@@ -1,0 +1,105 @@
+<div layout="column">
+    <!--player list search-->
+    <div layout="row">
+        <input ng-model="searchText" class="form-control" placeholder="Player Search" flex>
+    </div>
+
+    <!--list of players per server-->
+    <div layout="row" flex>
+        <table width=100% style="background-color:black">
+            <!--server list-->
+            <tr ng-repeat-start="server in servers">
+                <td style="cursor: pointer;" ng-click="server.expanded = !server.expanded" class="PlayerServer">
+                    {{server.name}} <span class="badge">{{pfilter.length}}</span>
+                </td>
+            </tr>
+            <!--player list-->
+            <tr ng-show="server.expanded" ng-repeat-end="">
+                <td>
+                    <div>
+                        <table width=100%>
+                            <!--player row-->
+                            <tr ng-repeat="player in pfilter = (((players | filter:{chatClient:server.port}) | filter:searchText) | orderBy:server.order)" ng-class="{igPlist:player.ignore}">
+                                <td>
+                                    <!--functions menu-->
+                                    <md-menu>
+                                        <span onmouseover="this.style.color='gold'" onmouseout="this.style.color='white'" aria-label="PC Menu" ng-click="openMenu($mdOpenMenu, $event)">
+                                            <i class="fa fa-bars"></i>
+                                        </span>
+                                        <md-menu-content>
+                                            <md-menu-item ng-if="loginshow">
+                                                <md-button aria-label="PM">
+                                                    <md-tooltip md-direction="top">PM</md-tooltip>
+                                                    <i class="fa fa-commenting-o" ng-click="setPM(player)"> Private Message</i>
+                                                </md-button>
+                                            </md-menu-item>
+                                            <md-menu-item>
+                                                <md-button aria-label="Zoom Portrait">
+                                                    <md-tooltip md-direction="top">Zoom Portrait</md-tooltip>
+                                                    <i class="fa fa-search" ng-click="showPort(player)" data-toggle="modal" data-target="#bioModal"> Zoom Portrait</i>
+                                                </md-button>
+                                            </md-menu-item>
+                                            <md-menu-item ng-if="player.pcName.length">
+                                                <md-button aria-label="View Bio">
+                                                    <md-tooltip md-direction="top">View Bio</md-tooltip>
+                                                    <i class="fa fa-bars" ng-click="showBio(player)" data-toggle="modal" data-target="#bioModal"> View Bio.</i>
+                                                </md-button>
+                                            </md-menu-item>
+                                            <md-menu-item ng_if="!player.fnd">
+                                                <md-button aria-label="Friend">
+                                                    <md-tooltip md-direction="top">Add Friend</md-tooltip>
+                                                    <i class="fa fa-heart-o" ng-click="addFriend(player)"> Add Friend.</i>
+                                                </md-button>
+                                            </md-menu-item>
+                                            <md-menu-item ng_if="player.fnd">
+                                                <md-button aria-label="Unfriend">
+                                                    <md-tooltip md-direction="top">Remove Friend</md-tooltip>
+                                                    <i class="fa fa-heart" ng-click="remFriend(player)"> Remove Friend</i>
+                                                </md-button>
+                                            </md-menu-item>
+                                            <md-menu-item ng_if="!player.ignore">
+                                                <md-button aria-label="Ignore">
+                                                    <md-tooltip md-direction="top">Ignore</md-tooltip>
+                                                    <i class="fa fa-minus" ng-click="mutePlayer(player)"> OOC Ignore</i>
+                                                </md-button>
+                                            </md-menu-item>
+                                            <md-menu-item ng_if="player.ignore">
+                                                <md-button aria-label="Un-Ignore">
+                                                    <md-tooltip md-direction="top">Un-Ignore</md-tooltip>
+                                                    <i class="fa fa-check" ng-click="unmutePlayer(player)"> Un-Ignore</i>
+                                                </md-button>
+                                            </md-menu-item>
+                                            <md-menu-item>
+                                                <md-button aria-label="Other Chars">
+                                                    <md-tooltip md-direction="top">Other Char.s</md-tooltip>
+                                                    <i class="fa fa-users" ng-click="plist(player)" data-toggle="modal" data-target="#charListModal"> Char. List</i>
+                                                </md-button>
+                                            </md-menu-item>
+                                        </md-menu-content>
+                                    </md-menu>
+                                    <!--player/char-->
+                                    <img ng-src="http://nwn.sinfar.net{{ player.portrait }}" class="img-circle" ng-if="portchecked" />
+                                    <span style="cursor: pointer;"
+                                          ng-class="{sinfarfriend:player.fnd}"
+                                          ng-show="!player.pcName.length"
+                                          ng-click="setPM(player)">
+                                        {{player.playerName}}
+                                    </span>
+                                    <span style="cursor: pointer;"
+                                          ng-class="{'sinfarfriend':player.fnd}"
+                                          ng-click="setPM(player)"
+                                          ng-if="player.pcName.length">
+                                        <md-tooltip md-direction="right">
+                                            {{player.playerName}}
+                                        </md-tooltip>
+                                        {{player.pcName}}
+                                    </span>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>

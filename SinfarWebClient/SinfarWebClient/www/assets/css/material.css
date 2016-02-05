@@ -1,0 +1,394 @@
+    html{
+      height:100%;
+    }
+    body {
+      height: 100%;
+      overflow:hidden;
+    }
+    .panel-group .list-group {
+      margin-bottom: 0;
+    }
+    .panel-group .list-group .list-group-item {
+      border-radius: 0;
+      border-left: none;
+      border-right: none;
+    }
+    .panel-group .list-group .list-group-item:last-child {
+      border-bottom: none;
+    }
+    #playerlistdiv td{
+      padding:10px;
+    }
+
+/*webchat original*/
+    body
+    {
+      background-color:#000;
+      color:#FFF;
+      font-family:Tahoma, Geneva, sans-serif;
+    }
+
+    md-tooltip{
+        color:black;
+    }
+
+
+
+
+
+
+#select-channel, #textarea-chat-bar
+    {
+      background-color:#000;
+      color:#FFF;
+      font-size:16px;
+      font-family:Tahoma, Geneva, sans-serif;
+
+      padding:0;
+      margin:0;
+      border:0;
+
+      -moz-appearance:none;
+      -webkit-appearance:none;
+
+      outline:0;
+    }
+    #textarea-chat-bar
+    {
+      width:100%;
+      height:100%;
+      resize:none;
+      display:block;
+    }
+    #div-chat-messages
+    {
+      position:absolute;
+      bottom:35px;
+      top:7px;
+      overflow:auto;
+      width:100%;
+    }
+    #div-players-list
+    {
+    right:0;
+    width:100%;
+    height:90%;
+    top:0;
+    overflow-y:auto;
+    overflow-x: hidden;
+    }
+    #table-players-list
+    {
+      width:100%;
+      border:0;
+    }
+    #table-players-list div[data-player-id] span
+    {
+      vertical-align:middle;
+      text-align:left;
+      word-wrap:break-word;
+      max-width:110px;
+    }
+    #table-players-list div[data-player-id]
+    {
+      cursor:pointer;
+    }
+    #table-players-list div[data-player-id]:hover
+    {
+      opacity:0.7;
+    }
+    #table-players-list player-list-name
+    {
+      width:100%;
+    }
+    .players-list-category{
+    text-align: center;
+    }
+    .players-list-category span
+    {
+      text-align:center;
+      font-weight:bold;
+    }
+    #table-chat-messages-container
+    {
+    width:100%;
+    height:95%;
+    bottom:3em;
+    left:0;
+    padding-right:3.5em;
+    position:absolute;
+    overflow:auto;
+    }
+    #table-chat-messages
+    {
+    left:0;
+    height:100%;
+    position:absolute;
+    overflow:auto;
+    padding-right:3.5em;
+    bottom:0;
+    }
+    #table-action-bar
+    {
+      height:2em;
+      width:100%;
+      bottom:0;
+      right:0;
+      position:absolute;
+    }
+    #table-action-bar td
+    {
+      border:2px ridge #bf9f64;
+    }
+    #td-slect-channel
+    {
+      vertical-align:middle;
+      text-align:center;
+      background-color:#000;
+
+      border-right-width:0;
+
+      padding:0;
+      margin:0;
+      height:0;
+      width:0;
+    }
+    #td-chat-bar
+    {
+      height:100%;
+      width:100%;
+      background-color:#000;
+    }
+    .img-chat-message
+    {
+      height:50px;
+      width:32px;
+      vertical-align: middle;
+      padding:1px;
+    }
+    .td-chat-message
+    {
+      width:100%;
+    }
+    .span-chat-message-from-pc-name /*player name in message*/
+    {
+      color:#8F7FFF;
+    }
+    .chat-channel-2, .chat-channel-18 /*Shout - Non mute*/
+    {
+      color:#FFEF50;
+    }
+    .chat-channel-3, .chat-channel-19 /*Whisper*/
+    {
+      color:#808080;
+    }
+    .chat-channel-4, .chat-channel-20 /*tells*/
+    {
+      color:#20FF20;
+    }
+    .chat-channel-30 /*Yell*/
+    {
+      color:#D92324;
+    }
+    .chat-channel-31 /*Quiet*/
+    {
+      color:#404040;
+    }
+    .chat-channel-32 /*Silent*/
+    {
+      color:#303030;
+    }
+    .chat-channel-101 /*DM*/
+    {
+      color:#f67271;
+    }
+    .chat-channel-102 /*Build*/
+    {
+      color:#b7f520;
+    }
+    .chat-channel-104 /*Event*/
+    {
+      color:#ab23f2;
+    }
+    .chat-channel-108 /*Sex*/
+    {
+      color:#f520e1;
+    }
+    .chat-channel-132 /*FFA*/
+    {
+      color:#20bff0;
+    }
+    .chat-channel-116 /*Action*/
+    {
+      color:#b56a23;
+    }
+    .chat-channel-164 /*OOC*/
+    {
+      color:#b1a2bd;
+    }
+    .chat-channel-228 /*PVP*/
+    {
+      color:#fe5f2e;
+    }
+
+    .quote-channel-2, .quote-channel-18 /*Shout - Non mute*/
+    {
+      border-color:#FFEF50;
+    }
+    .quote-channel-3, .quote-channel-19 /*Whisper*/
+    {
+      border-color:#808080;
+    }
+    .quote-channel-4, .quote-channel-20 /*tells*/
+    {
+      border-color:#20FF20;
+    }
+    .quote-channel-30 /*Yell*/
+    {
+      border-color:#D92324;
+    }
+    .quote-channel-31 /*Quiet*/
+    {
+      border-color:#404040;
+    }
+    .quote-channel-32 /*Silent*/
+    {
+      border-color:#303030;
+    }
+    .quote-channel-101 /*DM*/
+    {
+      border-color:#f67271;
+    }
+    .quote-channel-102 /*Build*/
+    {
+      border-color:#b7f520;
+    }
+    .quote-channel-104 /*Event*/
+    {
+      border-color:#ab23f2;
+    }
+    .quote-channel-108 /*Sex*/
+    {
+      border-color:#f520e1;
+    }
+    .quote-channel-132 /*FFA*/
+    {
+      border-color:#20bff0;
+    }
+    .quote-channel-116 /*Action*/
+    {
+      border-color:#b56a23;
+    }
+    .quote-channel-164 /*OOC*/
+    {
+      border-color:#b1a2bd;
+    }
+    .quote-channel-228 /*PVP*/
+    {
+      border-color:#fe5f2e;
+    }
+
+    #settins-dialog-box
+    {
+      display:none;
+    }
+    #select-translate-to
+    {
+
+    }
+    .chat-message-info
+    {
+      color:#0F0;
+    }
+    .chat-message-error
+    {
+      color:#F00;
+    }
+    .chat-channel-ignore{
+      display: none;
+    }
+    .sinfarfriend{color:gold}
+    .channel-mute{display:none;}
+    .ignorePlayer{display:none;}
+    .igPlist{background-color:rgba(255,0,0,.25);}
+
+/*playerlist menu button*/
+    .PlayerServer{
+    background: black;
+    color: white;
+    font-weight: bold;
+    border: 2px ridge #bf9f64;
+    text-align: center;
+    padding: 3px;
+    margin: 3px;
+    }
+    .nav-tabs{
+        border-color: #bf9f64;
+    }
+    .nav-tabs>li.active>a, .nav-tabs>li.active>a:hover, .nav-tabs>li.active>a:focus{
+        background-color:#987f50;
+        color:#fff;
+        text-shadow: 0px 0px 5px rgba(0, 0, 0, 1);
+        border-color: #bf9f64;
+
+    }
+    .nav{
+        height:100%;
+        overflow:auto;
+        width:3em;
+        float:left;
+        position:absolute;
+        top:0;
+        left:0;
+    }
+    .nav:hover{width:15em}
+    .plLabel{display:none;}
+    .nav:hover .plLabel{display:inline;}
+    .tab-content{
+        overflow:hidden;
+        vertical-align:top;
+        margin-left:3em;
+    }
+    .sinfarTabContent{
+        overflow:auto;
+    }
+    .alert{
+        position: absolute;
+        z-index: 1000;
+    }
+/*hacky*/
+    .table{
+      background-color:black;
+    }
+    .well{
+    background-color:black;
+    color:white;
+    border:none;
+    }
+    .tree-toggler{
+    background-color:black;
+    color:white;
+    width:100%;
+    padding:.5em;
+    border:2px ridge #bf9f64;
+    }
+    .popover{
+    color:black;
+    }
+    .modal-body{background-color:black; max-height:80%; overflow:auto;}
+    .modal-body img{display:block;margin:auto;}
+    .ms-drop ul{text-align:left;}
+    .select2-drop{text-align:left;}
+    .select2-container-multi .select2-choices .select2-search-field input{width:auto}
+md-sidenav,
+md-sidenav.md-locked-open,
+md-sidenav.md-closed.md-locked-open-add-active {
+    min-width: 0 !important;
+    width: 15em !important;
+    max-width: 15em !important;
+}
+.md-sidenav-right {
+    min-width: 0 !important;
+    width: 30em !important;
+    max-width: 30em !important;
+}

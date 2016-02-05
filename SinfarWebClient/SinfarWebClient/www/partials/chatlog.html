@@ -1,0 +1,176 @@
+<div layout="row" flex> 
+   <div layout="column" flex style="height:94%;">
+        <div flex style="overflow-y:auto;" scroll-glue>
+            <div ng-repeat="m in chatLog"
+                    layout="row"
+                    class="chat-channel-{{m.channel}}"
+                    ng-class="{'channel-mute': channels.muted.indexOf({{m.channel}})>-1, 'ignorePlayer':msg.igmsg}">
+                <blockquote class="quote-channel-{{m.channel}}"
+                            style="padding:0 10px; margin:0 0 5px">
+                    <!--from line-->
+                    <footer>
+                        <i class="fa fa-times-circle" id="{{m.$$hashKey}}" remove-Message></i>
+                        <span style="cursor: pointer;" ng-click="setPM(m)">
+                            <span ng-show="portchecked">
+                                <img ng-src="http://nwn.sinfar.net{{m.fromPortrait}}" class="img-circle">
+                            </span>
+                            <span class="span-chat-message-from-pc-name">
+                                <md-tooltip md-direction="right" ng-if="m.fromPCName">
+                                    {{m.fromPlayerName}}
+                                </md-tooltip>
+                                <span ng-class="{sinfarfriend:m.fndmsg}"
+                                        ng-bind="m.fromName">
+                                </span>
+                            </span>
+                        </span>
+                        <!--timestamp-->
+                        <cite ng-show="chattimestamp">
+                            <span ng-bind="m.timestamp"></span>
+                        </cite>
+                    </footer>
+                    <!--message-->
+                    <span class="span-chat-message" ng-bind-html="m.message" style=""></span>
+                </blockquote>
+            </div>
+        </div>
+        <div layout="row" flex="none">
+            <input channel-select />
+            <input message flex />
+        </div>
+    </div>
+    <md-sidenav flex layout="column" class="md-sidenav-right" md-component-id="playerListNav" md-is-locked-open="tnav.playerListNav" ng-if="!tnav.playerListNav">
+        <player-list-side></player-list-side>
+    </md-sidenav>
+</div>
+
+<!--
+<md-content>
+
+</md-content>
+<md-toolbar layout="row">
+    <div layout="row" flex style="max-height:100%;">
+        <div layout="column" flex id="content">
+            <md-content ui-view layout-fill flex class="md-padding">
+                <div flex ng-repeat="m in messagesList.chatLog.messages"
+                     class="chat-channel-{{m.channel}}"
+                     ng-class="{'channel-mute': channels.muted.indexOf({{m.channel}})>-1, 'ignorePlayer':m.igmsg}"
+                     style="width:100%">
+
+                </div>
+-->
+                <!--message submit area-->
+                <!--<table ng-show="!settingsTabActive && !playersTabActive" id="table-action-bar" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td ng-model="selChannel" id="td-slect-channel">
+                            <select name="channel" id="select-channel" ng-model="chatMessageChannel">
+                                <option value="talk">Talk:</option>
+                                <option value="whisper">Whisper:</option>
+                                <option value="quiet">Quiet:</option>
+                                <option value="silent">Silent:</option>
+                                <option value="yell">Yell:</option>
+                                <option value="party">Party:</option>
+                                <option value="dm">DM:</option>
+                                <option value="ooc">OOC:</option>
+                                <option value="event">Event:</option>
+                                <option value="action">Action:</option>
+                                <option value="pvp">PvP:</option>
+                                <option value="sex">Sex:</option>
+                                <option value="ffa">FFA:</option>
+                                <option value="build">Builders:</option>
+                            </select>
+                        </td>
+                        <td id="td-chat-bar">
+                            <div contenteditable id="textarea-chat-bar" ng-keydown="$event.keyCode === 13 && sChat()" ng-keyup="$event.keyCode === 13 && msgReset()"></div>
+                        </td>
+                    </tr>
+                </table>
+            </md-content>
+        </div>-->
+        <!--<md-sidenav layout="column" class="md-sidenav-right" md-component-id="right" md-is-locked-open="$mdMedia('gt-sm')">
+            <input ng-model="searchText" class="form-control" placeholder="Player Search">
+            <div>
+                <table style="background-color:black;width:100%">
+                    <tr ng-repeat-start="server in playerList">
+                        <td style="cursor: pointer;" ng-click="server.expanded = !server.expanded" class="PlayerServer">
+                            {{server.name}} <span class="badge">{{pfilter.length}}</span>
+                        </td>
+                    </tr>
+                    <tr ng-show="server.expanded" ng-repeat-end="">
+                        <td>
+                            <div>
+                                <table sstyle="width:100%">
+                                    <tr ng-repeat="player in pfilter = (server.players | filter:searchText)" ng-class="{igPlist:player.ignore}">
+                                        <td>
+                                            <span uib-dropdown dropdown-append-to-body>
+                                                <a href id="simple-dropdown" class="plistItem" uib-dropdown-toggle>
+                                                    <i class="fa fa-angle-down"></i>
+                                                </a>
+                                                <ul class="uib-dropdown-menu" aria-labelledby="simple-dropdown">
+                                                    <li>
+                                                        <a href="#">
+                                                            <i class="fa fa-commenting-o" style="cursor: pointer;" ng-click="setPM(player)" ng-show="loginshow"> PM</i>
+                                                        </a>
+                                                    </li>
+                                                    <li>
+                                                        <a href="#">
+                                                            <i class="fa fa-search" style="cursor: pointer;" ng-click="showPort(player)" data-toggle="modal" data-target="#bioModal"> Zoom Portrait.</i>
+                                                        </a>
+                                                    </li>
+                                                    <li ng-if="player.pcName.length">
+                                                        <a href="#">
+                                                            <i class="fa fa-bars" style="cursor: pointer;" ng-click="showBio(player)" data-toggle="modal" data-target="#bioModal"> View Bio.</i>
+                                                        </a>
+                                                    </li>
+                                                    <li ng_if="!player.fnd">
+                                                        <a href="#">
+                                                            <i class="fa fa-heart-o" style="cursor: pointer;" ng-click="addFriend(player)"> Friend</i>
+                                                        </a>
+                                                    </li>
+                                                    <li ng_if="player.fnd">
+                                                        <a href="#">
+                                                            <i class="fa fa-heart" style="cursor: pointer;" ng-click="remFriend(player)"> Unfriend</i>
+                                                        </a>
+                                                    </li>
+                                                    <li ng_if="!player.ignore">
+                                                        <a href="#">
+                                                            <i class="fa fa-minus" style="cursor: pointer;" ng-click="mutePlayer(player)"> Ignore</i>
+                                                        </a>
+                                                    </li>
+                                                    <li ng_if="player.ignore">
+                                                        <a href="#">
+                                                            <i class="fa fa-check" style="cursor: pointer;" ng-click="unmutePlayer(player)"> Un-Ignore</i>
+                                                        </a>
+                                                    </li>
+                                                    <li>
+                                                        <a href="#">
+                                                            <i class="fa fa-users" style="cursor: pointer;" ng-click="plist(player)" data-toggle="modal" data-target="#charListModal"> Other Chars.</i>
+                                                        </a>
+                                                    </li>
+                                                </ul>
+                                            </span>
+                                            <img ng-src="http://nwn.sinfar.net{{ player.portrait }}" class="img-circle" ng-if="portchecked" />
+                                            <span style="cursor: pointer;"
+                                                  ng-class="{sinfarfriend:player.fnd}"
+                                                  ng-show="!player.pcName.length"
+                                                  ng-click="setPM(player)">
+                                                {{player.playerName}}
+                                            </span>
+                                            <span style="cursor: pointer;"
+                                                  ng-class="{'sinfarfriend':player.fnd}"
+                                                  ng-click="setPM(player)"
+                                                  ng-if="player.pcName.length"
+                                                  popover-placement="left"
+                                                  popover-trigger="mouseenter"
+                                                  popover="{{player.playerName}}"
+                                                  popover-append-to-body='true'>
+                                                {{player.pcName}}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </md-sidenav>-->

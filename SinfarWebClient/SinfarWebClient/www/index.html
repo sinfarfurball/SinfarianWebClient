@@ -1,0 +1,44 @@
+﻿<html>
+<!--Primairy use is to load libraries and initialize app. Views, controls and logic will all be handled by initalized functions.-->
+    <head>
+        <title>Sinfarian Chat</title>
+        <link rel="stylesheet" href="assets/css/angular/angular-material.min.css">
+        <link rel="stylesheet" href="assets/css/angular/ngDialog.css">
+        <link rel="stylesheet" href="assets/css/angular/ngDialog-theme-default.css">
+        <link rel="stylesheet" href="assets/css/font-awesome.min.css" />
+        <link rel="stylesheet" href="assets/css/material.css">
+
+        <script src="assets/js/libs/winstore-jscompat.js"></script>
+        <script src="assets/js/libs/jquery-2.1.4.min.js"></script>
+        <script src="assets/js/libs/underscore.js" type="text/javascript"></script>
+
+        <script src="assets/js/angular/angular.min.js"></script>
+        <script src="assets/js/angular/angular-messages.js"></script>
+        <script src="assets/js/angular/angular-animate.min.js"></script>
+        <script src="assets/js/angular/angular-aria.min.js"></script>
+        <script src="assets/js/angular/angular-sanitize.js"></script>
+        <script src="assets/js/angular/restangular.js"></script>
+        <script src="assets/js/angular/angular-material.min.js"></script>
+        <script src="assets/js/angular/ngDialog.js" type="text/javascript"></script>
+        <script src="assets/js/angular/scrollglue.js" type="text/javascript"></script>
+
+        <script src="assets/js/FileSaver.min.js" type="text/javascript"></script>
+        <script src="assets/js/jszip.min.js" type="text/javascript"></script>
+    </head>
+    <body layout="column" flex>
+        <div ng-app="myApp" ng-controller="chatCtrl">
+            <uib-alert ng-repeat="alert in alerts" type="{{alert.type}}" close="closeAlert($index)" style="position:absolute;top:0;width:100%;">{{alert.msg}}</uib-alert>
+
+            <primary-page></primary-page>
+
+            <audio id="audio1"><source src="http://sinfar.net/sounds/button-9.wav"></audio>
+        </div>
+        <!--controler js-->
+        <script src="assets/js/material.js"></script>
+        <script src="components/controllers/controllers.js"></script>
+        <script src="components/directives/directives.js"></script>
+        <script src="components/services/services.js"></script>
+        <script src="components/services/chatLogService.js"></script>
+        <script src="components/services/settingsService.js"></script>
+    </body>
+</html>
