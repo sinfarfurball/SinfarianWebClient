@@ -1,5 +1,4 @@
 ﻿<html>
-<!--Primairy use is to load libraries and initialize app. Views, controls and logic will all be handled by initalized functions.-->
     <head>
         <title>Sinfarian Chat</title>
         <link rel="stylesheet" href="assets/css/angular/angular-material.min.css">
@@ -26,18 +25,47 @@
         <script src="assets/js/jszip.min.js" type="text/javascript"></script>
     </head>
     <body layout="column" flex>
-        <div ng-app="myApp" ng-controller="chatCtrl">
+        <div ng-app="myApp" ng-controller="chatCtrl"><!--alert messages-->
             <uib-alert ng-repeat="alert in alerts" type="{{alert.type}}" close="closeAlert($index)" style="position:absolute;top:0;width:100%;">{{alert.msg}}</uib-alert>
 
-            <primary-page></primary-page>
+
+            <div layout="column"><!--main page-->
+                <md-toolbar layout="row" flex>
+                    <md-button ng-click="toggleSidenav('primaryNav')" class="md-icon-button">
+                        <md-icon aria-label="Menu Toggle">
+                            <i class="fa fa-bars"></i>
+                        </md-icon>
+                    </md-button>
+                    <span flex>Sinfar Chat: {{playerName}}</span>
+                    <md-button ng-click="toggleSidenav('playerListNav')" class="md-icon-button" ng-if="pNav='chat'">
+                        <md-icon aria-label="Player List Toggle">
+                            <i class="fa fa-bars"></i>
+                        </md-icon>
+                    </md-button>
+                </md-toolbar>
+                <div layout="row" flex>
+                    <md-sidenav flex layout="column" class="md-sidenav-left" md-component-id="primaryNav">
+                        <md-button class="md-accent" ng-click="pNav='settings'">Settings</md-button>
+                        <md-button class="md-accent" ng-click="pNav='chat'">Chat Log</md-button>
+                        <md-button class="md-accent" ng-repeat="(player,msg) in messagesList.pms">{{player}}</md-button>
+                    </md-sidenav>
+                    <div layout="column" flex ng-switch on="pNav">
+                        <div class="animate-switch" ng-switch-when="settings" settings-view></div>
+                        <div class="animate-switch" ng-switch-when="pm" pm-view></div>
+                        <div class="animate-switch" ng-switch-default chat-view></div>
+                    </div>
+                </div>
+            </div>
+
 
             <audio id="audio1"><source src="http://sinfar.net/sounds/button-9.wav"></audio>
         </div>
-        <!--controler js-->
+
+
         <script src="assets/js/material.js"></script>
-        <script src="components/controllers/controllers.js"></script>
+        <script src="assets/js/controllers.js"></script>
         <script src="components/directives/directives.js"></script>
-        <script src="components/services/services.js"></script>
+        <script src="assets/js/services.js"></script>
         <script src="components/services/chatLogService.js"></script>
         <script src="components/services/settingsService.js"></script>
     </body>
