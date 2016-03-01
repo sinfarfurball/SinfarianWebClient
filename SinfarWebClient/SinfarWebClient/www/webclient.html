@@ -1,0 +1,95 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>Sinfarian Web Client</title>
+    <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/angular_material/1.0.4/angular-material.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.6.0/lodash.min.js"></script>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular-animate.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular-aria.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular-messages.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular-sanitize.min.js"></script>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/angular_material/1.0.4/angular-material.min.js"></script>
+
+    <script src="assets/js/angular/scrollglue.js" type="text/javascript"></script>
+
+    <script src="assets/js/FileSaver.min.js" type="text/javascript"></script>
+    <script src="assets/js/jszip.min.js" type="text/javascript"></script>
+
+</head>
+<body ng-app="sinfarWebclient" ng-controller="mainCtrl" ng-cloak>
+    <uib-alert ng-repeat="alert in alerts" type="{{alert.type}}" close="closeAlert($index)" style="position:absolute;top:0;width:100%;">{{alert.msg}}</uib-alert>
+    <div>
+        <md-toolbar layout="column">
+            <div layout-align="center center" class="md-padding">Sinfar Webclient</div>
+            <div layout="row">
+                <md-tabs md-selected="selTabIndex" md-border-bottom md-autoselect flex>
+                    <md-tab ng-repeat="pm in pmList" label="pm.player"></md-tab><!--need to notify when player leaves and they still have a pm tab so it can be cleaned.-->
+                </md-tabs>
+                <md-button>
+                    Login
+                </md-button>
+            </div>
+        </md-toolbar>
+        <div>
+            <md-sidenav class="md-sidenav-left md-whiteframe-z2" md-component-id="left" md-is-locked-open="$mdMedia('gt-md')">
+                <md-toolbar>
+                    <h1 class="md-toolbar-tools">Sidenav Left</h1>
+                </md-toolbar>
+                <md-content layout-padding ng-controller="LeftCtrl">
+
+                </md-content>
+            </md-sidenav>
+
+            <div>
+                Primary chat window
+                <md-virtual-repeat-container id="chat-container" md-top-index="messages.topIndex">
+                    <div md-virtual-repeat="msg in messages.log" md-on-demand class="repeated-item" flex>
+                        {{msg}}
+                    </div>
+                </md-virtual-repeat-container>
+            </div>
+
+            <md-sidenav class="md-sidenav-right md-whiteframe-z2" md-component-id="right" md-is-locked-open="$mdMedia('gt-md')">
+                <md-toolbar>
+                    <h1 class="md-toolbar-tools">Sidenav Right</h1>
+                </md-toolbar>
+                <md-content layout-padding ng-controller="LeftCtrl">
+
+                </md-content>
+            </md-sidenav>
+        </div>
+        <div>
+            <table id="table-action-bar" cellspacing="0" cellpadding="0">
+                <tr>
+                    <td ng-model="selChannel" id="td-slect-channel">
+                        <select name="channel" id="select-channel" ng-model="chatMessageChannel">
+                            <option value="talk">Talk:</option>
+                            <option value="whisper">Whisper:</option>
+                            <option value="quiet">Quiet:</option>
+                            <option value="silent">Silent:</option>
+                            <option value="yell">Yell:</option>
+                            <option value="party">Party:</option>
+                            <option value="dm">DM:</option>
+                            <option value="ooc">OOC:</option>
+                            <option value="event">Event:</option>
+                            <option value="action">Action:</option>
+                            <option value="pvp">PvP:</option>
+                            <option value="sex">Sex:</option>
+                            <option value="ffa">FFA:</option>
+                            <option value="build">Builders:</option>
+                        </select>
+                    </td>
+                    <td id="td-chat-bar">
+                        <div contenteditable id="textarea-chat-bar" ng-keydown="$event.keyCode === 13 && sChat()" ng-keyup="$event.keyCode === 13 && msgReset()"></div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</body>
+</html>
