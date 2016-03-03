@@ -1,19 +1,84 @@
-﻿var app = angular.module('sinfarWebclient', ['ngMaterial', 'ngSanitize', 'ngStorage']);
+﻿var app = angular.module('sinfarWebclient', ['ngMaterial', 'ngSanitize', 'ngStorage', 'luegg.directives']);
 app.run(function ($rootScope) {
     $rootScope._ = window._;
 });
 
+
 app.config(function ($mdThemingProvider, $mdIconProvider) {
+    $mdThemingProvider.definePalette('sinfarGold', {
+        '50': '#fbf9f7',
+        '100': '#e0d7c4',
+        '200': '#cdbda0',
+        '300': '#b49d71',
+        '400': '#aa8f5d',
+        '500': '#987f50',
+        '600': '#846e45',
+        '700': '#705d3b',
+        '800': '#5c4d30',
+        '900': '#483c26',
+        'A100': '#fbf9f7',
+        'A200': '#e0d7c4',
+        'A400': '#aa8f5d',
+        'A700': '#705d3b',
+        'contrastDefaultColor': 'light',
+        'contrastDarkColors': '50 100 200 A100 A200'
+    });
+    $mdThemingProvider.definePalette('sinfarCold', {
+        '50': '#f7f8fb',
+        '100': '#c4cee0',
+        '200': '#a0afcd',
+        '300': '#7188b4',
+        '400': '#5d78aa',
+        '500': '#506998',
+        '600': '#455b84',
+        '700': '#3b4d70',
+        '800': '#303f5c',
+        '900': '#263248',
+        'A100': '#f7f8fb',
+        'A200': '#c4cee0',
+        'A400': '#5d78aa',
+        'A700': '#3b4d70',
+        'contrastDefaultColor': 'light',
+        'contrastDarkColors': '50 100 200 300 A100 A200'
+    });
+    $mdThemingProvider.definePalette('sinfarRose', {
+        '50': '#fbf7f7',
+        '100': '#e0c9c4',
+        '200': '#cda7a0',
+        '300': '#b47b71',
+        '400': '#aa695d',
+        '500': '#985b50',
+        '600': '#844f45',
+        '700': '#70433b',
+        '800': '#5c3730',
+        '900': '#482b26',
+        'A100': '#fbf7f7',
+        'A200': '#e0c9c4',
+        'A400': '#aa695d',
+        'A700': '#70433b',
+        'contrastDefaultColor': 'light',
+        'contrastDarkColors': '50 100 200 300 A100 A200'
+    });
     $mdThemingProvider.theme('default')
-      .dark()
-      .primaryPalette('amber', {
-          'default': '400', // by default use shade 400 from the pink palette for primary intentions
-          'hue-1': '200', // use shade 100 for the <code>md-hue-1</code> class
-          'hue-2': '600', // use shade 600 for the <code>md-hue-2</code> class
-          'hue-3': 'A400' // use shade A100 for the <code>md-hue-3</code> class
-      })
-      .accentPalette('orange');
+        .dark()
+        .primaryPalette('sinfarGold')
+        .accentPalette('sinfarRose', {
+            'default': '500',
+            'hue-1': '300',
+            'hue-2': '800',
+            'hue-3': 'A100'
+        });
     //.backgroundPalette('black');
+
+    $mdThemingProvider.theme('settings')
+        .dark()
+        .primaryPalette('sinfarCold')
+        .accentPalette('sinfarGold', {
+            'default': '500',
+            'hue-1': '300',
+            'hue-2': '800',
+            'hue-3': 'A100'
+        });
 
     $mdIconProvider.fontSet('fa', 'fontawesome');
 });
@@ -335,9 +400,9 @@ app.controller('mainCtrl', function ($scope, $http, $timeout, $window, $filter, 
                     angular.forEach($scope.servers, function (server, key) {//add sort that is adjstable to user for server orders or for server hiding?
                         //orderID = 'pcName';
                         //if (server.port == 'web') { orderID = 'playerName'; }
-                        pList[server.name] = $filter('orderBy')($filter('filter')(response.data, { chatClient: server.port }),orderID);
+                        server.players = $filter('orderBy')($filter('filter')(response.data, { chatClient: server.port }),orderID);
                     });
-                    $scope.playerList = angular.copy(pList);
+                    //$scope.playerList = angular.copy(pList);
                 }
                 $timeout(function () {
                     getOnlinePlayers();
@@ -379,41 +444,10 @@ app.controller('mainCtrl', function ($scope, $http, $timeout, $window, $filter, 
             var chatmsg = message;
 
             chatmsg.timestamp = new Date();
-            chatmsg.logIndex = $scope.messageIndex++
-
-            if ($scope.player.ignores.indexOf(chatmsg.fromPlayerId) > -1 || $scope.channels.oocList.indexOf(chatmsg.channel) > -1) {
-                chatmsg.visible = false;
-            } else {
-                chatmsg.visible = true;
-            }
-            if (chatmsg.channel == "4") {
-                if (chatmsg.fromPlayerId == $scope.player.id) {
-                    //message from user
-                    var toPlayer = null; //$filter('filter')($scope.playerList,{playerID:chatmsg.toId);
-                    angular.forEach($scope.playerList,function(server,key){
-                        if(toPlayer != null){
-                            for(var i = 0, len = server.length; i < len; i++){
-                                if (server[i].playerId == chatmsg.toId){
-                                    toPlayer = server[i].playerName;
-                                    break;
-                                }
-                            }
-                        }
-                    });
-                    $scope.messages.pms[toPlayer].push(chatmsg);
-                    if ($scope.pmTabs.indexOf(toPlayer) == -1) {
-                        $scope.pmTabs.push(toPlayer);
-                    }
-                } else {
-                    //message to user
-                    $scope.messages.pms[chatmsg.fromPlayerName].push(chatmsg);
-                    if ($scope.pmTabs.indexOf(chatmsg.fromPlayerName) == -1) {
-                        $scope.pmTabs.push(chatmsg.fromPlayerName);
-                    }
-                }
-            } else {
-                $scope.messages.channelsLog.push(chatmsg);
-            }
+            chatmsg.logIndex = angular.copy($scope.messageIndex);
+            $scope.messageIndex++;
+            chatmsg.message = Autolinker.link(chatmsg.message, { className: "messageLink" });
+            $scope.messages.channelsLog.push(chatmsg);
 
             /*if (chatmsg.fromPlayerId === thisPlayer.get('playerId') {
                 var tempFrom = $scope.masterPlayerList({ playerId: chatmsg.toId }).first().playerName;//query playerList for playerName of chatmsg.toId
@@ -472,17 +506,20 @@ app.controller('mainCtrl', function ($scope, $http, $timeout, $window, $filter, 
                     }
                 }
             }*/
+
+            /*
             chatMsgs.push(chatmsg);
             while (chatMsgs.length > 1000) {
                 msgArchive.push(chatMsgs[0]);
                 chatMsgs.shift();
-            }
+            }*/
 
         });
     }
     function processCommands(commands) {
         angular.forEach(commands, function (chatcmd, key) {
             //instead of adding to chat log, issue alert (ngMessages?) - for server messages, need to work sound, image, video, youtube.
+            var chatMsgs = [];//only here for error supression
             var t = new Date();
             switch (chatcmd.tag) {
                 case "SCRIPT":
@@ -555,12 +592,15 @@ app.controller('mainCtrl', function ($scope, $http, $timeout, $window, $filter, 
                 '           <label>Password</label>                                                                 ' +
                 '           <input type="password" ng-model="player.pwd" ng-disabled="loginDisable">                ' +
                 '       </md-input-container>                                                                       ' +
-                '       <md-checkbox ng-model="player.rememberMe" ng-disabled="loginDisable">                       ' +
-                '           Remember Me                                                                             ' +
+                '       <md-checkbox ng-model="player.rememberMe" ng-disabled="loginDisable" class="md-accent">     ' +
+                '           <span style="color:white;">Remember Me</span>                                           ' +
                 '       </md-checkbox>                                                                              ' +
                 '   </md-dialog-content>                                                                            ' +
                 '   <md-dialog-actions layout="row">                                                                ' +
                 '       <span flex></span>                                                                          ' +
+                '       <md-button ng-click="closeLogin()" class="md-raised md-accent" ng-disabled="loginDisable">  ' +
+                '           Cancel                                                                                  ' +
+                '       </md-button>                                                                                ' +
                 '       <md-button ng-click="loginchk()" class="md-raised md-primary" ng-disabled="loginDisable">   ' +
                 '           Login                                                                                   ' +
                 '       </md-button>                                                                                ' +
@@ -569,7 +609,7 @@ app.controller('mainCtrl', function ($scope, $http, $timeout, $window, $filter, 
         });
         function loginCtrl($scope, $mdDialog, $http, $httpParamSerializerJQLike, $filter, $localStorage) {
             function pollPlayers() {
-                http.get("http://nwn.sinfar.net/getonlineplayers.php?" + Math.floor(Date.now() / 1000)).then(function (response) {
+                $http.get("http://nwn.sinfar.net/getonlineplayers.php?" + Math.floor(Date.now() / 1000)).then(function (response) {
                     angular.forEach(response.data, function (player, key) {
                         if ($filter('lowercase')(player.playerName) == $filter('lowercase')($scope.player.name)) {
                             loggedIn = true;
@@ -579,14 +619,20 @@ app.controller('mainCtrl', function ($scope, $http, $timeout, $window, $filter, 
                             if ($scope.player.rememberMe) {
                                 $localStorage.sinfarPlayerName = $scope.player.name;
                                 $localStorage.sinfarPassword = $scope.player.pwd;
+                                $localStorage.sinfarRemember = $scope.player.rememberMe;
                             }
                         }
                     });
-                    if (!$scope.player.authed) { $timeout(pollPlayers(), 1000); }
+                    if (!$scope.player.authed) {
+                        $timeout(pollPlayers(), 1000);
+                    } else {
+                        $mdDialog.hide();
+                    }
                 });
             }
 
             $scope.loginDisable = false;
+            $scope.closeLogin = function () { $mdDialog.hide(); }
             $scope.loginchk = function () {
                 if ($scope.player.name.length && $scope.player.pwd.length) {
                     $scope.loginDisable = true;
@@ -598,8 +644,9 @@ app.controller('mainCtrl', function ($scope, $http, $timeout, $window, $filter, 
                         headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
                     }).then(
                         function (response) {
-                            if (responce.data.length < 1) {
+                            if (response.data.length < 1) {
                                 //begin polling chat
+                                pollChat();
 
                                 //begin checking for player to login
                                 pollPlayers();
@@ -624,10 +671,11 @@ app.controller('mainCtrl', function ($scope, $http, $timeout, $window, $filter, 
     //initalize bases
     $scope.player               = {}; //logged in player details {id:playerID,name:login,pwd:password,friends:[array of friends player IDs],ignores:[array of ignored player IDs]}
     $scope.messages             = {}; //master message log. {channelsLog:[],pms:[],serverMsgs:[]}. array of objects {index:generatedIndexValue,visible:boolen,channel:messageChannel,fromID:playerID,toID:forPMsfromCurrentPlayer,msg:messageText}
+    $scope.messages.channelsLog = [];
     $scope.messageIndex         = 1;
     $scope.settings             = {}; //current settings
     $scope.playerList           = {}; //online players. {chatClient:serverPort:[{playerId:playerID,pcId:charID,playerName:playerLogin,pcName:charName,portrait:imageLinkPartial}]
-    $scope.servers              = [{ id: 1, port: 'web', prefix: 'web', name: "Web Client" }]; //list of current servers offered. {id:index (not used),port:serverPort,prefix:shortName (not used),name:serverName}
+    $scope.servers              = [{ id: 1, port: 'web', prefix: 'web', name: "Web Client", expanded: false }]; //list of current servers offered. {id:index (not used),port:serverPort,prefix:shortName (not used),name:serverName}
     $scope.channels             = {}; //array for channel lists
     $scope.channels.full        = [
 									{ code: 1, channel: 'Talk' },

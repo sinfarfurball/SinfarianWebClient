@@ -31,7 +31,24 @@
     md-tooltip{
         color:black;
     }
+    
+    .messageLink:link{
+        color:#987f50;
+        text-decoration:none; 
+        font-weight:bold;
+    }
 
+    .messageLink:visited{
+        color:#985b50;
+        text-decoration:none; 
+        font-weight:bold;
+    }
+
+    .messageLink:hover{
+        color:#506998;
+        text-decoration:none; 
+        font-weight:bold;
+    }
 
 
 
@@ -132,9 +149,6 @@
     {
       height:2em;
       width:100%;
-      bottom:0;
-      right:0;
-      position:absolute;
     }
     #table-action-bar td
     {
@@ -384,11 +398,7 @@ md-sidenav,
 md-sidenav.md-locked-open,
 md-sidenav.md-closed.md-locked-open-add-active {
     min-width: 0 !important;
-    width: 15em !important;
-    max-width: 15em !important;
-}
-.md-sidenav-right {
-    min-width: 0 !important;
     width: 30em !important;
     max-width: 30em !important;
 }
+md-tabs.md-default-theme .md-tab.md-active, md-tabs .md-tab.md-active, md-tabs.md-default-theme .md-tab.md-active md-icon, md-tabs .md-tab.md-active md-icon, md-tabs.md-default-theme .md-tab.md-focused, md-tabs .md-tab.md-focused, md-tabs.md-default-theme .md-tab.md-focused md-icon, md-tabs .md-tab.md-focused md-icon{color:white;}

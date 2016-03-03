@@ -4,6 +4,7 @@
     <title>Sinfarian Web Client</title>
     <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/angular_material/1.0.4/angular-material.min.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="assets/css/material.css">
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.6.0/lodash.min.js"></script>
 
@@ -18,6 +19,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/angular_material/1.0.4/angular-material.min.js"></script>
 
     <script src="assets/js/angular/scrollglue.js" type="text/javascript"></script>
+    <script src="assets/js/libs/autolinker.js" type="text/javascript"></script>
 
     <script src="assets/js/FileSaver.min.js" type="text/javascript"></script>
     <script src="assets/js/jszip.min.js" type="text/javascript"></script>
@@ -26,25 +28,48 @@
 <body ng-app="sinfarWebclient" ng-controller="mainCtrl" ng-cloak>
     <uib-alert ng-repeat="alert in alerts" type="{{alert.type}}" close="closeAlert($index)" style="position:absolute;top:0;width:100%;">{{alert.msg}}</uib-alert>
     <div layout="row" layout-fill flex>
-        <md-sidenav flex layout="column" class="md-sidenav-left md-whiteframe-z2" md-component-id="left">
-            <md-toolbar>
-                <h1 class="md-toolbar-tools">Sidenav Left</h1>
+        <md-sidenav flex layout="column" class="md-sidenav-left md-whiteframe-z2" md-component-id="left" md-theme="settings">
+            <md-toolbar class="md-accent">
+                <h1 class="md-toolbar-tools">Player Settings</h1>
             </md-toolbar>
-            <md-content layout-padding ng-controller="LeftCtrl">
-                Settings
+            <md-content layout-padding>
+                <div ng-click="expandSettings = !expandSettings">Chat Settings</div>
+                <div ng-show="expandSettings">
+                    <md-switch ng-model="settings.portraits" class="md-primary">
+                        Portraits <span ng-if="settings.portraits">Visible</span><span ng-if="!settings.portraits">Hidden</span>
+                    </md-switch>
+                    <md-switch ng-model="settings.timestamps" class="md-primary">
+                        Timestamps <span ng-if="settings.timestamps">Visible</span><span ng-if="!settings.timestamps">Hidden</span>
+                    </md-switch>
+                    <md-switch ng-model="settings.bell" class="md-primary">
+                        Private Message Bell <span ng-if="settings.bell">On</span><span ng-if="!settings.bell">Off</span>
+                    </md-switch>
+                    <md-switch ng-model="settings.tabChat" class="md-primary">
+                        Tabbed Chats <span ng-if="settings.tabChat">Active</span><span ng-if="!settings.tabChat">Disabled</span>
+                    </md-switch>
+                    <md-switch ng-model="settings.msgStyle" class="md-primary">
+                        Message Style: <span ng-if="settings.msgStyle">Chat</span><span ng-if="!settings.msgStyle">Inline</span>
+                    </md-switch>
+                </div>
+                <div ng-click="expandChar = !expandChar">
+                    Charater Settings
+                </div>
+                <div ng-show="expandChar">
+                    Bio Editor
+                </div>
             </md-content>
         </md-sidenav>
         
         <div layout="column" layout-fill>
             <md-toolbar layout="column">
                 <div layout="row" layout-align="center center">
-                    <md-button class="md-raised" ng-click="toggleSidenav('left')">
+                    <md-button class="md-primary md-hue-1 md-raised" ng-click="toggleSidenav('left')">
                         Settings
                     </md-button>
                     <span flex>
                         Sinfar Webclient<span ng-if="player.name">: {{player.name}} <span ng-if="player.charName"><i>({{player.charName}})</i></span></span>
                     </span>
-                    <md-button class="md-raised" ng-click="toggleSidenav('right')">
+                    <md-button class="md-primary md-hue-1 md-raised" ng-click="toggleSidenav('right')">
                         Online Players
                     </md-button>
                 </div>
@@ -60,47 +85,274 @@
                     </md-button>
                 </div>
             </md-toolbar>
-            <div flex>
-                Primary chat window
-                <div ng-repeat="msg in holdingMessages track by logIndex">
-                    {{msg.fromPlayerName}}: 
+            <div flex style="background-color:black;" layout="column" layout-fill>
+                <div ng-if="!player.authed" class="md-padding" style="font-family:arial;font-weight:bold;color:#FFF;background-color:#000;" flex layout-fill>
+                    <center><h1></h1></center><font color=#fefe20>Sinfar uses all default chat channels plus many new ones.</font><br />
+                    <br />
+                    <font color=#fefe20>Here's the list of them with:</font><br />
+                    - Who can see and use them<br />
+                    - What can be said in those channels<br />
+                    - Whether they should be considered IC or OOC<br />
+                    <br />
+                    <font color=#feef50>Shout</font><br />
+                    - Only DMs can use it. Everyone can see it, except people with the immersive mode ON.<br />
+                    - Things that DMs want to say publicly, it is a privilege that they have.<br />
+                    - IC and OOC.<br />
+                    <br />
+                    <font color=#f67271>DM</font><br />
+                    - Everyone can use it, Only DMs can see it.<br />
+                    - Send a message in this channel if you need a DM. If a DM is available they will send you a tell.<br />
+                    - OOC<br />
+                    <br />
+                    <font color=#ab23f2>Event</font><br />
+                    - Everyone can use it, Everyone can see it except people busy or with the immersive mode ON.<br />
+                    - This is the player version of the Shout channel. It is to announce important important events. If you didn't plan that even for more than 3 days, it is probably not worth to be posted in this channel. Do not reply in this channel, send them a tell instead.<br />
+                    - IC or OOC<br />
+                    <br />
+                    <font color=#b56a23>Action</font><br />
+                    - Everyone can use it, Everyone looking "for an adventure" can see it.<br />
+                    - This is an alternative to the Event channel, It is the place to say "Level 30 looking for a party" or "Shard run in preparation, send me a tell if you want to join it" or "I am dead, can someone come resurrect me? I am in the crypt - level 1". Do not ever use the Event channel to say something like that, use the /action channel instead.<br />
+                    - OOC<br />
+                    <br />
+                    <font color=#b1a2bd>OOC</font><br />
+                    - Everyone can use it, Everyone "looking for an OOC conversation" can see it.<br />
+                    - This is a place where you can ask a question concerning Sinfar. Replies can be posted in this channel too, but do not get side tracked.<br />
+                    - OOC<br />
+                    <br />
+                    <font color=#fe5f2e>PVP</font><br />
+                    - Everyone can use it, Everyone in an arena or looking for both PvP and an OOC conversation.<br />
+                    - A place where you can talk between power gamers, please keep your PoWeRzOr trick in this channel.<br />
+                    - OOC<br />
+                    <br />
+                    <font color=#f520e1>Sex</font><br />
+                    - Everyone can use it, Everyone looking for an intimate role-play and an OOC conversation can see it.<br />
+                    - Try to use this channel only for serious ERP ideas that you have and would like to RP on Sinfar. I wish that this channel could be used as an alternative to the Action channel (so to propose an intimate role-play event)... it got trolled too much with obscene stuff so now people also need to be looking for an OOC conversation to see it.<br />
+                    - OOC<br />
+                    <br />
+                    <font color=#b7f520>Build</font><br />
+                    - Everyone can use it, builders or players that like to use the Aurora Toolset - and that are looking for an OOC conversation, can see it.<br />
+                    - A good place to ask for a house builder or to discuss how to do something in Toolset.<br />
+                    - OOC<br />
+                    <br />
+                    <font color=#20bff0>FFA</font><br />
+                    - Everyone can use it, only people that set that they want to see the FFA channel will see it.<br />
+                    - It is the place where you can talk about whatever you want. Still, do not spam it or troll it voluntarily.<br />
+                    - OOC<br />
+                    <br />
+                    <font color=#fefefe>Talk</font><br />
+                    - People that are in a listen line of sight (not behind a door for example) and within ~40 meters.<br />
+                    - Use it to make your character talk ICly.<br />
+                    - IC (unless you start your message by //)<br />
+                    <br />
+                    <font color=#b0b0b0>Whisper</font><br />
+                    - People that are in a line of sight and within ~3 meters.<br />
+                    - Use it to make your character whisper ICly.<br />
+                    - IC (unless you start your message by //)<br />
+                    <br />
+                    <font color=#404040>Quiet</font> (/q)<br />
+                    - People that are in a line of sight and within ~1 meter.<br />
+                    - Use it to reach only people that are right next, like on the same bench and even then, some some bench are too wide.<br />
+                    - IC (unless you start your message by //)<br />
+                    <br />
+                    <font color=#303030>Silent</font><br />
+                    - The person that is hugging you (within 0.5 meter).<br />
+                    - Use it to make your character talk to himself or whisper to the person that is hugging them.<br />
+                    - IC (unless you start your message by //)<br />
+                    <br />
+                    <font color=#d92324>Yell</font> (/y)<br />
+                    - People that are in the same area.<br />
+                    - Use it to make your character yell ICly<br />
+                    - IC (unless you start your message by //)<br />
+                    <br />
+                    <font color=#fefefe>Party</font><br />
+                    - Everyone in your party<br />
+                    - Anything related to your party<br />
+                    - OOC<br />
+                    <br />
+                    You can set what you are looking for in your player list account settings menu (Class Radial Menu -&gt; Player Tool 1 -&gt; [Settings] -&gt; [Player List Status] and [Account settings]).<br />
+                    <br />
+                    <font color=#fefe20>Additionally to the conditions above, the following can affect whether you will see a chat channel or not:</font><br />
+                    1) When your immersive mode is ON, you will only see the tells from people that are in the same area.<br />
+                    2) When you are set as "busy", you will only see the Shout and Tell messages.<br />
+                    3) When you are are set to see the FFA channel, you will also see all other public channels.<br />
+                    4) When you are in an OOC area, you are automatically considered as "looking for an OOC conversation".<br />
+                    <br />
+                    <font color=#fefe20>You can use the !WHOSPY command to know if people near you are in your /wisper or /quiet or /silent range.</font>
                 </div>
-            </div>
-            <div ng-if="player.authed">
-                <table id="table-action-bar" cellspacing="0" cellpadding="0">
-                    <tr>
-                        <td ng-model="selChannel" id="td-slect-channel">
-                            <select name="channel" id="select-channel" ng-model="chatMessageChannel">
-                                <option value="talk">Talk:</option>
-                                <option value="whisper">Whisper:</option>
-                                <option value="quiet">Quiet:</option>
-                                <option value="silent">Silent:</option>
-                                <option value="yell">Yell:</option>
-                                <option value="party">Party:</option>
-                                <option value="dm">DM:</option>
-                                <option value="ooc">OOC:</option>
-                                <option value="event">Event:</option>
-                                <option value="action">Action:</option>
-                                <option value="pvp">PvP:</option>
-                                <option value="sex">Sex:</option>
-                                <option value="ffa">FFA:</option>
-                                <option value="build">Builders:</option>
-                            </select>
-                        </td>
-                        <td id="td-chat-bar">
-                            <div contenteditable id="textarea-chat-bar" ng-keydown="$event.keyCode === 13 && sChat()" ng-keyup="$event.keyCode === 13 && msgReset()"></div>
-                        </td>
-                    </tr>
-                </table>
+                <div ng-if="player.authed" 
+                     style="overflow-y:auto;" 
+                     flex
+                     scroll-glue>
+                            <blockquote ng-repeat="msg in messages.channelsLog track by msg.logIndex" class="quote-channel-{{msg.channel}}"
+                                        style="padding:0 10px; margin:0 0 5px"
+                                        layout-align="start start" layout="row">
+                                <!--from line-->
+                                <i class="fa fa-times-circle" id="{{msg.logIndex}}" remove-Message></i>
+                                <span ng-show="settings.portraits">
+                                    <img ng-src="http://nwn.sinfar.net{{msg.fromPortrait}}" class="img-circle">
+                                </span>
+                                <span layout="column">
+                                    <footer layout="row">
+                                        <span style="cursor: pointer;" ng-click="setPM(msg)">
+                                            <span class="span-chat-message-from-pc-name">
+                                                <md-tooltip md-direction="right" ng-if="msg.fromPCName">
+                                                    {{msg.fromPlayerName}}
+                                                </md-tooltip>
+                                                <span ng-class="{sinfarfriend:msg.fndmsg}"
+                                                      ng-bind="msg.fromName">
+                                                </span>
+                                            </span>
+                                        </span>
+                                        <!--timestamp-->
+                                        <cite ng-show="settings.timestamps">
+                                            <span>{{msg.timestamp | date: 'shortTime'}}</span>
+                                        </cite>
+                                    </footer>
+                                    <!--message-->
+                                    <span class="span-chat-message" ng-bind-html="msg.message" style=""></span>
+                                </span>
+                            </blockquote>
+                </div>
+                <div ng-if="player.authed">
+                    <table id="table-action-bar" cellspacing="0" cellpadding="0">
+                        <tr>
+                            <td ng-model="selChannel" id="td-slect-channel">
+                                <select name="channel" id="select-channel" ng-model="chatMessageChannel">
+                                    <option value="talk">Talk:</option>
+                                    <option value="whisper">Whisper:</option>
+                                    <option value="quiet">Quiet:</option>
+                                    <option value="silent">Silent:</option>
+                                    <option value="yell">Yell:</option>
+                                    <option value="party">Party:</option>
+                                    <option value="dm">DM:</option>
+                                    <option value="ooc">OOC:</option>
+                                    <option value="event">Event:</option>
+                                    <option value="action">Action:</option>
+                                    <option value="pvp">PvP:</option>
+                                    <option value="sex">Sex:</option>
+                                    <option value="ffa">FFA:</option>
+                                    <option value="build">Builders:</option>
+                                </select>
+                            </td>
+                            <td id="td-chat-bar">
+                                <div contenteditable id="textarea-chat-bar" ng-keydown="$event.keyCode === 13 && sChat()" ng-keyup="$event.keyCode === 13 && msgReset()"></div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
             </div>
         </div>
 
         <md-sidenav flex layout="column" class="md-sidenav-right md-whiteframe-z2" md-component-id="right">
             <md-toolbar>
-                <h1 class="md-toolbar-tools">Sidenav Right</h1>
+                <h1 class="md-toolbar-tools">Online Player Tools</h1>
             </md-toolbar>
-            <md-content layout-padding ng-controller="LeftCtrl">
-                Player List
+            <md-content>
+                <div layout="column">
+                    <!--player list search-->
+                    <div layout="row">
+                        <input ng-model="searchText" class="form-control" placeholder="Player Search" flex>
+                    </div>
+
+                    <!--list of players per server-->
+                    <div layout="row" flex>
+                        <table width=100% style="background-color:black">
+                            <!--server list-->
+                            <tr ng-repeat-start="server in servers">
+                                <td style="cursor: pointer;" ng-click="server.expanded = !server.expanded" class="PlayerServer">
+                                    {{server.name}} <span class="badge">{{pfilter.length}}</span>
+                                </td>
+                            </tr>
+                            <!--player list-->
+                            <tr ng-show="server.expanded" ng-repeat-end="">
+                                <td>
+                                    <div>
+                                        <table width=100%>
+                                            <!--player row-->
+                                            <tr ng-repeat="player in pfilter = ((server.players | filter:searchText) | orderBy:server.id)" ng-class="{igPlist:player.ignore}">
+                                                <td>
+                                                    <!--functions menu-->
+                                                    <md-menu>
+                                                        <span onmouseover="this.style.color='gold'" onmouseout="this.style.color='white'" aria-label="PC Menu" ng-click="openMenu($mdOpenMenu, $event)">
+                                                            <i class="fa fa-bars"></i>
+                                                        </span>
+                                                        <md-menu-content>
+                                                            <md-menu-item ng-if="loginshow">
+                                                                <md-button aria-label="PM">
+                                                                    <md-tooltip md-direction="top">PM</md-tooltip>
+                                                                    <i class="fa fa-commenting-o" ng-click="setPM(player)"> Private Message</i>
+                                                                </md-button>
+                                                            </md-menu-item>
+                                                            <md-menu-item>
+                                                                <md-button aria-label="Zoom Portrait">
+                                                                    <md-tooltip md-direction="top">Zoom Portrait</md-tooltip>
+                                                                    <i class="fa fa-search" ng-click="showPort(player)" data-toggle="modal" data-target="#bioModal"> Zoom Portrait</i>
+                                                                </md-button>
+                                                            </md-menu-item>
+                                                            <md-menu-item ng-if="player.pcName.length">
+                                                                <md-button aria-label="View Bio">
+                                                                    <md-tooltip md-direction="top">View Bio</md-tooltip>
+                                                                    <i class="fa fa-bars" ng-click="showBio(player)" data-toggle="modal" data-target="#bioModal"> View Bio.</i>
+                                                                </md-button>
+                                                            </md-menu-item>
+                                                            <md-menu-item ng_if="!player.fnd">
+                                                                <md-button aria-label="Friend">
+                                                                    <md-tooltip md-direction="top">Add Friend</md-tooltip>
+                                                                    <i class="fa fa-heart-o" ng-click="addFriend(player)"> Add Friend.</i>
+                                                                </md-button>
+                                                            </md-menu-item>
+                                                            <md-menu-item ng_if="player.fnd">
+                                                                <md-button aria-label="Unfriend">
+                                                                    <md-tooltip md-direction="top">Remove Friend</md-tooltip>
+                                                                    <i class="fa fa-heart" ng-click="remFriend(player)"> Remove Friend</i>
+                                                                </md-button>
+                                                            </md-menu-item>
+                                                            <md-menu-item ng_if="!player.ignore">
+                                                                <md-button aria-label="Ignore">
+                                                                    <md-tooltip md-direction="top">Ignore</md-tooltip>
+                                                                    <i class="fa fa-minus" ng-click="mutePlayer(player)"> OOC Ignore</i>
+                                                                </md-button>
+                                                            </md-menu-item>
+                                                            <md-menu-item ng_if="player.ignore">
+                                                                <md-button aria-label="Un-Ignore">
+                                                                    <md-tooltip md-direction="top">Un-Ignore</md-tooltip>
+                                                                    <i class="fa fa-check" ng-click="unmutePlayer(player)"> Un-Ignore</i>
+                                                                </md-button>
+                                                            </md-menu-item>
+                                                            <md-menu-item>
+                                                                <md-button aria-label="Other Chars">
+                                                                    <md-tooltip md-direction="top">Other Char.s</md-tooltip>
+                                                                    <i class="fa fa-users" ng-click="plist(player)" data-toggle="modal" data-target="#charListModal"> Char. List</i>
+                                                                </md-button>
+                                                            </md-menu-item>
+                                                        </md-menu-content>
+                                                    </md-menu>
+                                                    <!--player/char-->
+                                                    <img ng-src="http://nwn.sinfar.net{{ player.portrait }}" class="img-circle" ng-if="portchecked" />
+                                                    <span style="cursor: pointer;"
+                                                          ng-class="{sinfarfriend:player.fnd}"
+                                                          ng-show="!player.pcName.length"
+                                                          ng-click="setPM(player)">
+                                                        {{player.playerName}}
+                                                    </span>
+                                                    <span style="cursor: pointer;"
+                                                          ng-class="{'sinfarfriend':player.fnd}"
+                                                          ng-click="setPM(player)"
+                                                          ng-if="player.pcName.length">
+                                                        <md-tooltip md-direction="right">
+                                                            {{player.playerName}}
+                                                        </md-tooltip>
+                                                        {{player.pcName}}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
             </md-content>
         </md-sidenav>
     </div>
