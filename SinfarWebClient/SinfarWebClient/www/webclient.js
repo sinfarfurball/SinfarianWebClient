@@ -1,9 +1,9 @@
-﻿var app = angular.module('sinfarWebclient', ['ngMaterial', 'ngSanitize']);
+﻿var app = angular.module('sinfarWebclient', ['ngMaterial', 'ngSanitize', 'ngStorage']);
 app.run(function ($rootScope) {
     $rootScope._ = window._;
 });
 
-app.config(function ($mdThemingProvider) {
+app.config(function ($mdThemingProvider, $mdIconProvider) {
     $mdThemingProvider.theme('default')
       .dark()
       .primaryPalette('amber', {
@@ -13,6 +13,9 @@ app.config(function ($mdThemingProvider) {
           'hue-3': 'A400' // use shade A100 for the <code>md-hue-3</code> class
       })
       .accentPalette('orange');
+    //.backgroundPalette('black');
+
+    $mdIconProvider.fontSet('fa', 'fontawesome');
 });
 
 app.service('thisPlayer', function () {
@@ -150,7 +153,6 @@ app.service('chatMsgs', function ($http, alerts, thisPlayer) {
 			        pollChat();
 			    } else {
 			        alerts('danger', "An error occurred, try reloading or report this to Mavrixio (mavrixio@sinfar.net)");
-			        //reset pollTest?
 			    }
 			}
 		);
@@ -298,109 +300,9 @@ app.service('chatMsgs', function ($http, alerts, thisPlayer) {
     }
 });
 
-app.filter('muteFilter', function () {
-    return function (items, props) {
-        var out = [];
-
-        if (angular.isArray(items)) {
-            items.forEach(function (item) {
-                var itemMatches = false;
-
-                var keys = Object.keys(props);
-                for (var i = 0; i < keys.length; i++) {
-                    var prop = keys[i];
-                    var text = props[prop].toLowerCase();
-                    if (item[prop].toString().toLowerCase().indexOf(text) !== -1) {
-                        itemMatches = true;
-                        break;
-                    }
-                }
-
-                if (itemMatches) {
-                    out.push(item);
-                }
-            });
-        } else {
-            // Let the output be the input untouched
-            out = items;
-        }
-
-        return out;
-    };
-});
-
-app.controller('mainCtrl', function ($scope, $http, $timeout, $window, alerts, thisPlayer, chatMsgs, settingsStore) {
-    // [[{"fromPlayerId":"23615","fromName":"furball","channel":"4","message":"XD","fromPlayerName":"furball","fromPCId":null,"fromPCName":null,"toId":"16358","fromPortrait":"\/portraits\/47074\/furballasss.jpg"}],[]]
-    // In this example, we set up our model using a plain object.
-    // Using a class works too. All that matters is that we implement
-    // getItemAtIndex and getLength.
-    $scope.messages = {
-        topIndex = 0,
-        numLoaded_: 0,
-        toLoad_: 0,
-        // Required.
-        getItemAtIndex: function (index) {
-            if (index > this.numLoaded_) {
-                this.fetchMoreItems_(index);
-                return null;
-            }
-            return index;
-        },
-        // Required.
-        // For infinite scroll behavior, we always return a slightly higher
-        // number than the previously loaded items.
-        getLength: function () {
-            return this.numLoaded_;
-        },
-        fetchMoreItems_: function (index) {
-            // For demo purposes, we simulate loading more items with a timed
-            // promise. In real code, this function would likely contain an
-            // $http request.
-            if (this.toLoad_ < index) {
-                this.toLoad_ += 20;
-                $timeout(angular.noop, 300).then(angular.bind(this, function () {
-                    this.numLoaded_ = this.toLoad_;
-                }));
-            }
-        }
-    };
-
-    $scope.alerts = alerts.getAlerts();
-    $scope.closeAlert = function (i) { alerts.closeAlert(i); }
-    settingsStore.init();
-
-    //variable initialization
-
-    //$scope.devPrefix			= "/";
-
-    //$scope.chatMessageChannel = "talk";//default message channel, can also be changed dynamicaly in code
-    //$scope.messages = TAFFY();//messages table for storage/manipulation.
-    $scope.channels = {};//array for channel lists
-    $scope.channels.full = [
-									{ code: 1, channel: 'Talk' },
-									{ code: 3, channel: 'Whisper' },
-									{ code: 31, channel: 'Quiet' },
-									{ code: 32, channel: 'Silent' },
-									{ code: 30, channel: 'Yell' },
-									{ code: 4, channel: 'Tell' },
-									{ code: 6, channel: 'Party' },
-									{ code: 164, channel: 'OOC' },
-									{ code: 108, channel: 'Sex' },
-									{ code: 228, channel: 'PVP' },
-									{ code: 116, channel: 'Action' },
-									{ code: 104, channel: 'Event' },
-									{ code: 132, channel: 'FFA' },
-									{ code: 102, channel: 'Build' }
-    ];//all channels
-    $scope.channels.muted = [];//muted channels
-    $scope.channels.oocList = ["4", "6", "164", "108", "228", "11", "6", "104", "132", "102"];//ooc channels (used with the player ignore)
-    $scope.channels.icList = ["1", "3", "31", "32", "30"];//ic channels
-    //$scope.channels.tabs		= [];//store tab custom name and assigned channels
-    $scope.messagesList = { chatLog: { count: 0, messages: [], active: true }, pms: {}, serverMessages: [] }
-    $scope.selChannel = "talk";
-
-    $scope.NewLogActive = false;
-
+app.controller('mainCtrl', function ($scope, $http, $timeout, $window, $filter, $mdMedia, $mdDialog, $mdSidenav, $localStorage, alerts, thisPlayer, chatMsgs, settingsStore) {
+    var chatFailCount = 0;
+    //callbacks
     function tblScrape(table) {
         var rows = table.rows;
         var propCells = rows[0].cells;
@@ -423,6 +325,374 @@ app.controller('mainCtrl', function ($scope, $http, $timeout, $window, alerts, t
         }
         return results;
     }
+    function getOnlinePlayers() {
+        $http.get("http://nwn.sinfar.net/getonlineplayers.php?nocache=" + new Date().getTime())
+            .then(function (response) {
+                if (angular.isArray(response.data)) {
+                    var pList = {};
+                    var orderID = ['pcName','playerName'];
+                    //process json
+                    angular.forEach($scope.servers, function (server, key) {//add sort that is adjstable to user for server orders or for server hiding?
+                        //orderID = 'pcName';
+                        //if (server.port == 'web') { orderID = 'playerName'; }
+                        pList[server.name] = $filter('orderBy')($filter('filter')(response.data, { chatClient: server.port }),orderID);
+                    });
+                    $scope.playerList = angular.copy(pList);
+                }
+                $timeout(function () {
+                    getOnlinePlayers();
+                }, 60 * 1000);
+            },
+            function () {
+                //http failed
+                $timeout(function () {
+                    getOnlinePlayers();
+                }, 60 * 1000);
+            });
+    }
+    function pollChat() {
+        $http.get("http://nwn.sinfar.net/getchat.php?nocache=" + new Date().getTime())
+            .then(function (response) {
+                var msg = response.data;
+                if (angular.isArray(msg)) {
+                    if (angular.isArray(msg[0])) {
+                        processMessages(msg[0]);
+                    }
+                    if (angular.isArray(msg[1])) {
+                        processCommands(msg[1]);
+                    }
+                }
+                chatFailCount = 0;
+                pollChat();
+            }, function (response) {
+                chatFailCount++;
+                if (chatFailCount < 100) {
+                    pollChat();
+                } else {
+                    alerts('danger', "An error occurred, try reloading or report this to Mavrixio (mavrixio@sinfar.net)");
+                }
+            }
+        );
+    }
+    function processMessages(messages) {
+        angular.forEach(messages, function (message, key) {
+            var chatmsg = message;
+
+            chatmsg.timestamp = new Date();
+            chatmsg.logIndex = $scope.messageIndex++
+
+            if ($scope.player.ignores.indexOf(chatmsg.fromPlayerId) > -1 || $scope.channels.oocList.indexOf(chatmsg.channel) > -1) {
+                chatmsg.visible = false;
+            } else {
+                chatmsg.visible = true;
+            }
+            if (chatmsg.channel == "4") {
+                if (chatmsg.fromPlayerId == $scope.player.id) {
+                    //message from user
+                    var toPlayer = null; //$filter('filter')($scope.playerList,{playerID:chatmsg.toId);
+                    angular.forEach($scope.playerList,function(server,key){
+                        if(toPlayer != null){
+                            for(var i = 0, len = server.length; i < len; i++){
+                                if (server[i].playerId == chatmsg.toId){
+                                    toPlayer = server[i].playerName;
+                                    break;
+                                }
+                            }
+                        }
+                    });
+                    $scope.messages.pms[toPlayer].push(chatmsg);
+                    if ($scope.pmTabs.indexOf(toPlayer) == -1) {
+                        $scope.pmTabs.push(toPlayer);
+                    }
+                } else {
+                    //message to user
+                    $scope.messages.pms[chatmsg.fromPlayerName].push(chatmsg);
+                    if ($scope.pmTabs.indexOf(chatmsg.fromPlayerName) == -1) {
+                        $scope.pmTabs.push(chatmsg.fromPlayerName);
+                    }
+                }
+            } else {
+                $scope.messages.channelsLog.push(chatmsg);
+            }
+
+            /*if (chatmsg.fromPlayerId === thisPlayer.get('playerId') {
+                var tempFrom = $scope.masterPlayerList({ playerId: chatmsg.toId }).first().playerName;//query playerList for playerName of chatmsg.toId
+            } else {
+                var tempFrom = chatmsg.fromPlayerName;
+            }
+
+            if ($scope.$storage.iglist.indexOf(chatmsg.fromPlayerId) == -1 || $scope.$storage.iglist.indexOf(chatmsg.fromPlayerId) > -1 && $scope.channels.oocList.indexOf(chatmsg.channel) === -1) {
+                var t = new Date();
+                chatmsg["timestamp"] = (t.getHours() < 10 ? '0' : '') + t.getHours() + ":" + (t.getMinutes() < 10 ? '0' : '') + t.getMinutes();
+                if ($scope.$storage.flist.indexOf(chatmsg.fromPlayerId) == -1) {
+                    chatmsg["fndmsg"] = false;
+                } else {
+                    chatmsg["fndmsg"] = true;
+                }
+                if ($scope.pmHolder.held) {
+                    if (chatmsg.fromPlayerId === $scope.pmHolder.playerId && chatmsg.message === $scope.pmHolder.toMsg) {
+                        chatmsg.fromName = chatmsg.fromName + " to " + $scope.pmHolder.toPlayer;
+                        $scope.pmHolder.head = false;
+                    }
+                }
+                //manipulate into new array
+                if (chatmsg.channel === "4") {
+                    if (!($scope.messagesList.pms[tempFrom])) {
+                        $scope.messagesList.pms[tempFrom] = {};
+                        $scope.messagesList.pms[tempFrom].messages = [];
+                        $scope.messagesList.pms[tempFrom].count = 0;
+                        $scope.messagesList.pms[tempFrom].active = false;
+                    }
+                    $scope.messagesList.pms[tempFrom].messages.push(chatmsg);
+                    if ($scope.messagesList.pms[tempFrom].active) {
+                        $scope.messagesList.pms[tempFrom].count = 0;
+                    } else {
+                        $scope.messagesList.pms[tempFrom].count = $scope.messagesList.pms[tempFrom].count + 1
+                    }
+
+                } else {
+                    $scope.messagesList.chatLog.messages.push(chatmsg);
+                    if ($scope.messagesList.chatLog.active) {
+                        $scope.messagesList.chatLog.count = 0;
+                    } else {
+                        if ($scope.channels.muted.indexOf(chatmsg.channel) === -1) {
+                            $scope.messagesList.chatLog.count = $scope.messagesList.chatLog.count + 1
+                        }
+                    }
+
+                }
+                $scope.messages.insert(chatmsg);
+                $scope.cmessages = $scope.messages().get();
+
+                if (!$scope.windowActive) {
+                    alertMsg(chatmsg);
+                    if ($scope.bell && chatmsg.channel == 4) {
+                        var audio = document.getElementById("audio1");
+                        audio.play();
+                    }
+                }
+            }*/
+            chatMsgs.push(chatmsg);
+            while (chatMsgs.length > 1000) {
+                msgArchive.push(chatMsgs[0]);
+                chatMsgs.shift();
+            }
+
+        });
+    }
+    function processCommands(commands) {
+        angular.forEach(commands, function (chatcmd, key) {
+            //instead of adding to chat log, issue alert (ngMessages?) - for server messages, need to work sound, image, video, youtube.
+            var t = new Date();
+            switch (chatcmd.tag) {
+                case "SCRIPT":
+                    eval(chatcmd.tag);
+                    break;
+                case "ENTER_WC":
+                case "ENTER_PLAYER":
+                case "LEAVE_PLAYER":
+                    amsg = chatcmd.params;
+                    chatcmd.params = '<span class="chat-message-info">' + chatcmd.params + '</span>'
+                    var srvmsg = [];
+                    srvmsg["timestamp"] = (t.getHours() < 10 ? '0' : '') + t.getHours() + ":" + (t.getMinutes() < 10 ? '0' : '') + t.getMinutes();
+                    srvmsg["fndmsg"] = false;
+                    srvmsg["channel"] = 18;
+                    srvmsg["fromPortrait"] = null;
+                    srvmsg["fromName"] = null;
+                    srvmsg["message"] = chatcmd.params;
+                    //$scope.messages.insert(_.extend({}, srvmsg));
+                    //$scope.cmessages = $scope.messages().get();
+                    //$scope.addAlert('success', amsg);
+                    chatMsgs.push(srvmsg);
+                    alerts.addAlert('success', amsg);
+                    break;
+                case "CHAT_MESSAGE_NOT_SENT":
+                    amsg = chatcmd.params;
+                    chatcmd.params = '<span class="chat-message-error">' + chatcmd.params + '</span>';
+                    var srvmsg = [];
+                    srvmsg["timestamp"] = (t.getHours() < 10 ? '0' : '') + t.getHours() + ":" + (t.getMinutes() < 10 ? '0' : '') + t.getMinutes();
+                    srvmsg["fndmsg"] = false;
+                    srvmsg["channel"] = 18;
+                    srvmsg["fromPortrait"] = null;
+                    srvmsg["fromName"] = null;
+                    srvmsg["message"] = chatcmd.params;
+                    //$scope.messages.insert(_.extend({}, srvmsg));
+                    //$scope.cmessages = $scope.messages().get();
+                    //$scope.alerts.push({ type: 'danger', msg: amsg });
+                    chatMsgs.push(srvmsg);
+                    alerts.addAlert('danger', amsg);
+                    break;
+                case "SOUND":
+                case "IMAGE":
+                case "VIDEO":
+                case "YOUTUBE":
+                    chatcmd.params = "";
+                    break;
+            }
+        });
+    }
+    function loginCallback() {//allow remember me functionality from browser storage
+        //login
+        var fullscreen = $mdMedia('sm') || $mdMedia('xd');
+        $mdDialog.show({
+            fullscreen: fullscreen,
+            controller: loginCtrl,
+            scope: $scope,
+            preserveScope: true,
+            clickOutsideToClose: false,
+            escapeToClose: false,
+            template:
+                '<md-dialog layout="column">                                                                        ' +
+                '   <md-toolbar layout-align="center center">                                                       ' +
+                '       <h1 class="md-title">Sinfar Webclient Login</h1>                                            ' +
+                '   </md-toolbar>                                                                                   ' +
+                '   <md-dialog-content class="md-padding" layout="column"> <br>                                     ' +
+                '       <md-input-container>                                                                        ' +
+                '           <label>Username</label>                                                                 ' +
+                '           <input ng-model="player.name" ng-disabled="loginDisable">                               ' +
+                '       </md-input-container>                                                                       ' +
+                '       <md-input-container>                                                                        ' +
+                '           <label>Password</label>                                                                 ' +
+                '           <input type="password" ng-model="player.pwd" ng-disabled="loginDisable">                ' +
+                '       </md-input-container>                                                                       ' +
+                '       <md-checkbox ng-model="player.rememberMe" ng-disabled="loginDisable">                       ' +
+                '           Remember Me                                                                             ' +
+                '       </md-checkbox>                                                                              ' +
+                '   </md-dialog-content>                                                                            ' +
+                '   <md-dialog-actions layout="row">                                                                ' +
+                '       <span flex></span>                                                                          ' +
+                '       <md-button ng-click="loginchk()" class="md-raised md-primary" ng-disabled="loginDisable">   ' +
+                '           Login                                                                                   ' +
+                '       </md-button>                                                                                ' +
+                '   </md-dialog-actions>                                                                            ' +
+                '</md-dialog>'
+        });
+        function loginCtrl($scope, $mdDialog, $http, $httpParamSerializerJQLike, $filter, $localStorage) {
+            function pollPlayers() {
+                http.get("http://nwn.sinfar.net/getonlineplayers.php?" + Math.floor(Date.now() / 1000)).then(function (response) {
+                    angular.forEach(response.data, function (player, key) {
+                        if ($filter('lowercase')(player.playerName) == $filter('lowercase')($scope.player.name)) {
+                            loggedIn = true;
+
+                            $scope.player.id = player.playerId;
+                            $scope.player.authed = true;
+                            if ($scope.player.rememberMe) {
+                                $localStorage.sinfarPlayerName = $scope.player.name;
+                                $localStorage.sinfarPassword = $scope.player.pwd;
+                            }
+                        }
+                    });
+                    if (!$scope.player.authed) { $timeout(pollPlayers(), 1000); }
+                });
+            }
+
+            $scope.loginDisable = false;
+            $scope.loginchk = function () {
+                if ($scope.player.name.length && $scope.player.pwd.length) {
+                    $scope.loginDisable = true;
+
+                    $http({
+                        method: 'POST',
+                        url: "http://nwn.sinfar.net/login.php",
+                        data: $httpParamSerializerJQLike({ "player_name": $scope.player.name, "password": $scope.player.pwd }),
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+                    }).then(
+                        function (response) {
+                            if (responce.data.length < 1) {
+                                //begin polling chat
+
+                                //begin checking for player to login
+                                pollPlayers();
+                            } else {
+                                $scope.loginDisable = false;
+                                alerts.addAlert('danger', 'Error durring login.');
+                            }
+                        },
+                        function () {
+                            //error in login submission
+                            scope.loginDisable = false;
+                            alerts.addAlert('danger', 'Error logging in.');
+                        }
+                    );
+                } else {
+                    alerts.addAlert("danger", "Login Incomplete. Please enter both player name and password.");//incomplete login fields
+                }
+            }
+        }
+    }
+
+    //initalize bases
+    $scope.player               = {}; //logged in player details {id:playerID,name:login,pwd:password,friends:[array of friends player IDs],ignores:[array of ignored player IDs]}
+    $scope.messages             = {}; //master message log. {channelsLog:[],pms:[],serverMsgs:[]}. array of objects {index:generatedIndexValue,visible:boolen,channel:messageChannel,fromID:playerID,toID:forPMsfromCurrentPlayer,msg:messageText}
+    $scope.messageIndex         = 1;
+    $scope.settings             = {}; //current settings
+    $scope.playerList           = {}; //online players. {chatClient:serverPort:[{playerId:playerID,pcId:charID,playerName:playerLogin,pcName:charName,portrait:imageLinkPartial}]
+    $scope.servers              = [{ id: 1, port: 'web', prefix: 'web', name: "Web Client" }]; //list of current servers offered. {id:index (not used),port:serverPort,prefix:shortName (not used),name:serverName}
+    $scope.channels             = {}; //array for channel lists
+    $scope.channels.full        = [
+									{ code: 1, channel: 'Talk' },
+									{ code: 3, channel: 'Whisper' },
+									{ code: 31, channel: 'Quiet' },
+									{ code: 32, channel: 'Silent' },
+									{ code: 30, channel: 'Yell' },
+									{ code: 4, channel: 'Tell' },
+									{ code: 6, channel: 'Party' },
+									{ code: 164, channel: 'OOC' },
+									{ code: 108, channel: 'Sex' },
+									{ code: 228, channel: 'PVP' },
+									{ code: 116, channel: 'Action' },
+									{ code: 104, channel: 'Event' },
+									{ code: 132, channel: 'FFA' },
+									{ code: 102, channel: 'Build' }
+                                ]; //all channels
+    $scope.channels.muted       = []; //muted channels
+    $scope.channels.oocList     = ["4", "6", "164", "108", "228", "11", "6", "104", "132", "102"];//ooc channels (used with the player ignore)
+    $scope.channels.icList      = ["1", "3", "31", "32", "30"];//ic channels
+    $scope.tabs                 = []; //list of tab objects. {index:tabPosition, label:textOnTab, channels:[array of channels to add to tab]}.
+    $scope.pmTabs               = []; //list of player ids in pm tabs
+    $scope.alerts               = alerts.getAlerts();
+
+    //inital values
+    $scope.player.name = $localStorage.sinfarPlayerName;
+    $scope.player.pwd = $localStorage.sinfarPassword;
+    $scope.player.friends = $localStorage.sinfarFriends;
+    $scope.player.ignores = $localStorage.sinfarIgnores;
+    $scope.player.rememberMe = $localStorage.sinfarRemember
+    $scope.player.authed = false;
+    $http.get("http://nwn.sinfar.net/get_chat_servers.php?nocache=" + new Date().getTime())
+    .then(function (response) {
+        if (angular.isArray(response.data)) {
+            $scope.servers = response.data;
+            $scope.servers.push({ id: $scope.servers.length + 1, port: 'web', prefix: 'web', name: "Web Client" });
+            angular.forEach($scope.servers, function (server, key) {
+                server.expanded = false;
+            })
+            getOnlinePlayers();
+        }
+    }, function () {
+        $scope.servers = [{ id: 1, port: 'web', prefix: 'web', name: "Web Client", expanded: false }];
+        getOnlinePlayers();
+    });
+
+    //scoped functions
+    $scope.closeAlert = function (i) { alerts.closeAlert(i); }
+    $scope.login = function () { loginCallback(); }
+
+    $scope.LeftCtrl = function () { }
+    $scope.toggleSidenav = function (nav) {
+        $mdSidenav(nav).toggle();
+    }
+});
+app.controller('oldData', function ($scope, $http, $timeout, $window, $filter, $mdMedia, $mdDialog, $localStorage, alerts, thisPlayer, chatMsgs, settingsStore) {
+    //begin old code
+    // [[{"fromPlayerId":"23615","fromName":"furball","channel":"4","message":"XD","fromPlayerName":"furball","fromPCId":null,"fromPCName":null,"toId":"16358","fromPortrait":"\/portraits\/47074\/furballasss.jpg"}],[]]
+    settingsStore.init();
+
+    //variable initialization
+    //$scope.channels.tabs		= [];//store tab custom name and assigned channels
+    $scope.messagesList = { chatLog: { count: 0, messages: [], active: true }, pms: {}, serverMessages: [] }
+    $scope.selChannel = "talk";
+    $scope.NewLogActive = false;
 
     //window functions
     angular.element($window)
@@ -668,6 +938,4 @@ app.controller('mainCtrl', function ($scope, $http, $timeout, $window, alerts, t
                 });
                 $scope.messagesList.pms = t;*/
     }
-
-
 });

@@ -13,6 +13,8 @@
     <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular-messages.min.js"></script>
     <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular-sanitize.min.js"></script>
 
+    <script src="assets/js/angular/ngStorage.js" type="text/javascript"></script>
+
     <script src="https://ajax.googleapis.com/ajax/libs/angular_material/1.0.4/angular-material.min.js"></script>
 
     <script src="assets/js/angular/scrollglue.js" type="text/javascript"></script>
@@ -23,73 +25,85 @@
 </head>
 <body ng-app="sinfarWebclient" ng-controller="mainCtrl" ng-cloak>
     <uib-alert ng-repeat="alert in alerts" type="{{alert.type}}" close="closeAlert($index)" style="position:absolute;top:0;width:100%;">{{alert.msg}}</uib-alert>
-    <div>
-        <md-toolbar layout="column">
-            <div layout-align="center center" class="md-padding">Sinfar Webclient</div>
-            <div layout="row">
-                <md-tabs md-selected="selTabIndex" md-border-bottom md-autoselect flex>
-                    <md-tab ng-repeat="pm in pmList" label="pm.player"></md-tab><!--need to notify when player leaves and they still have a pm tab so it can be cleaned.-->
-                </md-tabs>
-                <md-button>
-                    Login
-                </md-button>
-            </div>
-        </md-toolbar>
-        <div>
-            <md-sidenav class="md-sidenav-left md-whiteframe-z2" md-component-id="left" md-is-locked-open="$mdMedia('gt-md')">
-                <md-toolbar>
-                    <h1 class="md-toolbar-tools">Sidenav Left</h1>
-                </md-toolbar>
-                <md-content layout-padding ng-controller="LeftCtrl">
-
-                </md-content>
-            </md-sidenav>
-
-            <div>
+    <div layout="row" layout-fill flex>
+        <md-sidenav flex layout="column" class="md-sidenav-left md-whiteframe-z2" md-component-id="left">
+            <md-toolbar>
+                <h1 class="md-toolbar-tools">Sidenav Left</h1>
+            </md-toolbar>
+            <md-content layout-padding ng-controller="LeftCtrl">
+                Settings
+            </md-content>
+        </md-sidenav>
+        
+        <div layout="column" layout-fill>
+            <md-toolbar layout="column">
+                <div layout="row" layout-align="center center">
+                    <md-button class="md-raised" ng-click="toggleSidenav('left')">
+                        Settings
+                    </md-button>
+                    <span flex>
+                        Sinfar Webclient<span ng-if="player.name">: {{player.name}} <span ng-if="player.charName"><i>({{player.charName}})</i></span></span>
+                    </span>
+                    <md-button class="md-raised" ng-click="toggleSidenav('right')">
+                        Online Players
+                    </md-button>
+                </div>
+                <div layout="row">
+                    <md-tabs md-selected="selTabIndex" md-border-bottom md-autoselect flex ng-if="player.authed">
+                        <md-tab>Chat</md-tab><!--allow tab to be renamed.-->
+                        <md-tab ng-repeat="tab in tabs" label="tab.label"></md-tab>
+                        <md-tab ng-repeat="pm in pmTabs" label="pm.player"></md-tab><!--need to notify when player leaves and they still have a pm tab so it can be cleaned.-->
+                    </md-tabs>
+                    <span flex></span>
+                    <md-button class="md-accent md-raised" ng-click="login()" ng-if="!player.authed">
+                        Login
+                    </md-button>
+                </div>
+            </md-toolbar>
+            <div flex>
                 Primary chat window
-                <md-virtual-repeat-container id="chat-container" md-top-index="messages.topIndex">
-                    <div md-virtual-repeat="msg in messages.log" md-on-demand class="repeated-item" flex>
-                        {{msg}}
-                    </div>
-                </md-virtual-repeat-container>
+                <div ng-repeat="msg in holdingMessages track by logIndex">
+                    {{msg.fromPlayerName}}: 
+                </div>
             </div>
-
-            <md-sidenav class="md-sidenav-right md-whiteframe-z2" md-component-id="right" md-is-locked-open="$mdMedia('gt-md')">
-                <md-toolbar>
-                    <h1 class="md-toolbar-tools">Sidenav Right</h1>
-                </md-toolbar>
-                <md-content layout-padding ng-controller="LeftCtrl">
-
-                </md-content>
-            </md-sidenav>
+            <div ng-if="player.authed">
+                <table id="table-action-bar" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td ng-model="selChannel" id="td-slect-channel">
+                            <select name="channel" id="select-channel" ng-model="chatMessageChannel">
+                                <option value="talk">Talk:</option>
+                                <option value="whisper">Whisper:</option>
+                                <option value="quiet">Quiet:</option>
+                                <option value="silent">Silent:</option>
+                                <option value="yell">Yell:</option>
+                                <option value="party">Party:</option>
+                                <option value="dm">DM:</option>
+                                <option value="ooc">OOC:</option>
+                                <option value="event">Event:</option>
+                                <option value="action">Action:</option>
+                                <option value="pvp">PvP:</option>
+                                <option value="sex">Sex:</option>
+                                <option value="ffa">FFA:</option>
+                                <option value="build">Builders:</option>
+                            </select>
+                        </td>
+                        <td id="td-chat-bar">
+                            <div contenteditable id="textarea-chat-bar" ng-keydown="$event.keyCode === 13 && sChat()" ng-keyup="$event.keyCode === 13 && msgReset()"></div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
         </div>
-        <div>
-            <table id="table-action-bar" cellspacing="0" cellpadding="0">
-                <tr>
-                    <td ng-model="selChannel" id="td-slect-channel">
-                        <select name="channel" id="select-channel" ng-model="chatMessageChannel">
-                            <option value="talk">Talk:</option>
-                            <option value="whisper">Whisper:</option>
-                            <option value="quiet">Quiet:</option>
-                            <option value="silent">Silent:</option>
-                            <option value="yell">Yell:</option>
-                            <option value="party">Party:</option>
-                            <option value="dm">DM:</option>
-                            <option value="ooc">OOC:</option>
-                            <option value="event">Event:</option>
-                            <option value="action">Action:</option>
-                            <option value="pvp">PvP:</option>
-                            <option value="sex">Sex:</option>
-                            <option value="ffa">FFA:</option>
-                            <option value="build">Builders:</option>
-                        </select>
-                    </td>
-                    <td id="td-chat-bar">
-                        <div contenteditable id="textarea-chat-bar" ng-keydown="$event.keyCode === 13 && sChat()" ng-keyup="$event.keyCode === 13 && msgReset()"></div>
-                    </td>
-                </tr>
-            </table>
-        </div>
+
+        <md-sidenav flex layout="column" class="md-sidenav-right md-whiteframe-z2" md-component-id="right">
+            <md-toolbar>
+                <h1 class="md-toolbar-tools">Sidenav Right</h1>
+            </md-toolbar>
+            <md-content layout-padding ng-controller="LeftCtrl">
+                Player List
+            </md-content>
+        </md-sidenav>
     </div>
+    <script src="webclient.js" type="text/javascript"></script>
 </body>
 </html>
