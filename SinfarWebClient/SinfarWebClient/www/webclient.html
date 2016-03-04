@@ -67,7 +67,7 @@
                         Settings
                     </md-button>
                     <span flex>
-                        Sinfar Webclient<span ng-if="player.name">: {{player.name}} <span ng-if="player.charName"><i>({{player.charName}})</i></span></span>
+                        Sinfar Webclient<span ng-if="player.authed">: {{player.name}} <span ng-if="player.charName"><i>({{player.charName}})</i></span></span>
                     </span>
                     <md-button class="md-primary md-hue-1 md-raised" ng-click="toggleSidenav('right')">
                         Online Players

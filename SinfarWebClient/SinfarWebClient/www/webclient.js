@@ -365,7 +365,7 @@ app.service('chatMsgs', function ($http, alerts, thisPlayer) {
     }
 });
 
-app.controller('mainCtrl', function ($scope, $http, $timeout, $window, $filter, $mdMedia, $mdDialog, $mdSidenav, $localStorage, alerts, thisPlayer, chatMsgs, settingsStore) {
+app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, $timeout, $window, $filter, $mdMedia, $mdDialog, $mdSidenav, $localStorage, alerts, thisPlayer, chatMsgs, settingsStore) {
     var chatFailCount = 0;
     //callbacks
     function tblScrape(table) {
@@ -402,7 +402,7 @@ app.controller('mainCtrl', function ($scope, $http, $timeout, $window, $filter, 
                         //if (server.port == 'web') { orderID = 'playerName'; }
                         server.players = $filter('orderBy')($filter('filter')(response.data, { chatClient: server.port }),orderID);
                     });
-                    //$scope.playerList = angular.copy(pList);
+                    $scope.player.charName = $filter('filter')(response.data, { playerId: $scope.player.id })[0].pcName
                 }
                 $timeout(function () {
                     getOnlinePlayers();
@@ -673,7 +673,7 @@ app.controller('mainCtrl', function ($scope, $http, $timeout, $window, $filter, 
     $scope.messages             = {}; //master message log. {channelsLog:[],pms:[],serverMsgs:[]}. array of objects {index:generatedIndexValue,visible:boolen,channel:messageChannel,fromID:playerID,toID:forPMsfromCurrentPlayer,msg:messageText}
     $scope.messages.channelsLog = [];
     $scope.messageIndex         = 1;
-    $scope.settings             = {}; //current settings
+    $scope.settings             = $localStorage.sinfarSettings;
     $scope.playerList           = {}; //online players. {chatClient:serverPort:[{playerId:playerID,pcId:charID,playerName:playerLogin,pcName:charName,portrait:imageLinkPartial}]
     $scope.servers              = [{ id: 1, port: 'web', prefix: 'web', name: "Web Client", expanded: false }]; //list of current servers offered. {id:index (not used),port:serverPort,prefix:shortName (not used),name:serverName}
     $scope.channels             = {}; //array for channel lists
@@ -725,11 +725,29 @@ app.controller('mainCtrl', function ($scope, $http, $timeout, $window, $filter, 
     //scoped functions
     $scope.closeAlert = function (i) { alerts.closeAlert(i); }
     $scope.login = function () { loginCallback(); }
-
-    $scope.LeftCtrl = function () { }
+    $scope.sChat = function () {//need to add channel from selector (if channel not specified in the post)
+        var msg = document.getElementById("textarea-chat-bar");
+        var msgTxt = msg.textContent || msg.innerText;
+        $http({
+            method: 'POST',
+            url: "http://nwn.sinfar.net/sendchat.php",
+            data: $httpParamSerializerJQLike({ "chat-message": msgTxt, "channel": $scope.chatMessageChannel }),
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+        }).then(
+            function (response) {
+                //check if message accepted. if not display error. if accepted clear and reset inputs
+            },
+            function () {
+                //transmission error
+            }
+        );
+    }
     $scope.toggleSidenav = function (nav) {
         $mdSidenav(nav).toggle();
     }
+    $scope.$watchCollection('settings', function (newSettings, oldSettings) {
+        $localStorage.sinfarSettings = newSettings;
+    });
 });
 app.controller('oldData', function ($scope, $http, $timeout, $window, $filter, $mdMedia, $mdDialog, $localStorage, alerts, thisPlayer, chatMsgs, settingsStore) {
     //begin old code
