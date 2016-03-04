@@ -20,6 +20,7 @@
 
     <script src="assets/js/angular/scrollglue.js" type="text/javascript"></script>
     <script src="assets/js/libs/autolinker.js" type="text/javascript"></script>
+    <script src="assets/js/libs/tinyColor.js" type="text/javascript"></script>
 
     <script src="assets/js/FileSaver.min.js" type="text/javascript"></script>
     <script src="assets/js/jszip.min.js" type="text/javascript"></script>
@@ -55,11 +56,437 @@
                     Charater Settings
                 </div>
                 <div ng-show="expandChar">
-                    Bio Editor
+                    <div layout="column">
+                        <md-input-container flex class="md-block">
+                            <label>Biography Editor</label>
+                            <textarea ng-model="player.pcBio" columns="1" md-maxlength="150" rows="5"></textarea>
+                        </md-input-container>
+                        <md-button class="md-accent md-raised" ng-click="saveBio()">Save</md-button>
+                    </div>
+                    <div layout="column">
+                        <md-input-container flex class="md-block">
+                            <label>RP Notes</label>
+                            <textarea ng-model="player.rpNotes" columns="1" rows="5"></textarea>
+                        </md-input-container>
+                        <md-button class="md-accent md-raised">Save</md-button>
+                    </div>
+                </div>
+                <div ng-click="expandColor = !expandColor">
+                    Color Settings
+                </div>
+                <div ng-show="expandColor" class="md-padding">
+
+                    <div ng-click="expandColorTalk = !expandColorTalk" layout="row">
+                        Talk
+                        <span flex></span>
+                        <span ng-attr-style="border: 1px solid #333; background: hsl({{settings.msgColors.Talk.hue}},{{settings.msgColors.Talk.sat}}%,{{settings.msgColors.Talk.light}}%)">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                    </div>
+                    <div ng-show="expandColorTalk" layout="row" class="md-padding">
+                        <div layout="column" flex="20">
+                            <span>
+                                Hue
+                            </span>
+                            <span>
+                                Saturation
+                            </span>
+                            <span>
+                                Lightness
+                            </span>
+                        </div>
+                        <div layout="column" flex>
+                            <span flex>
+                                <md-slider flex="" ng-model="settings.msgColors.Talk.hue" min="0" max="259" class="md-primary"></md-slider>
+                            </span>
+                            <span flex>
+                                <md-slider flex="" ng-model="settings.msgColors.Talk.sat" min="0" max="100" class="md-primary"></md-slider>
+                            </span>
+                            <span flex>
+                                <md-slider flex="" ng-model="settings.msgColors.Talk.light" min="0" max="100" class="md-primary"></md-slider>
+                            </span>
+                        </div>
+                    </div>
+                    <div ng-click="expandColorWhisper = !expandColorWhisper" layout="row">
+                        Whisper
+                        <span flex></span>
+                        <span ng-attr-style="border: 1px solid #333; background: hsl({{settings.msgColors.Whisper.hue}},{{settings.msgColors.Whisper.sat}}%,{{settings.msgColors.Whisper.light}}%)">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                    </div>
+                    <div ng-show="expandColorWhisper" layout="row" class="md-padding">
+                        <div layout="column" flex="20">
+                            <span>
+                                Hue
+                            </span>
+                            <span>
+                                Saturation
+                            </span>
+                            <span>
+                                Lightness
+                            </span>
+                        </div>
+                        <div layout="column" flex>
+                            <span flex>
+                                <md-slider flex="" ng-model="settings.msgColors.Whisper.hue" min="0" max="259" class="md-primary"></md-slider>
+                            </span>
+                            <span flex>
+                                <md-slider flex="" ng-model="settings.msgColors.Whisper.sat" min="0" max="100" class="md-primary"></md-slider>
+                            </span>
+                            <span flex>
+                                <md-slider flex="" ng-model="settings.msgColors.Whisper.light" min="0" max="100" class="md-primary"></md-slider>
+                            </span>
+                        </div>
+                    </div>
+                    <div ng-click="expandColorQuiet = !expandColorQuiet" layout="row">
+                        Quiet
+                        <span flex></span>
+                        <span ng-attr-style="border: 1px solid #333; background: hsl({{settings.msgColors.Quiet.hue}},{{settings.msgColors.Quiet.sat}}%,{{settings.msgColors.Quiet.light}}%)">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                    </div>
+                    <div ng-show="expandColorQuiet" layout="row" class="md-padding">
+                        <div layout="column" flex="20">
+                            <span>
+                                Hue
+                            </span>
+                            <span>
+                                Saturation
+                            </span>
+                            <span>
+                                Lightness
+                            </span>
+                        </div>
+                        <div layout="column" flex>
+                            <span flex>
+                                <md-slider flex="" ng-model="settings.msgColors.Quiet.hue" min="0" max="259" class="md-primary"></md-slider>
+                            </span>
+                            <span flex>
+                                <md-slider flex="" ng-model="settings.msgColors.Quiet.sat" min="0" max="100" class="md-primary"></md-slider>
+                            </span>
+                            <span flex>
+                                <md-slider flex="" ng-model="settings.msgColors.Quiet.light" min="0" max="100" class="md-primary"></md-slider>
+                            </span>
+                        </div>
+                    </div>
+                    <div ng-click="expandColorSilent = !expandColorSilent" layout="row">
+                        Silent
+                        <span flex></span>
+                        <span ng-attr-style="border: 1px solid #333; background: hsl({{settings.msgColors.Silent.hue}},{{settings.msgColors.Silent.sat}}%,{{settings.msgColors.Silent.light}}%)">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                    </div>
+                    <div ng-show="expandColorSilent" layout="row" class="md-padding">
+                        <div layout="column" flex="20">
+                            <span>
+                                Hue
+                            </span>
+                            <span>
+                                Saturation
+                            </span>
+                            <span>
+                                Lightness
+                            </span>
+                        </div>
+                        <div layout="column" flex>
+                            <span flex>
+                                <md-slider flex="" ng-model="settings.msgColors.Silent.hue" min="0" max="259" class="md-primary"></md-slider>
+                            </span>
+                            <span flex>
+                                <md-slider flex="" ng-model="settings.msgColors.Silent.sat" min="0" max="100" class="md-primary"></md-slider>
+                            </span>
+                            <span flex>
+                                <md-slider flex="" ng-model="settings.msgColors.Silent.light" min="0" max="100" class="md-primary"></md-slider>
+                            </span>
+                        </div>
+                    </div>
+                    <div ng-click="expandColorYell = !expandColorYell" layout="row">
+                        Yell
+                        <span flex></span>
+                        <span ng-attr-style="border: 1px solid #333; background: hsl({{settings.msgColors.Yell.hue}},{{settings.msgColors.Yell.sat}}%,{{settings.msgColors.Yell.light}}%)">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                    </div>
+                    <div ng-show="expandColorYell" layout="row" class="md-padding">
+                        <div layout="column" flex="20">
+                            <span>
+                                Hue
+                            </span>
+                            <span>
+                                Saturation
+                            </span>
+                            <span>
+                                Lightness
+                            </span>
+                        </div>
+                        <div layout="column" flex>
+                            <span flex>
+                                <md-slider flex="" ng-model="settings.msgColors.Yell.hue" min="0" max="259" class="md-primary"></md-slider>
+                            </span>
+                            <span flex>
+                                <md-slider flex="" ng-model="settings.msgColors.Yell.sat" min="0" max="100" class="md-primary"></md-slider>
+                            </span>
+                            <span flex>
+                                <md-slider flex="" ng-model="settings.msgColors.Yell.light" min="0" max="100" class="md-primary"></md-slider>
+                            </span>
+                        </div>
+                    </div>
+                    <div ng-click="expandColorTell = !expandColorTell" layout="row">
+                        Tell
+                        <span flex></span>
+                        <span ng-attr-style="border: 1px solid #333; background: hsl({{settings.msgColors.Tell.hue}},{{settings.msgColors.Tell.sat}}%,{{settings.msgColors.Tell.light}}%)">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                    </div>
+                    <div ng-show="expandColorTell" layout="row" class="md-padding">
+                        <div layout="column" flex="20">
+                            <span>
+                                Hue
+                            </span>
+                            <span>
+                                Saturation
+                            </span>
+                            <span>
+                                Lightness
+                            </span>
+                        </div>
+                        <div layout="column" flex>
+                            <span flex>
+                                <md-slider flex="" ng-model="settings.msgColors.Tell.hue" min="0" max="259" class="md-primary"></md-slider>
+                            </span>
+                            <span flex>
+                                <md-slider flex="" ng-model="settings.msgColors.Tell.sat" min="0" max="100" class="md-primary"></md-slider>
+                            </span>
+                            <span flex>
+                                <md-slider flex="" ng-model="settings.msgColors.Tell.light" min="0" max="100" class="md-primary"></md-slider>
+                            </span>
+                        </div>
+                    </div>
+                    <div ng-click="expandColorParty = !expandColorParty" layout="row">
+                        Party
+                        <span flex></span>
+                        <span ng-attr-style="border: 1px solid #333; background: hsl({{settings.msgColors.Party.hue}},{{settings.msgColors.Party.sat}}%,{{settings.msgColors.Party.light}}%)">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                    </div>
+                    <div ng-show="expandColorParty" layout="row" class="md-padding">
+                        <div layout="column" flex="20">
+                            <span>
+                                Hue
+                            </span>
+                            <span>
+                                Saturation
+                            </span>
+                            <span>
+                                Lightness
+                            </span>
+                        </div>
+                        <div layout="column" flex>
+                            <span flex>
+                                <md-slider flex="" ng-model="settings.msgColors.Party.hue" min="0" max="259" class="md-primary"></md-slider>
+                            </span>
+                            <span flex>
+                                <md-slider flex="" ng-model="settings.msgColors.Party.sat" min="0" max="100" class="md-primary"></md-slider>
+                            </span>
+                            <span flex>
+                                <md-slider flex="" ng-model="settings.msgColors.Party.light" min="0" max="100" class="md-primary"></md-slider>
+                            </span>
+                        </div>
+                    </div>
+                    <div ng-click="expandColorOOC = !expandColorOOC" layout="row">
+                        OOC
+                        <span flex></span>
+                        <span ng-attr-style="border: 1px solid #333; background: hsl({{settings.msgColors.OOC.hue}},{{settings.msgColors.OOC.sat}}%,{{settings.msgColors.OOC.light}}%)">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                    </div>
+                    <div ng-show="expandColorOOC" layout="row" class="md-padding">
+                        <div layout="column" flex="20">
+                            <span>
+                                Hue
+                            </span>
+                            <span>
+                                Saturation
+                            </span>
+                            <span>
+                                Lightness
+                            </span>
+                        </div>
+                        <div layout="column" flex>
+                            <span flex>
+                                <md-slider flex="" ng-model="settings.msgColors.OOC.hue" min="0" max="259" class="md-primary"></md-slider>
+                            </span>
+                            <span flex>
+                                <md-slider flex="" ng-model="settings.msgColors.OOC.sat" min="0" max="100" class="md-primary"></md-slider>
+                            </span>
+                            <span flex>
+                                <md-slider flex="" ng-model="settings.msgColors.OOC.light" min="0" max="100" class="md-primary"></md-slider>
+                            </span>
+                        </div>
+                    </div>
+                    <div ng-click="expandColorSex = !expandColorSex" layout="row">
+                        Sex
+                        <span flex></span>
+                        <span ng-attr-style="border: 1px solid #333; background: hsl({{settings.msgColors.Sex.hue}},{{settings.msgColors.Sex.sat}}%,{{settings.msgColors.Sex.light}}%)">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                    </div>
+                    <div ng-show="expandColorSex" layout="row" class="md-padding">
+                        <div layout="column" flex="20">
+                            <span>
+                                Hue
+                            </span>
+                            <span>
+                                Saturation
+                            </span>
+                            <span>
+                                Lightness
+                            </span>
+                        </div>
+                        <div layout="column" flex>
+                            <span flex>
+                                <md-slider flex="" ng-model="settings.msgColors.Sex.hue" min="0" max="259" class="md-primary"></md-slider>
+                            </span>
+                            <span flex>
+                                <md-slider flex="" ng-model="settings.msgColors.Sex.sat" min="0" max="100" class="md-primary"></md-slider>
+                            </span>
+                            <span flex>
+                                <md-slider flex="" ng-model="settings.msgColors.Sex.light" min="0" max="100" class="md-primary"></md-slider>
+                            </span>
+                        </div>
+                    </div>
+                    <div ng-click="expandColorPVP = !expandColorPVP" layout="row">
+                        PVP
+                        <span flex></span>
+                        <span ng-attr-style="border: 1px solid #333; background: hsl({{settings.msgColors.PVP.hue}},{{settings.msgColors.PVP.sat}}%,{{settings.msgColors.PVP.light}}%)">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                    </div>
+                    <div ng-show="expandColorPVP" layout="row" class="md-padding">
+                        <div layout="column" flex="20">
+                            <span>
+                                Hue
+                            </span>
+                            <span>
+                                Saturation
+                            </span>
+                            <span>
+                                Lightness
+                            </span>
+                        </div>
+                        <div layout="column" flex>
+                            <span flex>
+                                <md-slider flex="" ng-model="settings.msgColors.PVP.hue" min="0" max="259" class="md-primary"></md-slider>
+                            </span>
+                            <span flex>
+                                <md-slider flex="" ng-model="settings.msgColors.PVP.sat" min="0" max="100" class="md-primary"></md-slider>
+                            </span>
+                            <span flex>
+                                <md-slider flex="" ng-model="settings.msgColors.PVP.light" min="0" max="100" class="md-primary"></md-slider>
+                            </span>
+                        </div>
+                    </div>
+                    <div ng-click="expandColorAction = !expandColorAction" layout="row">
+                        Action
+                        <span flex></span>
+                        <span ng-attr-style="border: 1px solid #333; background: hsl({{settings.msgColors.Action.hue}},{{settings.msgColors.Action.sat}}%,{{settings.msgColors.Action.light}}%)">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                    </div>
+                    <div ng-show="expandColorAction" layout="row" class="md-padding">
+                        <div layout="column" flex="20">
+                            <span>
+                                Hue
+                            </span>
+                            <span>
+                                Saturation
+                            </span>
+                            <span>
+                                Lightness
+                            </span>
+                        </div>
+                        <div layout="column" flex>
+                            <span flex>
+                                <md-slider flex="" ng-model="settings.msgColors.Action.hue" min="0" max="259" class="md-primary"></md-slider>
+                            </span>
+                            <span flex>
+                                <md-slider flex="" ng-model="settings.msgColors.Action.sat" min="0" max="100" class="md-primary"></md-slider>
+                            </span>
+                            <span flex>
+                                <md-slider flex="" ng-model="settings.msgColors.Action.light" min="0" max="100" class="md-primary"></md-slider>
+                            </span>
+                        </div>
+                    </div>
+                    <div ng-click="expandColorEvent = !expandColorEvent" layout="row">
+                        Event
+                        <span flex></span>
+                        <span ng-attr-style="border: 1px solid #333; background: hsl({{settings.msgColors.Event.hue}},{{settings.msgColors.Event.sat}}%,{{settings.msgColors.Event.light}}%)">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                    </div>
+                    <div ng-show="expandColorEvent" layout="row" class="md-padding">
+                        <div layout="column" flex="20">
+                            <span>
+                                Hue
+                            </span>
+                            <span>
+                                Saturation
+                            </span>
+                            <span>
+                                Lightness
+                            </span>
+                        </div>
+                        <div layout="column" flex>
+                            <span flex>
+                                <md-slider flex="" ng-model="settings.msgColors.Event.hue" min="0" max="259" class="md-primary"></md-slider>
+                            </span>
+                            <span flex>
+                                <md-slider flex="" ng-model="settings.msgColors.Event.sat" min="0" max="100" class="md-primary"></md-slider>
+                            </span>
+                            <span flex>
+                                <md-slider flex="" ng-model="settings.msgColors.Event.light" min="0" max="100" class="md-primary"></md-slider>
+                            </span>
+                        </div>
+                    </div>
+                    <div ng-click="expandColorFFA = !expandColorFFA" layout="row">
+                        FFA
+                        <span flex></span>
+                        <span ng-attr-style="border: 1px solid #333; background: hsl({{settings.msgColors.FFA.hue}},{{settings.msgColors.FFA.sat}}%,{{settings.msgColors.FFA.light}}%)">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                    </div>
+                    <div ng-show="expandColorFFA" layout="row" class="md-padding">
+                        <div layout="column" flex="20">
+                            <span>
+                                Hue
+                            </span>
+                            <span>
+                                Saturation
+                            </span>
+                            <span>
+                                Lightness
+                            </span>
+                        </div>
+                        <div layout="column" flex>
+                            <span flex>
+                                <md-slider flex="" ng-model="settings.msgColors.FFA.hue" min="0" max="259" class="md-primary"></md-slider>
+                            </span>
+                            <span flex>
+                                <md-slider flex="" ng-model="settings.msgColors.FFA.sat" min="0" max="100" class="md-primary"></md-slider>
+                            </span>
+                            <span flex>
+                                <md-slider flex="" ng-model="settings.msgColors.FFA.light" min="0" max="100" class="md-primary"></md-slider>
+                            </span>
+                        </div>
+                    </div>
+                    <div ng-click="expandColorBuild = !expandColorBuild" layout="row">
+                        Build
+                        <span flex></span>
+                        <span ng-attr-style="border: 1px solid #333; background: hsl({{settings.msgColors.Build.hue}},{{settings.msgColors.Build.sat}}%,{{settings.msgColors.Build.light}}%)">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                    </div>
+                    <div ng-show="expandColorBuild" layout="row" class="md-padding">
+                        <div layout="column" flex="20">
+                            <span>
+                                Hue
+                            </span>
+                            <span>
+                                Saturation
+                            </span>
+                            <span>
+                                Lightness
+                            </span>
+                        </div>
+                        <div layout="column" flex>
+                            <span flex>
+                                <md-slider flex="" ng-model="settings.msgColors.Build.hue" min="0" max="259" class="md-primary"></md-slider>
+                            </span>
+                            <span flex>
+                                <md-slider flex="" ng-model="settings.msgColors.Build.sat" min="0" max="100" class="md-primary"></md-slider>
+                            </span>
+                            <span flex>
+                                <md-slider flex="" ng-model="settings.msgColors.Build.light" min="0" max="100" class="md-primary"></md-slider>
+                            </span>
+                        </div>
+                    </div>
+
                 </div>
             </md-content>
         </md-sidenav>
-        
+
         <div layout="column" layout-fill>
             <md-toolbar layout="column">
                 <div layout="row" layout-align="center center">
@@ -179,39 +606,39 @@
                     <br />
                     <font color=#fefe20>You can use the !WHOSPY command to know if people near you are in your /wisper or /quiet or /silent range.</font>
                 </div>
-                <div ng-if="player.authed" 
-                     style="overflow-y:auto;" 
+                <div ng-if="player.authed"
+                     style="overflow-y:auto;"
                      flex
                      scroll-glue>
-                            <blockquote ng-repeat="msg in messages.channelsLog track by msg.logIndex" class="quote-channel-{{msg.channel}}"
-                                        style="padding:0 10px; margin:0 0 5px"
-                                        layout-align="start start" layout="row">
-                                <!--from line-->
-                                <i class="fa fa-times-circle" id="{{msg.logIndex}}" remove-Message></i>
-                                <span ng-show="settings.portraits">
-                                    <img ng-src="http://nwn.sinfar.net{{msg.fromPortrait}}" class="img-circle">
-                                </span>
-                                <span layout="column">
-                                    <footer layout="row">
-                                        <span style="cursor: pointer;" ng-click="setPM(msg)">
-                                            <span class="span-chat-message-from-pc-name">
-                                                <md-tooltip md-direction="right" ng-if="msg.fromPCName">
-                                                    {{msg.fromPlayerName}}
-                                                </md-tooltip>
-                                                <span ng-class="{sinfarfriend:msg.fndmsg}"
-                                                      ng-bind="msg.fromName">
-                                                </span>
-                                            </span>
+                    <blockquote ng-repeat="msg in messages.channelsLog track by msg.logIndex" class="quote-channel-{{msg.channel}}"
+                                style="padding:0 10px; margin:0 0 5px"
+                                layout-align="start start" layout="row">
+                        <!--from line-->
+                        <i class="fa fa-times-circle" id="{{msg.logIndex}}" remove-Message></i>
+                        <span ng-show="settings.portraits">
+                            <img ng-src="http://nwn.sinfar.net{{msg.fromPortrait}}" class="img-circle">
+                        </span>
+                        <span layout="column">
+                            <footer layout="row">
+                                <span style="cursor: pointer;" ng-click="setPM(msg)">
+                                    <span class="span-chat-message-from-pc-name">
+                                        <md-tooltip md-direction="right" ng-if="msg.fromPCName">
+                                            {{msg.fromPlayerName}}
+                                        </md-tooltip>
+                                        <span ng-class="{sinfarfriend:msg.fndmsg}"
+                                              ng-bind="msg.fromName">
                                         </span>
-                                        <!--timestamp-->
-                                        <cite ng-show="settings.timestamps">
-                                            <span>{{msg.timestamp | date: 'shortTime'}}</span>
-                                        </cite>
-                                    </footer>
-                                    <!--message-->
-                                    <span class="span-chat-message" ng-bind-html="msg.message" style=""></span>
+                                    </span>
                                 </span>
-                            </blockquote>
+                                <!--timestamp-->
+                                <cite ng-show="settings.timestamps">
+                                    <span>{{msg.timestamp | date: 'shortTime'}}</span>
+                                </cite>
+                            </footer>
+                            <!--message-->
+                            <span class="span-chat-message" ng-style=getMsgStyle(msg.channel) ng-bind-html="msg.message" style=""></span>
+                        </span>
+                    </blockquote>
                 </div>
                 <div ng-if="player.authed">
                     <table id="table-action-bar" cellspacing="0" cellpadding="0">

@@ -1,5 +1,15 @@
     html{
       height:100%;
+       -ms-word-break: break-all;
+     word-break: break-all;
+
+     /* Non standard for webkit */
+     word-break: break-word;
+
+-webkit-hyphens: auto;
+   -moz-hyphens: auto;
+    -ms-hyphens: auto;
+        hyphens: auto;
     }
     body {
       height: 100%;
@@ -402,3 +412,4 @@ md-sidenav.md-closed.md-locked-open-add-active {
     max-width: 30em !important;
 }
 md-tabs.md-default-theme .md-tab.md-active, md-tabs .md-tab.md-active, md-tabs.md-default-theme .md-tab.md-active md-icon, md-tabs .md-tab.md-active md-icon, md-tabs.md-default-theme .md-tab.md-focused, md-tabs .md-tab.md-focused, md-tabs.md-default-theme .md-tab.md-focused md-icon, md-tabs .md-tab.md-focused md-icon{color:white;}
+blockquote span span font{color:inherit;}

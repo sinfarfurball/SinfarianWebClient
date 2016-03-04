@@ -402,17 +402,28 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
                         //if (server.port == 'web') { orderID = 'playerName'; }
                         server.players = $filter('orderBy')($filter('filter')(response.data, { chatClient: server.port }),orderID);
                     });
+                    angular.forEach(response.data, function (player, key) {
+                        if (player.playerId == $scope.player.id) {
+                            $scope.player.charName = player.pcName;
+                            $scope.player.charID = player.pcId;
+                            var lookupID = player.portrait.split("/");
+                            $http.get("http://nwn.sinfar.net/getcharbio.php?pc_id=" + lookupID[2]).then(function (response) {
+                                $scope.player.pcBio = response.data;
+                            });
+                            $scope.player.pcID = lookupID[2];
+                        }
+                    });
                     $scope.player.charName = $filter('filter')(response.data, { playerId: $scope.player.id })[0].pcName
                 }
                 $timeout(function () {
                     getOnlinePlayers();
-                }, 60 * 1000);
+                }, 15 * 1000);
             },
             function () {
                 //http failed
                 $timeout(function () {
                     getOnlinePlayers();
-                }, 60 * 1000);
+                }, 15 * 1000);
             });
     }
     function pollChat() {
@@ -705,7 +716,7 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
     $scope.player.pwd = $localStorage.sinfarPassword;
     $scope.player.friends = $localStorage.sinfarFriends;
     $scope.player.ignores = $localStorage.sinfarIgnores;
-    $scope.player.rememberMe = $localStorage.sinfarRemember
+    $scope.player.rememberMe = $localStorage.sinfarRemember;
     $scope.player.authed = false;
     $http.get("http://nwn.sinfar.net/get_chat_servers.php?nocache=" + new Date().getTime())
     .then(function (response) {
@@ -745,9 +756,24 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
     $scope.toggleSidenav = function (nav) {
         $mdSidenav(nav).toggle();
     }
-    $scope.$watchCollection('settings', function (newSettings, oldSettings) {
+    $scope.getMsgStyle = function (channel) {
+        channel = $filter('filter')($scope.channels.full, { code: channel })[0].channel;
+        cval = tinycolor('hsl(' + $scope.settings.msgColors[channel].hue + ',' + $scope.settings.msgColors[channel].sat + '%,' + $scope.settings.msgColors[channel].light + '%)').toHex();
+        return {
+            "color": '#'+cval
+        };
+    }
+    $scope.saveBio = function () {
+        $http({
+            method: 'POST',
+            url: "http://nwn.sinfar.net/char_desc_save.php",
+            data: $httpParamSerializerJQLike({ pc_id: $scope.player.pcID, description: $scope.player.pcBio }),
+            headers: { 'Content-type': 'application/x-www-form-urlencoded' }
+        }).then(function (response) { console.log(response.data); });
+    }
+    $scope.$watch('settings', function (newSettings, oldSettings) {
         $localStorage.sinfarSettings = newSettings;
-    });
+    },true);
 });
 app.controller('oldData', function ($scope, $http, $timeout, $window, $filter, $mdMedia, $mdDialog, $localStorage, alerts, thisPlayer, chatMsgs, settingsStore) {
     //begin old code
