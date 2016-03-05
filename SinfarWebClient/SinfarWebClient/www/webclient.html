@@ -27,7 +27,6 @@
 
 </head>
 <body ng-app="sinfarWebclient" ng-controller="mainCtrl" ng-cloak>
-    <uib-alert ng-repeat="alert in alerts" type="{{alert.type}}" close="closeAlert($index)" style="position:absolute;top:0;width:100%;">{{alert.msg}}</uib-alert>
     <div layout="row" layout-fill flex>
         <md-sidenav flex layout="column" class="md-sidenav-left md-whiteframe-z2" md-component-id="left" md-theme="settings">
             <md-toolbar class="md-accent">
@@ -72,24 +71,24 @@
                     </div>
                 </div>
                 <div ng-click="expandColor = !expandColor">
-                    Color Settings
+                    Channel Settings
                 </div>
                 <div ng-show="expandColor" class="md-padding">
 
-                    <div ng-click="expandColorTalk = !expandColorTalk" layout="row">
-                        Talk
-                        <span flex></span>
-                        <span ng-attr-style="border: 1px solid #333; background: hsl({{settings.msgColors.Talk.hue}},{{settings.msgColors.Talk.sat}}%,{{settings.msgColors.Talk.light}}%)">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                    <div layout="row">
+                        <span ng-click="expandColorTalk = !expandColorTalk" flex>Talk</span>
+                        Color: <span ng-attr-style="border: 1px solid #333; background: hsl({{settings.msgColors.Talk.hue}},{{settings.msgColors.Talk.sat}}%,{{settings.msgColors.Talk.light}}%)">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                        Mute: <md-checkbox></md-checkbox>
                     </div>
                     <div ng-show="expandColorTalk" layout="row" class="md-padding">
                         <div layout="column" flex="20">
-                            <span>
+                            <span flex>
                                 Hue
                             </span>
-                            <span>
+                            <span flex>
                                 Saturation
                             </span>
-                            <span>
+                            <span flex>
                                 Lightness
                             </span>
                         </div>
@@ -105,20 +104,20 @@
                             </span>
                         </div>
                     </div>
-                    <div ng-click="expandColorWhisper = !expandColorWhisper" layout="row">
-                        Whisper
-                        <span flex></span>
-                        <span ng-attr-style="border: 1px solid #333; background: hsl({{settings.msgColors.Whisper.hue}},{{settings.msgColors.Whisper.sat}}%,{{settings.msgColors.Whisper.light}}%)">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                    <div layout="row">
+                        <span ng-click="expandColorWhisper = !expandColorWhisper" flex>Whisper</span>
+                        Color:  <span ng-attr-style="border: 1px solid #333; background: hsl({{settings.msgColors.Whisper.hue}},{{settings.msgColors.Whisper.sat}}%,{{settings.msgColors.Whisper.light}}%)">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                        Mute: <md-checkbox></md-checkbox>
                     </div>
                     <div ng-show="expandColorWhisper" layout="row" class="md-padding">
                         <div layout="column" flex="20">
-                            <span>
+                            <span flex>
                                 Hue
                             </span>
-                            <span>
+                            <span flex>
                                 Saturation
                             </span>
-                            <span>
+                            <span flex>
                                 Lightness
                             </span>
                         </div>
@@ -134,20 +133,20 @@
                             </span>
                         </div>
                     </div>
-                    <div ng-click="expandColorQuiet = !expandColorQuiet" layout="row">
-                        Quiet
-                        <span flex></span>
-                        <span ng-attr-style="border: 1px solid #333; background: hsl({{settings.msgColors.Quiet.hue}},{{settings.msgColors.Quiet.sat}}%,{{settings.msgColors.Quiet.light}}%)">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                    <div layout="row">
+                        <span ng-click="expandColorQuiet = !expandColorQuiet" flex>Quiet</span>
+                        Color: <span ng-attr-style="border: 1px solid #333; background: hsl({{settings.msgColors.Quiet.hue}},{{settings.msgColors.Quiet.sat}}%,{{settings.msgColors.Quiet.light}}%)">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                        Mute: <md-checkbox></md-checkbox>
                     </div>
                     <div ng-show="expandColorQuiet" layout="row" class="md-padding">
                         <div layout="column" flex="20">
-                            <span>
+                            <span flex>
                                 Hue
                             </span>
-                            <span>
+                            <span flex>
                                 Saturation
                             </span>
-                            <span>
+                            <span flex>
                                 Lightness
                             </span>
                         </div>
@@ -163,20 +162,20 @@
                             </span>
                         </div>
                     </div>
-                    <div ng-click="expandColorSilent = !expandColorSilent" layout="row">
-                        Silent
-                        <span flex></span>
-                        <span ng-attr-style="border: 1px solid #333; background: hsl({{settings.msgColors.Silent.hue}},{{settings.msgColors.Silent.sat}}%,{{settings.msgColors.Silent.light}}%)">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                    <div layout="row">
+                        <span ng-click="expandColorSilent = !expandColorSilent" flex>Silent</span>
+                        Color: <span ng-attr-style="border: 1px solid #333; background: hsl({{settings.msgColors.Silent.hue}},{{settings.msgColors.Silent.sat}}%,{{settings.msgColors.Silent.light}}%)">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                        Mute: <md-checkbox></md-checkbox>
                     </div>
                     <div ng-show="expandColorSilent" layout="row" class="md-padding">
                         <div layout="column" flex="20">
-                            <span>
+                            <span flex>
                                 Hue
                             </span>
-                            <span>
+                            <span flex>
                                 Saturation
                             </span>
-                            <span>
+                            <span flex>
                                 Lightness
                             </span>
                         </div>
@@ -192,20 +191,20 @@
                             </span>
                         </div>
                     </div>
-                    <div ng-click="expandColorYell = !expandColorYell" layout="row">
-                        Yell
-                        <span flex></span>
-                        <span ng-attr-style="border: 1px solid #333; background: hsl({{settings.msgColors.Yell.hue}},{{settings.msgColors.Yell.sat}}%,{{settings.msgColors.Yell.light}}%)">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                    <div layout="row">
+                        <span ng-click="expandColorYell = !expandColorYell" flex>Yell</span>
+                        Color: <span ng-attr-style="border: 1px solid #333; background: hsl({{settings.msgColors.Yell.hue}},{{settings.msgColors.Yell.sat}}%,{{settings.msgColors.Yell.light}}%)">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                        Mute: <md-checkbox></md-checkbox>
                     </div>
                     <div ng-show="expandColorYell" layout="row" class="md-padding">
                         <div layout="column" flex="20">
-                            <span>
+                            <span flex>
                                 Hue
                             </span>
-                            <span>
+                            <span flex>
                                 Saturation
                             </span>
-                            <span>
+                            <span flex>
                                 Lightness
                             </span>
                         </div>
@@ -221,20 +220,20 @@
                             </span>
                         </div>
                     </div>
-                    <div ng-click="expandColorTell = !expandColorTell" layout="row">
-                        Tell
-                        <span flex></span>
-                        <span ng-attr-style="border: 1px solid #333; background: hsl({{settings.msgColors.Tell.hue}},{{settings.msgColors.Tell.sat}}%,{{settings.msgColors.Tell.light}}%)">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                    <div layout="row">
+                        <span ng-click="expandColorTell = !expandColorTell" flex>Tell</span>
+                        Color: <span ng-attr-style="border: 1px solid #333; background: hsl({{settings.msgColors.Tell.hue}},{{settings.msgColors.Tell.sat}}%,{{settings.msgColors.Tell.light}}%)">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                        Mute: <md-checkbox></md-checkbox>
                     </div>
                     <div ng-show="expandColorTell" layout="row" class="md-padding">
                         <div layout="column" flex="20">
-                            <span>
+                            <span flex>
                                 Hue
                             </span>
-                            <span>
+                            <span flex>
                                 Saturation
                             </span>
-                            <span>
+                            <span flex>
                                 Lightness
                             </span>
                         </div>
@@ -250,20 +249,20 @@
                             </span>
                         </div>
                     </div>
-                    <div ng-click="expandColorParty = !expandColorParty" layout="row">
-                        Party
-                        <span flex></span>
-                        <span ng-attr-style="border: 1px solid #333; background: hsl({{settings.msgColors.Party.hue}},{{settings.msgColors.Party.sat}}%,{{settings.msgColors.Party.light}}%)">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                    <div layout="row">
+                        <span ng-click="expandColorParty = !expandColorParty" flex>Party</span>
+                        Color: <span ng-attr-style="border: 1px solid #333; background: hsl({{settings.msgColors.Party.hue}},{{settings.msgColors.Party.sat}}%,{{settings.msgColors.Party.light}}%)">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                        Mute: <md-checkbox></md-checkbox>
                     </div>
                     <div ng-show="expandColorParty" layout="row" class="md-padding">
                         <div layout="column" flex="20">
-                            <span>
+                            <span flex>
                                 Hue
                             </span>
-                            <span>
+                            <span flex>
                                 Saturation
                             </span>
-                            <span>
+                            <span flex>
                                 Lightness
                             </span>
                         </div>
@@ -279,20 +278,20 @@
                             </span>
                         </div>
                     </div>
-                    <div ng-click="expandColorOOC = !expandColorOOC" layout="row">
-                        OOC
-                        <span flex></span>
-                        <span ng-attr-style="border: 1px solid #333; background: hsl({{settings.msgColors.OOC.hue}},{{settings.msgColors.OOC.sat}}%,{{settings.msgColors.OOC.light}}%)">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                    <div layout="row">
+                        <span ng-click="expandColorOOC = !expandColorOOC" flex>OOC</span>
+                        Color:  <span ng-attr-style="border: 1px solid #333; background: hsl({{settings.msgColors.OOC.hue}},{{settings.msgColors.OOC.sat}}%,{{settings.msgColors.OOC.light}}%)">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                        Mute: <md-checkbox></md-checkbox>
                     </div>
                     <div ng-show="expandColorOOC" layout="row" class="md-padding">
                         <div layout="column" flex="20">
-                            <span>
+                            <span flex>
                                 Hue
                             </span>
-                            <span>
+                            <span flex>
                                 Saturation
                             </span>
-                            <span>
+                            <span flex>
                                 Lightness
                             </span>
                         </div>
@@ -308,20 +307,20 @@
                             </span>
                         </div>
                     </div>
-                    <div ng-click="expandColorSex = !expandColorSex" layout="row">
-                        Sex
-                        <span flex></span>
-                        <span ng-attr-style="border: 1px solid #333; background: hsl({{settings.msgColors.Sex.hue}},{{settings.msgColors.Sex.sat}}%,{{settings.msgColors.Sex.light}}%)">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                    <div layout="row">
+                        <span ng-click="expandColorSex = !expandColorSex" flex>Sex</span>
+                        Color:  <span ng-attr-style="border: 1px solid #333; background: hsl({{settings.msgColors.Sex.hue}},{{settings.msgColors.Sex.sat}}%,{{settings.msgColors.Sex.light}}%)">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                        Mute: <md-checkbox></md-checkbox>
                     </div>
                     <div ng-show="expandColorSex" layout="row" class="md-padding">
                         <div layout="column" flex="20">
-                            <span>
+                            <span flex>
                                 Hue
                             </span>
-                            <span>
+                            <span flex>
                                 Saturation
                             </span>
-                            <span>
+                            <span flex>
                                 Lightness
                             </span>
                         </div>
@@ -337,20 +336,20 @@
                             </span>
                         </div>
                     </div>
-                    <div ng-click="expandColorPVP = !expandColorPVP" layout="row">
-                        PVP
-                        <span flex></span>
-                        <span ng-attr-style="border: 1px solid #333; background: hsl({{settings.msgColors.PVP.hue}},{{settings.msgColors.PVP.sat}}%,{{settings.msgColors.PVP.light}}%)">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                    <div layout="row">
+                        <span ng-click="expandColorPVP = !expandColorPVP" flex>PVP</span>
+                        Color:  <span ng-attr-style="border: 1px solid #333; background: hsl({{settings.msgColors.PVP.hue}},{{settings.msgColors.PVP.sat}}%,{{settings.msgColors.PVP.light}}%)">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                        Mute: <md-checkbox></md-checkbox>
                     </div>
                     <div ng-show="expandColorPVP" layout="row" class="md-padding">
                         <div layout="column" flex="20">
-                            <span>
+                            <span flex>
                                 Hue
                             </span>
-                            <span>
+                            <span flex>
                                 Saturation
                             </span>
-                            <span>
+                            <span flex>
                                 Lightness
                             </span>
                         </div>
@@ -366,20 +365,20 @@
                             </span>
                         </div>
                     </div>
-                    <div ng-click="expandColorAction = !expandColorAction" layout="row">
-                        Action
-                        <span flex></span>
-                        <span ng-attr-style="border: 1px solid #333; background: hsl({{settings.msgColors.Action.hue}},{{settings.msgColors.Action.sat}}%,{{settings.msgColors.Action.light}}%)">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                    <div layout="row">
+                        <span ng-click="expandColorAction = !expandColorAction" flex>Action</span>
+                        Color:  <span ng-attr-style="border: 1px solid #333; background: hsl({{settings.msgColors.Action.hue}},{{settings.msgColors.Action.sat}}%,{{settings.msgColors.Action.light}}%)">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                        Mute: <md-checkbox></md-checkbox>
                     </div>
                     <div ng-show="expandColorAction" layout="row" class="md-padding">
                         <div layout="column" flex="20">
-                            <span>
+                            <span flex>
                                 Hue
                             </span>
-                            <span>
+                            <span flex>
                                 Saturation
                             </span>
-                            <span>
+                            <span flex>
                                 Lightness
                             </span>
                         </div>
@@ -395,20 +394,20 @@
                             </span>
                         </div>
                     </div>
-                    <div ng-click="expandColorEvent = !expandColorEvent" layout="row">
-                        Event
-                        <span flex></span>
-                        <span ng-attr-style="border: 1px solid #333; background: hsl({{settings.msgColors.Event.hue}},{{settings.msgColors.Event.sat}}%,{{settings.msgColors.Event.light}}%)">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                    <div layout="row">
+                        <span ng-click="expandColorEvent = !expandColorEvent" flex>Event</span>
+                        Color:  <span ng-attr-style="border: 1px solid #333; background: hsl({{settings.msgColors.Event.hue}},{{settings.msgColors.Event.sat}}%,{{settings.msgColors.Event.light}}%)">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                        Mute: <md-checkbox></md-checkbox>
                     </div>
                     <div ng-show="expandColorEvent" layout="row" class="md-padding">
                         <div layout="column" flex="20">
-                            <span>
+                            <span flex>
                                 Hue
                             </span>
-                            <span>
+                            <span flex>
                                 Saturation
                             </span>
-                            <span>
+                            <span flex>
                                 Lightness
                             </span>
                         </div>
@@ -424,20 +423,20 @@
                             </span>
                         </div>
                     </div>
-                    <div ng-click="expandColorFFA = !expandColorFFA" layout="row">
-                        FFA
-                        <span flex></span>
-                        <span ng-attr-style="border: 1px solid #333; background: hsl({{settings.msgColors.FFA.hue}},{{settings.msgColors.FFA.sat}}%,{{settings.msgColors.FFA.light}}%)">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                    <div layout="row">
+                        <span ng-click="expandColorFFA = !expandColorFFA" flex>FFA</span>
+                        Color: <span ng-attr-style="border: 1px solid #333; background: hsl({{settings.msgColors.FFA.hue}},{{settings.msgColors.FFA.sat}}%,{{settings.msgColors.FFA.light}}%)">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                        Mute: <md-checkbox></md-checkbox>
                     </div>
                     <div ng-show="expandColorFFA" layout="row" class="md-padding">
                         <div layout="column" flex="20">
-                            <span>
+                            <span flex>
                                 Hue
                             </span>
-                            <span>
+                            <span flex>
                                 Saturation
                             </span>
-                            <span>
+                            <span flex>
                                 Lightness
                             </span>
                         </div>
@@ -453,20 +452,20 @@
                             </span>
                         </div>
                     </div>
-                    <div ng-click="expandColorBuild = !expandColorBuild" layout="row">
-                        Build
-                        <span flex></span>
-                        <span ng-attr-style="border: 1px solid #333; background: hsl({{settings.msgColors.Build.hue}},{{settings.msgColors.Build.sat}}%,{{settings.msgColors.Build.light}}%)">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                    <div layout="row">
+                        <span ng-click="expandColorBuild = !expandColorBuild" flex>Build</span>
+                        Color:  <span ng-attr-style="border: 1px solid #333; background: hsl({{settings.msgColors.Build.hue}},{{settings.msgColors.Build.sat}}%,{{settings.msgColors.Build.light}}%)">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                        Mute: <md-checkbox></md-checkbox>
                     </div>
                     <div ng-show="expandColorBuild" layout="row" class="md-padding">
                         <div layout="column" flex="20">
-                            <span>
+                            <span flex>
                                 Hue
                             </span>
-                            <span>
+                            <span flex>
                                 Saturation
                             </span>
-                            <span>
+                            <span flex>
                                 Lightness
                             </span>
                         </div>

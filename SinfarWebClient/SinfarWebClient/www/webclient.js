@@ -365,9 +365,32 @@ app.service('chatMsgs', function ($http, alerts, thisPlayer) {
     }
 });
 
-app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, $timeout, $window, $filter, $mdMedia, $mdDialog, $mdSidenav, $localStorage, alerts, thisPlayer, chatMsgs, settingsStore) {
+app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, $timeout, $window, $filter, $mdMedia, $mdDialog, $mdToast, $mdSidenav, $localStorage) {
     var chatFailCount = 0;
     //callbacks
+    function addAlert(newType, newMsg) {
+        if (newType == 'success') {
+            $mdToast.show(
+                $mdToast.simple()
+                  .textContent(newMsg)
+                  .position('top right')
+                  .hideDelay(5000)
+                  .highlightAction(false)
+             );
+
+        } else {
+            $mdToast.show(
+                $mdToast.simple()
+                  .textContent(newMsg)
+                  .hideDelay(0)
+                  .position('top right')
+                  .highlightAction(false)
+                  .action('OK')
+            );
+
+        }
+    }
+    
     function tblScrape(table) {
         var rows = table.rows;
         var propCells = rows[0].cells;
@@ -396,10 +419,7 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
                 if (angular.isArray(response.data)) {
                     var pList = {};
                     var orderID = ['pcName','playerName'];
-                    //process json
-                    angular.forEach($scope.servers, function (server, key) {//add sort that is adjstable to user for server orders or for server hiding?
-                        //orderID = 'pcName';
-                        //if (server.port == 'web') { orderID = 'playerName'; }
+                    angular.forEach($scope.servers, function (server, key) {
                         server.players = $filter('orderBy')($filter('filter')(response.data, { chatClient: server.port }),orderID);
                     });
                     angular.forEach(response.data, function (player, key) {
@@ -407,10 +427,13 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
                             $scope.player.charName = player.pcName;
                             $scope.player.charID = player.pcId;
                             var lookupID = player.portrait.split("/");
-                            $http.get("http://nwn.sinfar.net/getcharbio.php?pc_id=" + lookupID[2]).then(function (response) {
-                                $scope.player.pcBio = response.data;
-                            });
-                            $scope.player.pcID = lookupID[2];
+                            if ($scope.player.pcID != lookupID[2]) {
+                                $http.get("http://nwn.sinfar.net/getcharbio.php?pc_id=" + lookupID[2]).then(function (response) {
+                                    $scope.player.pcBio = response.data;
+                                });
+                                $scope.player.pcID = lookupID[2];
+
+                            }
                         }
                     });
                     $scope.player.charName = $filter('filter')(response.data, { playerId: $scope.player.id })[0].pcName
@@ -552,7 +575,7 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
                     //$scope.cmessages = $scope.messages().get();
                     //$scope.addAlert('success', amsg);
                     chatMsgs.push(srvmsg);
-                    alerts.addAlert('success', amsg);
+                    addAlert('success', amsg);
                     break;
                 case "CHAT_MESSAGE_NOT_SENT":
                     amsg = chatcmd.params;
@@ -568,7 +591,7 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
                     //$scope.cmessages = $scope.messages().get();
                     //$scope.alerts.push({ type: 'danger', msg: amsg });
                     chatMsgs.push(srvmsg);
-                    alerts.addAlert('danger', amsg);
+                    addAlert('danger', amsg);
                     break;
                 case "SOUND":
                 case "IMAGE":
@@ -663,17 +686,17 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
                                 pollPlayers();
                             } else {
                                 $scope.loginDisable = false;
-                                alerts.addAlert('danger', 'Error durring login.');
+                                addAlert('danger', 'Error durring login.');
                             }
                         },
                         function () {
                             //error in login submission
                             scope.loginDisable = false;
-                            alerts.addAlert('danger', 'Error logging in.');
+                            addAlert('danger', 'Error logging in.');
                         }
                     );
                 } else {
-                    alerts.addAlert("danger", "Login Incomplete. Please enter both player name and password.");//incomplete login fields
+                    addAlert("danger", "Login Incomplete. Please enter both player name and password.");//incomplete login fields
                 }
             }
         }
@@ -705,11 +728,11 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
 									{ code: 102, channel: 'Build' }
                                 ]; //all channels
     $scope.channels.muted       = []; //muted channels
-    $scope.channels.oocList     = ["4", "6", "164", "108", "228", "11", "6", "104", "132", "102"];//ooc channels (used with the player ignore)
+    $scope.channels.oocList     = ["4", "6", "164", "108", "228", "11", "6", "104", "132", "102", "116"];//ooc channels (used with the player ignore)
     $scope.channels.icList      = ["1", "3", "31", "32", "30"];//ic channels
     $scope.tabs                 = []; //list of tab objects. {index:tabPosition, label:textOnTab, channels:[array of channels to add to tab]}.
     $scope.pmTabs               = []; //list of player ids in pm tabs
-    $scope.alerts               = alerts.getAlerts();
+    $scope.alerts               = [];
 
     //inital values
     $scope.player.name = $localStorage.sinfarPlayerName;
