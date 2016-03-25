@@ -138,68 +138,6 @@ app.filter('inArray', function($filter){
     };
 });
 
-app.service('settingsStore', function ($http, $httpParamSerializerJQLike) {
-    var settings = {};
-
-    function initSettings() {
-        $http.get(linkPrefix + "get_settings.php?group=chat")
-            .then(function (response) {
-                settings = {};
-                angular.forEach(response.data, function (value, key) {
-                    if (value.slice(0, 7) == "angular") {
-                        settings[key] = JSON.parse(value.slice(7));
-                    } else {
-                        settings[key] = value;
-                    }
-                });
-                //settings = response.data
-            }, function (response) {
-                //error
-            }
-        );
-    }
-    function postSettings(data) {
-        var p = {};
-        p.chat = {};
-        angular.forEach(data, function (value, key) {
-            if (value !== null && typeof value === 'object') {
-                p.chat[key] = 'angular' + JSON.stringify(value);
-            } else {
-                p.chat[key] = value;
-            }
-        });
-        $http({
-            method: 'POST',
-            url: linkPrefix + "save_settings.php",
-            data: $httpParamSerializerJQLike(p),
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-        }).then(
-            function (response) {
-                //settings saved
-            }, function (response) {
-                //error
-            }
-        );
-    }
-
-    this.init = function () {
-        initSettings();
-    }
-    this.getSettings = function () {
-        return settings;
-    }
-    this.saveSettings = function () {
-        postSettings(settings);
-    }
-    this.set = function (prop, val) {
-        settings[prop] = val;
-        postSettings(settings);
-    }
-    this.get = function (prop) {
-        return settings[prop];
-    }
-});
-
 app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, $timeout, $window, $filter, $mdMedia, $mdDialog, $mdToast, $mdSidenav, $localStorage, Upload) {
     var chatFailCount = 0;
     //callbacks
@@ -244,6 +182,11 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
             }
             return resultholder[""] || resultholder;
         };
+
+        function openSaveAsDialog(filename, content, mediaType) {
+            var blob = new Blob([content], { type: mediaType });
+            saveAs(blob, filename);
+        }
 
         function addAlert(newType, newMsg) {
             if (newType == 'success') {
@@ -362,7 +305,7 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
                 if (chatmsg.channel == 4) {
                     var toPlayer = chatmsg.toPlayerName;
                     if (!toPlayer) {
-                        toPlayer = "self"
+                        toPlayer = $scope.player.name;
                     }
                     chatmsg.fromName = chatmsg.fromName + " to <i>" + toPlayer + "</i>";
                 }
@@ -747,24 +690,13 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
         }
 
         $scope.charInfo = function (pc) {
-
             var diagScope = {};
             diagScope.useFullScreen = ($mdMedia('sm') || $mdMedia('xs'));
-            diagScope.currentPortrait = "http://play.sinfar.net/" + pc.portrait.slice(1, -5) + "h.jpg";
-
-            $http.get(linkPrefix + "search_characters.php?player_name=" + pc.playerName)
+            $http.get(linkPrefix + "getpcs.php?player_id=" + pc.playerId)
             .then(function (response) {
-                diagScope.charList = [];
-                var d = response.data.split('<table class="game_structure tablesorter alternate_row" id="tab_char_list">');
-                var tbl = d[1].split('</table>');
-                var ele = document.createElement('table');
-                ele.innerHTML = tbl[0].replace(/<img[^>]*>/g, "");
-
-                var plrs = tblScrape(ele);
-                plrs.forEach(function (char) {
-                    if (char.PLID == pc.playerId) {
-                        diagScope.charList.push({pcid:char['PCID'],name:char['Character Name']});
-                    }
+                diagScope.charList = response.data.pcs;
+                angular.forEach(diagScope.charList, function (char, key) {
+                    char.portrait = char.portrait.slice(0, -5) + "h.jpg";
                 });
 
                 $mdDialog.show({
@@ -772,11 +704,26 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
                     locals: diagScope,
                     templateUrl: 'partials/moreInfo.html',
                     clickOutsideToClose: true,
-                    controller: function DialogController($scope, $mdDialog, charList, currentPortrait) {
+                    controller: function DialogController($scope, $mdDialog, charList) {
                         $scope.charList = charList;
-                        $scope.currentPortrait = currentPortrait;
-                        $scope.btn = function () {
-                            alert($scope.currentPortrait.toString());
+                        $scope.currentChar = charList[0];
+                        $scope.charSelect = function (id) {
+                            $scope.currentChar = charList[id];
+                            $http.get(linkPrefix + "getcharbio.php?pc_id=" + $scope.currentChar.pcId).then(
+                                function (response) {
+                                    $scope.currentBio = response.data;
+                                },
+                                function () {
+                                    $scope.currentBio = "Error getting character description. Try Again.";
+                                }
+                            );
+                        }
+                        $scope.dlport = function () {
+                            var linker = $scope.currentChar.portrait.split("/").slice(-1)[0].slice(0,-5);
+                            if (linker != 'po_hu_f_99_' && linker != 'po_hu_m_99_') {
+                                //needs to be reworked to handle through angular... window popup = bad juju
+                                $window.open(linkPrefix + "portraits_download_one.php?resref=" + linker);
+                            }
                         }
                     },
                 });

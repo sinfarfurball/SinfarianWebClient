@@ -874,13 +874,15 @@
                                     <cite ng-show="settings.timestamps">
                                         <span>{{msg.timestamp | date: 'shortTime'}} </span>
                                     </cite>
-                                    <span style="cursor: pointer;" ng-click="setPM(msg)" ng-class="{'md-padding': settings.inlineChat==='row'}">
+                                    <span style="cursor: pointer;" 
+                                          ng-click="setPM(msg)" 
+                                          ng-class="{'md-padding': settings.inlineChat==='row'}">
                                         <span>
                                             <md-tooltip md-direction="right" ng-if="msg.fromPCName">
                                                 {{msg.fromPlayerName}}
                                             </md-tooltip>
                                             <span ng-class="{sinfarfriend:settings.friends.indexOf(msg.fromPlayerId)!=-1}"
-                                                  ng-bind="msg.fromName">
+                                                  ng-bind-html="msg.fromName">
                                             </span>
                                         </span>
                                     </span>
