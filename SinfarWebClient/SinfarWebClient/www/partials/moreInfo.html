@@ -1,0 +1,25 @@
+﻿<md-dialog layout="column">
+    <md-toolbar layout-align="center center">
+        <h1 class="md-title">Player Character List</h1>
+    </md-toolbar>
+    <md-dialog-content class="md-padding" layout="row">
+        <div flex>
+            <img ng-src="{{currentPortrait}}" />
+        </div>
+        <div flex layout="column">
+            <div flex>
+                <ul ng-repeat="char in charList">
+                    <li>
+                        {{char.pcid}} - {{char.name}}
+                    </li>
+                </ul>
+            </div>
+            <div flex layout="column">
+                bio section
+                <md-button ng-click="btn()">
+                    Click
+                </md-button>
+            </div>
+        </div>
+    </md-dialog-content>
+</md-dialog>
