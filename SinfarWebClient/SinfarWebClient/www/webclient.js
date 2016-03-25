@@ -357,21 +357,20 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
                 chatmsg.timestamp = new Date();
                 chatmsg.logIndex = $scope.messages.messageIndex;
                 $scope.messages.messageIndex = $scope.messages.messageIndex + 1;
-                chatmsg.mute = false;
                 chatmsg.message = Autolinker.link(chatmsg.message, { className: "messageLink" });
 
-                if (chatmsg.channel == 4 && chatmsg.fromPlayerId == $scope.player.id) {
-                    var toPlayer = 'self';
-                    var tmpPlayer;
-                    if (chatmsg.toId != $scope.player.id) {
-                        angular.forEach($scope.servers, function (server, key) {
-                            tmpPlayer = $filter('filter')(server.players, { playerId: chatmsg.toId })[0];
-                            if (tmpPlayer) { toPlayer = tmpPlayer.playerName; }
-                        });
+                if (chatmsg.channel == 4) {
+                    var toPlayer = chatmsg.toPlayerName;
+                    if (!toPlayer) {
+                        toPlayer = "self"
                     }
                     chatmsg.fromName = chatmsg.fromName + " to <i>" + toPlayer + "</i>";
                 }
-
+                if ($scope.settings.ignores.indexOf(chatmsg.fromPlayerId) > -1 && $scope.channels.oocList.indexOf(chatmsg.channel)>-1) {
+                    chatmsg.mute = true;
+                } else {
+                    chatmsg.mute = false;
+                }
                 $scope.messages.channelsLog.push(chatmsg);
                 $scope.missedMessgeCount = $scope.missedMessageCount + 1;
             });

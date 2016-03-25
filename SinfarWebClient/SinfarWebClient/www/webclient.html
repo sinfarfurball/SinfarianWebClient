@@ -859,12 +859,13 @@
                      flex
                      scroll-glue>
                     <blockquote ng-repeat='msg in messages.channelsLog | inArray:currentChannels:"channel" as filtered_messages track by msg.logIndex'
-                                style="padding:0 10px; margin:0 0 5px"
-                                ng-if="settings.ignores.indexOf(msg.fromPlayerId)==-1">
+                                style="padding:0 10px; margin:0 0 5px">
                         <div layout="row" layout-align="start none">
                             <!--from line-->
-                            <i class="fa" ng-class="{'fa-angle-double-down':!msg.mute, 'fa-angle-double-right':msg.mute}" id="{{msg.logIndex}}" ng-click="msg.mute = !msg.mute"></i>
-                            <span ng-show="settings.portraits">
+                            <i class="fa" 
+                               ng-class="{'fa-angle-double-down':!msg.mute, 'fa-angle-double-right':msg.mute}"
+                               ng-click="msg.mute = !msg.mute"></i>
+                            <span ng-if="settings.portraits && !msg.mute">
                                 <img ng-src="http://nwn.sinfar.net{{msg.fromPortrait}}" class="img-circle">
                             </span>
                             <span layout={{settings.inlineChat}}>
@@ -885,7 +886,7 @@
                                     </span>
                                 </footer>
                                 <!--message-->
-                                <span ng-show="!msg.mute" ng-style=getMsgStyle(msg.channel) ng-bind-html="msg.message" flex></span>
+                                <span ng-if="!msg.mute" ng-style=getMsgStyle(msg.channel) ng-bind-html="msg.message" flex></span>
                             </span>
                         </div>
                     </blockquote>
