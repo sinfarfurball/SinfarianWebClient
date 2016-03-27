@@ -750,8 +750,25 @@
                         Sinfar Webclient
                     </span>
                     <md-tabs flex md-selected="selTabIndex" md-border-bottom md-autoselect ng-if="player.authed">
-                        <md-tab ng-repeat="tab in tabs" md-on-select="tabSelect(tab.id)"><md-tab-label>{{tab.label}}<span ng-if="!$first" ng-click="removeTab(tab.id)"> <i class="fa fa-times-circle"></i></span></md-tab-label></md-tab>
-                        <md-tab ng-if="settings.pmTabs" ng-repeat="pm in pmTabs" label="{{pm.player}}"></md-tab><!--need to notify when player leaves and they still have a pm tab so it can be cleaned.-->
+                        <md-tab ng-repeat="tab in tabs"
+                                md-on-select="tabSelect(tab.id)">
+                            <md-tab-label>
+                                {{tab.label}}
+                                <span ng-if="!$first" ng-click="removeTab(tab.id)">
+                                    <i class="fa fa-times-circle"></i>
+                                </span>
+                            </md-tab-label>
+                        </md-tab>
+                        <md-tab ng-if="settings.pmTabs"
+                                ng-repeat="pm in pmTabs"
+                                md-on-select="pmTabSelect(pm)">
+                            <md-tab-label>
+                                {{pm}}
+                                <span ng-click="removePMTab(pm)">
+                                    <i class="fa fa-times-circle"></i>
+                                </span>
+                            </md-tab-label>
+                        </md-tab><!--need to notify when player leaves? and they still have a pm tab so it can be cleaned.-->
                     </md-tabs>
                     <span ng-if="player.authed" layout="center center"><i class="fa fa-paw"></i></span>
                     <md-button class="md-accent md-raised" ng-click="login()" ng-if="!player.authed">
@@ -858,11 +875,11 @@
                      layout="column"
                      flex
                      scroll-glue>
-                    <blockquote ng-repeat='msg in messages.channelsLog | inArray:currentChannels:"channel" as filtered_messages track by msg.logIndex'
+                    <blockquote ng-repeat='msg in messages.channelsLog | filter:(onPMTab || "") && pmMatch(pmPlayer) | inArray:currentChannels:"channel" as filtered_messages track by msg.logIndex'
                                 style="padding:0 10px; margin:0 0 5px">
                         <div layout="row" layout-align="start none">
                             <!--from line-->
-                            <i class="fa" 
+                            <i class="fa"
                                ng-class="{'fa-angle-double-down':!msg.mute, 'fa-angle-double-right':msg.mute}"
                                ng-click="msg.mute = !msg.mute"></i>
                             <span ng-if="settings.portraits && !msg.mute">
@@ -874,15 +891,18 @@
                                     <cite ng-show="settings.timestamps">
                                         <span>{{msg.timestamp | date: 'shortTime'}} </span>
                                     </cite>
-                                    <span style="cursor: pointer;" 
-                                          ng-click="setPM(msg)" 
+                                    <span style="cursor: pointer;"
+                                          ng-click="setPM(msg)"
                                           ng-class="{'md-padding': settings.inlineChat==='row'}">
                                         <span>
                                             <md-tooltip md-direction="right" ng-if="msg.fromPCName">
                                                 {{msg.fromPlayerName}}
                                             </md-tooltip>
-                                            <span ng-class="{sinfarfriend:settings.friends.indexOf(msg.fromPlayerId)!=-1}"
-                                                  ng-bind-html="msg.fromName">
+                                            <span ng-class="{sinfarfriend:settings.friends.indexOf(msg.fromPlayerId)!=-1}">
+                                                {{msg.fromName}}
+                                                <span ng-if="msg.toPlayerName">
+                                                    <i> to {{msg.toPlayerName}}</i>
+                                                </span>
                                             </span>
                                         </span>
                                     </span>

@@ -28,6 +28,10 @@ function componentToHex(c) {
 /* Need to fix
  * ----------
  * PM Tabs
+ * ---Need to destroy tabs on disable of toggle
+ * ---need to not create furball tab for all tells
+ * ---need to remove tells from chat flow (remove channel from all tabs)
+ * ---new filter prevents muting tells.
  * PM Bell
  * Portrait Upload
  * char stats
@@ -35,7 +39,6 @@ function componentToHex(c) {
  * Friend login/out notifications
  * profanity filter - hold for later update
  * html in toasts
- * ERROR1 bios
  * timestamp color
  * player name color
  * inline style name div height for clicking to pm (atleast with many messages/varying height messages)
@@ -303,11 +306,16 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
                 chatmsg.message = Autolinker.link(chatmsg.message, { className: "messageLink" });
 
                 if (chatmsg.channel == 4) {
-                    var toPlayer = chatmsg.toPlayerName;
-                    if (!toPlayer) {
-                        toPlayer = $scope.player.name;
+                    chatmsg.toPlayerName = chatmsg.toPlayerName || $scope.player.name;
+
+                    if (chatmsg.fromPlayerId == $scope.player.id) {
+                        var pmTabLabel = $scope.player.name;
+                    } else {
+                        var pmTabLabel = chatmsg.fromPlayerName;
                     }
-                    chatmsg.fromName = chatmsg.fromName + " to <i>" + toPlayer + "</i>";
+                    if ($scope.settings.pmTabs && $scope.pmTabs.indexOf(pmTabLabel) == -1) {
+                        $scope.pmTabs.push(pmTabLabel);
+                    }
                 }
                 if ($scope.settings.ignores.indexOf(chatmsg.fromPlayerId) > -1 && $scope.channels.oocList.indexOf(chatmsg.channel)>-1) {
                     chatmsg.mute = true;
@@ -535,6 +543,7 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
         $scope.channels.icList = _.map($filter('filter')($scope.channels.full, { ooc: false }), 'code');//ic channels
         $scope.tabs = [{ id: 0, label: 'Chat' }]; //list of tab objects. {index:tabPosition, label:textOnTab, channels:[array of channels to add to tab]}.
         $scope.settings.pmTabs = false;
+        $scope.pmTabs = [];
         $scope.inFocus = true;
         $scope.msgSending = false;
         $scope.missedMessageCount = null;
@@ -566,6 +575,14 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
         });
 
     //scoped functions
+        $scope.pmMatch = function( player ) {
+          return function( item ) {
+              if (item.toPlayerName === player || item.fromPlayerName === player) {
+                  return item;
+              }
+          };
+        };
+
         $scope.login = function () { loginCallback(); }
         $scope.sChat = function () {//need to add channel from selector (if channel not specified in the post)
             $scope.msgSending = true;
@@ -617,6 +634,7 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
         $scope.tabSelect = function (id) {
             $scope.channels.currentTab = id;
             $scope.currentChannels = _.map($filter('filter')($scope.channels.full, { tab: $scope.channels.currentTab, mute: false }), 'code');
+            $scope.onPMTab = false;
         }
         $scope.removeTab = function (id) {
             var tabChannels = _.map($filter('filter')($scope.channels.full, { tab: id}), 'code');
@@ -625,13 +643,23 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
                     channel.tab = 0;
                 });
             });
-            $scope.channels.currentTab = 0;
+            $scope.channels.currentTab = 0;/*need to check if on remove tab before setting this*/
             for (var i = 0; i < $scope.tabs.length; i++) {
                 if ($scope.tabs[i].id == id) {
                     $scope.tabs.splice(i, 1);
                     break;
                 }
             }
+        }
+        $scope.removePMTab = function (player) {
+            $scope.onPMTab = false;
+            $scope.channels.currentTab = 0;/*need to check if on remove tab before setting this*/
+            $scope.pmTabs.splice($scope.pmTabs.indexOf(player), 1);
+        }
+        $scope.pmTabSelect = function (player) {
+            $scope.currentChannels = ['4'];
+            $scope.pmPlayer = player;
+            $scope.onPMTab = true;
         }
         $scope.setPM = function (player) {
             var p = "";
@@ -736,9 +764,9 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
     //watches
         $scope.$watch('settings', function (newSettings, oldSettings) {//this is much to often.... like with color scrolls
             var settingsTxt = flattenSettings(newSettings);
-
+            if (!newSettings.pmTabs) { $scope.pmTabs = [];}
             $localStorage.sinfarSettings = newSettings;
-            /*$http({
+            $http({
                 method: 'POST',
                 url: linkPrefix + "save_settings.php",
                 data: $httpParamSerializerJQLike({ newChat: settingsTxt }),
@@ -750,7 +778,7 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
                     function () {
                         addAlert('warn', 'Error saving settings.');
                     }
-                );?*/
+                );
         }, true);
         $scope.$watch('channels', function (newSettings, oldSettings) {
             $scope.currentChannels = _.map($filter('filter')($scope.channels.full, { tab: $scope.channels.currentTab, mute: false }), 'code');

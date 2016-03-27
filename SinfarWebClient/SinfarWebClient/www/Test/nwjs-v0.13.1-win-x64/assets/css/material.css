@@ -1,0 +1,200 @@
+html{
+    height:100%;
+    -ms-word-break: break-all;
+    word-break: break-all;
+    /* Non standard for webkit */
+    word-break: break-word;
+    /*auto hypenate long postes without spaces (spam)*/
+    -webkit-hyphens: auto;
+    -moz-hyphens: auto;
+    -ms-hyphens: auto;
+    hyphens: auto;
+}
+body {
+    height: 100%;
+    overflow:hidden;
+    background-color:#000;
+    color:#FFF;
+    font-family:Tahoma, Geneva, sans-serif;
+}
+
+md-tooltip{
+    color:black;
+}
+    
+.messageLink:link{
+    color:#987f50;
+    text-decoration:none; 
+    font-weight:bold;
+}
+.messageLink:visited{
+    color:#985b50;
+    text-decoration:none; 
+    font-weight:bold;
+}
+.messageLink:hover{
+    color:#506998;
+    text-decoration:none; 
+    font-weight:bold;
+}
+
+
+
+
+
+#select-channel, #textarea-chat-bar
+    {
+      background-color:#000;
+      color:#FFF;
+      font-size:16px;
+      font-family:Tahoma, Geneva, sans-serif;
+
+      padding:0;
+      margin:0;
+      border:0;
+
+      -moz-appearance:none;
+      -webkit-appearance:none;
+
+      outline:0;
+    }
+#textarea-chat-bar
+{
+    width:100%;
+    height:100%;
+    resize:none;
+    display:block;
+}
+#div-players-list
+{
+    right:0;
+    width:100%;
+    height:90%;
+    top:0;
+    overflow-y:auto;
+    overflow-x: hidden;
+}
+#table-players-list
+{
+    width:100%;
+    border:0;
+}
+#table-players-list div[data-player-id] span
+{
+    vertical-align:middle;
+    text-align:left;
+    word-wrap:break-word;
+    max-width:110px;
+}
+#table-players-list div[data-player-id]
+{
+    cursor:pointer;
+}
+#table-action-bar
+{
+    height:2em;
+    width:100%;
+}
+#table-action-bar td
+{
+    border:2px ridge #bf9f64;
+}
+#td-slect-channel
+{
+    vertical-align:middle;
+    text-align:center;
+    background-color:#000;
+
+    border-right-width:0;
+
+    padding:0;
+    margin:0;
+    height:0;
+    width:0;
+}
+#td-chat-bar
+{
+    height:100%;
+    width:100%;
+    background-color:#000;
+}
+.td-chat-message
+{
+    width:100%;
+}
+.chat-channel-ignore{
+    display: none;
+}
+.sinfarfriend{
+    color:gold;
+
+}
+.ignorePlayer{
+    display:none;
+
+}
+.igPlist{
+    background-color:rgba(255,0,0,.25);
+}
+
+    .popover{
+        color:black;
+    }
+
+/*tab color override (chat tabs)*/
+md-tabs.md-default-theme .md-tab.md-active, md-tabs .md-tab.md-active, md-tabs.md-default-theme .md-tab.md-active md-icon, md-tabs .md-tab.md-active md-icon, md-tabs.md-default-theme .md-tab.md-focused, md-tabs .md-tab.md-focused, md-tabs.md-default-theme .md-tab.md-focused md-icon, md-tabs .md-tab.md-focused md-icon{color:white;}
+/*override inline message html font color*/
+blockquote span span font{color:inherit;}
+/*tab selector for channels*/
+md-select-menu.md-settings-theme md-option:focus:not([disabled]):not([selected]){background:#987f50;}
+
+md-checkbox{margin-bottom:0;}
+md-input-container{margin:0;}
+
+.img-circle {
+    border-radius: 50%;
+}
+
+.settingsMenu{
+    cursor: pointer;
+    width: 100%;
+}
+md-select-menu{max-height:100%}
+md-select-menu md-content{max-height:100%}
+
+
+.drop-box {
+    border: 5px dashed #DDD;
+    padding-top: 25px;
+    margin: 10px;
+}
+.dragover {
+    border: 5px dashed blue;
+}
+
+.sidenav{
+  position: relative;
+  display: block;
+  min-height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  border: none;
+  -webkit-transition: all 0.5s cubic-bezier(0.55, 0, 0.1, 1);
+  -o-transition: all 0.5s cubic-bezier(0.55, 0, 0.1, 1);
+  transition: all 0.5s cubic-bezier(0.55, 0, 0.1, 1);
+
+}
+
+.sidenav.active{
+  min-width: 20em;
+  width: auto;
+  -webkit-transform: translate3d(0, 0, 0);
+  transform: translate3d(0, 0, 0);
+}
+.sidenavSub{
+    background-color:black;
+    margin:2px;
+}
+md-toolbar{
+    min-height:auto !important;
+}
