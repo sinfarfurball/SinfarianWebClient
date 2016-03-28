@@ -156,7 +156,7 @@
                         <md-switch ng-model="settings.bell" class="md-accent">
                             Private Message Bell <span ng-if="settings.bell">On</span><span ng-if="!settings.bell">Off</span>
                         </md-switch>
-                        <md-switch ng-model="settings.pmTabs" class="md-accent">
+                        <md-switch ng-model="settings.pmTabs" class="md-accent"><!--toggles do not flip if ngmodel changes, but value reflects properly?-->
                             PM Tabs <span ng-if="settings.pmTabs">Active</span><span ng-if="!settings.pmTabs">Disabled</span>
                         </md-switch>
                         <md-switch ng-model="settings.inlineChat" class="md-accent" ng-true-value="'column'" ng-false-value="'row'">

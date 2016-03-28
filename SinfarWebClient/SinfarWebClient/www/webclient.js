@@ -437,6 +437,10 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
                                     $localStorage.sinfarPassword = $scope.player.pwd;
                                     $localStorage.sinfarRemember = $scope.player.rememberMe;
                                 }
+                                /*$http.get(linkPrefix + "get_settings.php?group=newchat").then(function (settings) {
+                                    $scope.settings = unflattenSettings(settings.data);
+                                    addAlert('success', 'Settings synced from server.');
+                                });*/
                             }
                         });
                         if (!$scope.player.authed) {
