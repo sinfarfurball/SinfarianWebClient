@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="assets/css/angular/ng-img-crop.css" />
     <link rel="stylesheet" href="assets/css/material.css">
 
+    <script src="assets/js/libs/jquery-2.1.4.min.js"></script>
     <script src="assets/js/libs/lodash.js"></script>
 
     <script src="assets/js/angular/angular.js"></script>
@@ -153,10 +154,11 @@
                         <md-switch ng-model="settings.timestamps" class="md-accent">
                             Timestamps <span ng-if="settings.timestamps">Visible</span><span ng-if="!settings.timestamps">Hidden</span>
                         </md-switch>
-                        <md-switch ng-model="settings.bell" class="md-accent">
+                        <md-switch disabled ng-model="settings.bell" class="md-accent">
                             Private Message Bell <span ng-if="settings.bell">On</span><span ng-if="!settings.bell">Off</span>
                         </md-switch>
-                        <md-switch ng-model="settings.pmTabs" class="md-accent"><!--toggles do not flip if ngmodel changes, but value reflects properly?-->
+                        <md-switch ng-model="settings.pmTabs" class="md-accent">
+                            <!--toggles do not flip if ngmodel changes, but value reflects properly?-->
                             PM Tabs <span ng-if="settings.pmTabs">Active</span><span ng-if="!settings.pmTabs">Disabled</span>
                         </md-switch>
                         <md-switch ng-model="settings.inlineChat" class="md-accent" ng-true-value="'column'" ng-false-value="'row'">
@@ -164,26 +166,85 @@
                         </md-switch>
                     </div>
                     <div ng-click="expandChar = !expandChar" class="settingsMenu" style="padding-top:5px;padding-bottom:5px;" flex>
-                        <i class="fa fa-user"> Charater Settings</i>
+                        <i class="fa fa-user"> Charater Settings - under development</i>
                     </div>
                     <div ng-show="expandChar" class="md-padding" layout="column">
-                        <div layout="column" ng-if="player.pcID">
-                            <md-input-container flex class="md-block">
-                                <label>Biography Editor</label>
-                                <textarea ng-disabled="!player.authed" ng-model="player.pcBio" columns="1" md-maxlength="8000" rows="5"></textarea>
+                        <div layout="column">
+                            <div class="md-padding" layout="row">
+                                <div flex="33" layout="column" layout-align="start center">
+                                    <img ng-src="http://nwn.sinfar.net/getcharportrait.php?pc_id={{player.selectedChar.pcID}}&res=m" />
+                                </div>
+                                <div flex="66" style="overflow-y:auto;">
+                                    <div ng-repeat="char in player.pcs" style="cursor:pointer;padding-bottom:5px;" ng-click="pcCharSelect(char.pcId)">
+                                        {{char.pcName}}
+                                    </div>
+                                </div>
+                            </div>
+                            <md-input-container style="overflow-y:auto;background-color:hsla(0, 0%, 0%, 0.7);border-radius:15px;" class="md-padding md-block">
+                                <label></label>
+                                <textarea ng-disabled="!player.authed" ng-model="player.selectedChar.DescriptionOverr[1]" columns="1" md-maxlength="8000" rows="10"></textarea>
                             </md-input-container>
                             <md-button ng-disabled="!player.authed" class="md-accent md-raised" ng-click="saveBio()">Save</md-button>
-                        </div>
-                        <div layout="column">
-                            <md-input-container flex class="md-block">
-                                <label>RP Notes</label>
-                                <textarea ng-disabled="!player.authed" ng-model="player.rpNotes" columns="1" rows="5"></textarea>
-                            </md-input-container>
-                            <md-button ng-disabled="!player.authed" class="md-accent md-raised">Save</md-button>
-                        </div>
-                        <div ng-if="player.pcID" layout="column" layout-align="center center">
-                            <!--portrait-->
-                            <img ng-src="http://nwn.sinfar.net/getcharportrait.php?pc_id={{player.pcID}}&res=h" />
+
+                            <div layout="column">
+                                <div>
+                                    Race: {{player.selectedChar.Race[1]}}
+                                </div>
+                                <div>
+                                    Subrace: {{player.selectedChar.Subrace[1]}}
+                                </div>
+                                <div>
+                                    <div ng-click="playerCharDescShow = !playerCharDescShow" style="cursor:pointer;">Description</div>
+                                    <div ng-show="playerCharDescShow">{{player.selectedChar.DescriptionOverr[1]}}</div>
+                                </div>
+                                <div>
+                                    Experience: {{player.selectedChar.Experience[1]}}
+                                </div>
+                                <div></div>
+                                <div>
+                                    Contitution: {{player.selectedChar.Con[1]}}
+                                </div>
+                                <div>
+                                    Hit Points: {{player.selectedChar.HitPoints[1]}}
+                                </div>
+                                <div></div>
+                                <div>
+                                    Charisma: {{player.selectedChar.Cha[1]}}
+                                </div>
+                                <div>
+                                    Dexterity: {{player.selectedChar.Dex[1]}}
+                                </div>
+                                <div>
+                                    Intelligence: {{player.selectedChar.Int[1]}}
+                                </div>
+                                <div>
+                                    Strength: {{player.selectedChar.Str[1]}}
+                                </div>
+                                <div>
+                                    Wisdom: {{player.selectedChar.Wis[1]}}
+                                </div>
+                                <div></div>
+                                <div>
+                                    Reflex: {{player.selectedChar.RefSaveThrow[1]}}
+                                </div>
+                                <div></div>
+                                <div>
+                                    Bonus: {{player.selectedChar.refbonus[1]}}
+                                </div>
+                                <div>
+                                    Will: {{player.selectedChar.WillSaveThrow[1]}}
+                                </div>
+                                <div>
+                                    Bonus: {{player.selectedChar.willbonus[1]}}
+                                </div>
+                                <div>
+                                    Fort: {{player.selectedChar.FortSaveThrow[1]}}
+                                </div>
+                                <div>
+                                    Bonus: {{player.selectedChar.fortbonus[1]}}
+                                </div>
+                            </div>
+
                             <div layout="column">
                                 <form enctype="multipart/form-data" method="post" action="http://nwn.sinfar.net/portraits_upload.php">
                                     <input type="hidden" name="pc_id" value={{player.pcID}} />
@@ -880,7 +941,7 @@
                         <div layout="row" layout-align="start none">
                             <!--from line-->
                             <i class="fa"
-                               ng-class="{'fa-angle-double-down':!msg.mute, 'fa-angle-double-right':msg.mute}"
+                               ng-class="{'fa-minus-square':!msg.mute, 'fa-plus-square':msg.mute}"
                                ng-click="msg.mute = !msg.mute"></i>
                             <span ng-if="settings.portraits && !msg.mute">
                                 <img ng-src="http://nwn.sinfar.net{{msg.fromPortrait}}" class="img-circle">
@@ -917,14 +978,14 @@
                     <md-input-container>
                         <label>Channel</label>
                         <md-select ng-model="settings.channelSelect">
-                            <md-option ng-repeat="channel in channels.full | filter:{dm:false} " value="{{channel.channel}}">
+                            <md-option ng-repeat="channel in channels.full | filter:{dm:false} " value="{{channel.prefix}}">
                                 {{channel.channel}}
                             </md-option>
                         </md-select>
                     </md-input-container>
                     <md-input-container flex>
                         <label>Message</label>
-                        <textarea ng-model="$parent.chatMessageToSend" columns="1" rows="5" md-maxlength="8000" ng-keydown="$event.keyCode === 13 && sChat()" ng-keyup="$event.keyCode === 13 && msgReset()"></textarea>
+                        <textarea id="msgBox" ng-model="$parent.chatMessageToSend" columns="1" rows="5" md-maxlength="8000" ng-keydown="$event.keyCode === 13 && sChat()"></textarea>
                     </md-input-container>
                 </div>
             </div>

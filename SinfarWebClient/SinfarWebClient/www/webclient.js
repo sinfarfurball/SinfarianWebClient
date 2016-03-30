@@ -36,13 +36,13 @@ function componentToHex(c) {
  * Portrait Upload
  * char stats
  * Chat log export
- * Friend login/out notifications
+ * Friend login/out notifications - hold for later update
  * profanity filter - hold for later update
+ * rp notes - hold for later update
  * html in toasts
  * timestamp color
  * player name color
  * inline style name div height for clicking to pm (atleast with many messages/varying height messages)
- * 
  * 
  * devautologin cookie setup
  * 
@@ -441,6 +441,7 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
                                     $scope.settings = unflattenSettings(settings.data);
                                     addAlert('success', 'Settings synced from server.');
                                 });*/
+                                $http.get(linkPrefix + "getpcs.php?player_id=" + $scope.player.id).then(function (players) { $scope.player.pcs = players.data.pcs; });
                             }
                         });
                         if (!$scope.player.authed) {
@@ -503,24 +504,24 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
             $scope.settings.channelSelect = 'FFA';
         }
         $scope.channels.full        = [
-									    { code: '1', channel: 'Talk', mute: false, ooc: false, tab: 0, dm: false },
-                                        { code: '2', channel: 'Shout', mute: false, ooc: false, tab: 0, dm: true },
-									    { code: '3', channel: 'Whisper', mute: false, ooc: false, tab: 0, dm: false },
-                                        { code: '18', channel: 'DM Shout', mute: false, ooc: false, tab: 0, dm: true },
-                                        { code: '19', channel: 'DM Whisper', mute: false, ooc: false, tab: 0, dm: true },
-                                        { code: '20', channel: 'DM Tell', mute: false, ooc: false, tab: 0, dm: true },
-									    { code: '31', channel: 'Quiet', mute: false, ooc: false, tab: 0, dm: false },
-									    { code: '32', channel: 'Silent', mute: false, ooc: false, tab: 0, dm: false },
-									    { code: '30', channel: 'Yell', mute: false, ooc: false, tab: 0, dm: false },
-									    { code: '4', channel: 'Tell', mute: false, ooc: true, tab: 0, dm: false },
-									    { code: '6', channel: 'Party', mute: false, ooc: true, tab: 0, dm: false },
-									    { code: '164', channel: 'OOC', mute: false, ooc: true, tab: 0, dm: false },
-									    { code: '108', channel: 'Sex', mute: false, ooc: true, tab: 0, dm: false },
-									    { code: '228', channel: 'PVP', mute: false, ooc: true, tab: 0, dm: false },
-									    { code: '116', channel: 'Action', mute: false, ooc: true, tab: 0, dm: false },
-									    { code: '104', channel: 'Event', mute: false, ooc: true, tab: 0, dm: false },
-									    { code: '132', channel: 'FFA', mute: false, ooc: true, tab: 0, dm: false },
-									    { code: '102', channel: 'Build', mute: false, ooc: true, tab: 0, dm: false }
+									    { code: '1', channel: 'Talk', prefix: '/tk', mute: false, ooc: false, tab: 0, dm: false },
+                                        { code: '2', channel: 'Shout', prefix: '/shout', mute: false, ooc: false, tab: 0, dm: true },
+									    { code: '3', channel: 'Whisper', prefix: '/w', mute: false, ooc: false, tab: 0, dm: false },
+                                        { code: '18', channel: 'DM Shout', prefix: '', mute: false, ooc: false, tab: 0, dm: true },
+                                        { code: '19', channel: 'DM Whisper', prefix: '', mute: false, ooc: false, tab: 0, dm: true },
+                                        { code: '20', channel: 'DM Tell', prefix: '', mute: false, ooc: false, tab: 0, dm: true },
+									    { code: '31', channel: 'Quiet', prefix: '/q', mute: false, ooc: false, tab: 0, dm: false },
+									    { code: '32', channel: 'Silent', prefix: '/s', mute: false, ooc: false, tab: 0, dm: false },
+									    { code: '30', channel: 'Yell', prefix: '/y', mute: false, ooc: false, tab: 0, dm: false },
+									    { code: '4', channel: 'Tell', prefix: '/tp', mute: false, ooc: true, tab: 0, dm: false },
+									    { code: '6', channel: 'Party', prefix: '/p', mute: false, ooc: true, tab: 0, dm: false },
+									    { code: '164', channel: 'OOC', prefix: '/ooc', mute: false, ooc: true, tab: 0, dm: false },
+									    { code: '108', channel: 'Sex', prefix: '/sex', mute: false, ooc: true, tab: 0, dm: false },
+									    { code: '228', channel: 'PVP', prefix: '/pvp', mute: false, ooc: true, tab: 0, dm: false },
+									    { code: '116', channel: 'Action', prefix: '/action', mute: false, ooc: true, tab: 0, dm: false },
+									    { code: '104', channel: 'Event', prefix: '/event', mute: false, ooc: true, tab: 0, dm: false },
+									    { code: '132', channel: 'FFA', prefix: '/ffa', mute: false, ooc: true, tab: 0, dm: false },
+									    { code: '102', channel: 'Build', prefix: '/build', mute: false, ooc: true, tab: 0, dm: false }
         ]; //all channels
         $scope.customChannelTitle = '';
         if (!$scope.settings.msgColors) {
@@ -591,6 +592,9 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
         $scope.sChat = function () {//need to add channel from selector (if channel not specified in the post)
             $scope.msgSending = true;
             var msgTxt = $scope.chatMessageToSend;
+            if(msgTxt.slice(0,1) != '/'){
+                msgTxt = $scope.settings.channelSelect + " " + msgTxt;
+            }
             $http({
                 method: 'POST',
                 url: linkPrefix + "sendchat.php",
@@ -601,10 +605,12 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
                     //check if message accepted. if not display error. if accepted clear and reset inputs
                     $scope.chatMessageToSend = "";
                     $scope.msgSending = false;
+                    $timeout(function () { angular.element('#msgBox').focus(); }, 500);
                 },
                 function () {
                     //transmission error
-                    addAlert('warn','Error sending message. Try again.')
+                    addAlert('warn', 'Error sending message. Try again.');
+                    $scope.msgSending = false;
                 }
             );
         }
@@ -622,7 +628,7 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
             $http({
                 method: 'POST',
                 url: linkPrefix + "char_desc_save.php",
-                data: $httpParamSerializerJQLike({ pc_id: $scope.player.pcID, description: $scope.player.pcBio }),
+                data: $httpParamSerializerJQLike({ pc_id: $scope.player.selectedChar.pcID, description: $scope.player.selectedChar.DescriptionOverr[1] }),
                 headers: { 'Content-type': 'application/x-www-form-urlencoded' }
             }).then(function (response) { console.log(response.data); });
         }
@@ -673,6 +679,7 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
                 p = player.playerName;
             }
             $scope.chatMessageToSend = '/tp "' + p + '" ';
+            angular.element('#msgBox').focus();
         }
         $scope.openMenu = function ($mdOpenMenu, ev) {
             $mdOpenMenu(ev);
@@ -764,7 +771,12 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
                 addAlert('warn','Error, please try again.');
             });
         }
-
+        $scope.pcCharSelect = function (pcid) {
+            $http.get(linkPrefix + "get_character_json.php?pc_id="+pcid).then(function (pcinfo) {
+                $scope.player.selectedChar = pcinfo.data[1];
+                $scope.player.selectedChar.pcID = pcid;
+            });
+        }
     //watches
         $scope.$watch('settings', function (newSettings, oldSettings) {//this is much to often.... like with color scrolls
             var settingsTxt = flattenSettings(newSettings);
