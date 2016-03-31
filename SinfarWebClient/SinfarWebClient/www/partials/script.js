@@ -3293,3 +3293,9 @@
     "refbonus": [3, 0],
     "willbonus": [3, 0]
 }]
+
+get_classes/spells/feats/skills_info.php?rows=[1,2.3]
+player.selectedChar.dynSkills
+player.selectedChar.dynFeats
+player.selectedChar.dynSpells
+player.selectedChar.dynClasses

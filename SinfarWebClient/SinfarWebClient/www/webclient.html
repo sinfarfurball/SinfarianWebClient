@@ -39,7 +39,7 @@
             <div ng-if="player.authed" flex
                  layout="column"
                  ng-style="{'background-color': getMaterialColor('sinfarGold','500')}">
-                <span ng-if="player.authed" class="md-padding">
+                <span ng-if="player.authed" class="md-padding" layout-align="center center">
                     {{player.name}}
                     <span ng-if="player.charName">
                         <i>({{player.charName}})</i>
@@ -61,7 +61,7 @@
                     <!--list of players per server-->
                     <div layout="column" class="md-padding">
                         <!--server list-->
-                        <div ng-repeat="server in servers" layout="column">
+                        <div ng-repeat="server in servers | filter:{useWebClient:true}" layout="column">
                             <div class="settingsMenu"
                                  layout="row"
                                  layout-align="start center"
@@ -166,7 +166,7 @@
                         </md-switch>
                     </div>
                     <div ng-click="expandChar = !expandChar" class="settingsMenu" style="padding-top:5px;padding-bottom:5px;" flex>
-                        <i class="fa fa-user"> Charater Settings - under development</i>
+                        <i class="fa fa-user"> Charater Settings</i>
                     </div>
                     <div ng-show="expandChar" class="md-padding" layout="column">
                         <div layout="column">
@@ -175,77 +175,114 @@
                                     <img ng-src="http://nwn.sinfar.net/getcharportrait.php?pc_id={{player.selectedChar.pcID}}&res=m" />
                                 </div>
                                 <div flex="66" style="overflow-y:auto;">
-                                    <div ng-repeat="char in player.pcs" style="cursor:pointer;padding-bottom:5px;" ng-click="pcCharSelect(char.pcId)">
-                                        {{char.pcName}}
+                                    <div ng-repeat="char in player.pcs" style="cursor:pointer;padding-bottom:5px;" ng-click="pcCharSelect(char.pcId)" layout="row">
+                                        {{char.pcName}}<span flex></span><i ng-click="downloadChar(char.pcId)" class="fa fa-download"></i>
                                     </div>
                                 </div>
                             </div>
-                            <md-input-container style="overflow-y:auto;background-color:hsla(0, 0%, 0%, 0.7);border-radius:15px;" class="md-padding md-block">
-                                <label></label>
-                                <textarea ng-disabled="!player.authed" ng-model="player.selectedChar.DescriptionOverr[1]" columns="1" md-maxlength="8000" rows="10"></textarea>
-                            </md-input-container>
-                            <md-button ng-disabled="!player.authed" class="md-accent md-raised" ng-click="saveBio()">Save</md-button>
+                            <div>
+                                Race: {{player.selectedChar.Race[1]}}
+                            </div>
+                            <div>
+                                Subrace: {{player.selectedChar.Subrace[1]}}
+                            </div>
+                            <div layout="column" class="md-padding" style="padding-top:0!important">
+                                <div ng-repeat="class in player.selectedChar.dynClasses">
+                                    {{class.label}} ({{class.level}})
+                                </div>
+                            </div>
+                            <div style="cursor:pointer;" ng-click="playerStatsExpand = !playerStatsExpand">
+                                <i class="fa" ng-class="{'fa-angle-double-down':playerStatsExpand, 'fa-angle-double-right':!playerStatsExpand}"></i>
+                                Stats
+                            </div>
+                            <div ng-if="playerStatsExpand" class="md-padding" style="border-radius:15px;" ng-style="{'background-color': getMaterialColor('sinfarRose','900'),}" layout="column">
+                                <div layout="row">
+                                    <span>Experience:</span><span flex></span><span>{{player.selectedChar.Experience[1]}}</span>
+                                </div>
+                                <div layout="row">
+                                    <span>Contitution:</span><span flex></span><span>{{player.selectedChar.Con[1]}}</span>
+                                </div>
+                                <div layout="row">
+                                    <span> Hit Points:</span><span flex></span><span>{{player.selectedChar.HitPoints[1]}}</span>
+                                </div>
+                                <div></div>
+                                <div layout="row">
+                                    <span>Charisma:</span><span flex></span><span>{{player.selectedChar.Cha[1]}}</span>
+                                </div>
+                                <div layout="row">
+                                    <span>Dexterity:</span><span flex></span><span>{{player.selectedChar.Dex[1]}}</span>
+                                </div>
+                                <div layout="row">
+                                    <span>Intelligence:</span><span flex></span><span>{{player.selectedChar.Int[1]}}</span>
+                                </div>
+                                <div layout="row">
+                                    <span>Strength:</span><span flex></span><span>{{player.selectedChar.Str[1]}}</span>
+                                </div>
+                                <div layout="row">
+                                    <span>Wisdom:</span><span flex></span><span>{{player.selectedChar.Wis[1]}}</span>
+                                </div>
+                                <div></div>
+                                <div layout="row">
+                                    <span>Reflex:</span><span flex></span><span>{{player.selectedChar.RefSaveThrow[1]}}</span>
+                                </div>
+                                <div></div>
+                                <div layout="row">
+                                    <span>Bonus:</span><span flex></span><span>{{player.selectedChar.refbonus[1]}}</span>
+                                </div>
+                                <div layout="row">
+                                    <span>Will:</span><span flex></span><span>{{player.selectedChar.WillSaveThrow[1]}}</span>
+                                </div>
+                                <div layout="row">
+                                    <span>Bonus:</span><span flex></span><span>{{player.selectedChar.willbonus[1]}}</span>
+                                </div>
+                                <div layout="row">
+                                    <span>Fort:</span><span flex></span><span>{{player.selectedChar.FortSaveThrow[1]}}</span>
+                                </div>
+                                <div layout="row">
+                                    <span>Bonus:</span><span flex></span><span>{{player.selectedChar.fortbonus[1]}}</span>
+                                </div>
+                            </div>
+                            <div style="cursor:pointer;" ng-click="playerDescExpand = !playerDescExpand">
+                                <i class="fa" ng-class="{'fa-angle-double-down':playerDescExpand, 'fa-angle-double-right':!playerDescExpand}"></i>
+                                Description
+                            </div>
+                            <div ng-if="playerDescExpand" layout="column">
+                                <md-input-container style="overflow-y:auto;background-color:hsla(0, 0%, 0%, 0.7);border-radius:15px;" class="md-padding md-block">
+                                    <label></label>
+                                    <textarea ng-disabled="!player.authed" ng-model="player.selectedChar.DescriptionOverr[1]" columns="1" md-maxlength="8000" rows="10"></textarea>
+                                </md-input-container>
+                                <md-button ng-disabled="!player.authed" class="md-accent md-raised" ng-click="saveBio()">Save</md-button>
+                            </div>
 
-                            <div layout="column">
-                                <div>
-                                    Race: {{player.selectedChar.Race[1]}}
+                            <div style="cursor:pointer;" ng-click="playerSkillsExpand = !playerSkillsExpand">
+                                <i class="fa" ng-class="{'fa-angle-double-down':playerSkillsExpand, 'fa-angle-double-right':!playerSkillsExpand}"></i>
+                                Skills
+                            </div>
+                            <div ng-if="playerSkillsExpand" class="md-padding" style="border-radius:15px;" ng-style="{'background-color': getMaterialColor('sinfarRose','900'),}" layout="column">
+                                <div ng-repeat="skill in player.selectedChar.dynSkills | orderBy:'label'" layout="row">
+                                    <span>{{skill.label}}</span><span flex></span><span>({{skill.rank}})</span>
                                 </div>
-                                <div>
-                                    Subrace: {{player.selectedChar.Subrace[1]}}
+                            </div>
+                            <div style="cursor:pointer;" ng-click="playerFeatsExpand = !playerFeatsExpand">
+                                <i class="fa" ng-class="{'fa-angle-double-down':playerFeatsExpand, 'fa-angle-double-right':!playerFeatsExpand}"></i>
+                                Feats
+                            </div>
+                            <div ng-if="playerFeatsExpand" class="md-padding" style="border-radius:15px;" ng-style="{'background-color': getMaterialColor('sinfarRose','900'),}" layout="column">
+                                <div ng-repeat="feat in player.selectedChar.dynFeats | orderBy:'label'">
+                                    {{feat.label}}
                                 </div>
-                                <div>
-                                    <div ng-click="playerCharDescShow = !playerCharDescShow" style="cursor:pointer;">Description</div>
-                                    <div ng-show="playerCharDescShow">{{player.selectedChar.DescriptionOverr[1]}}</div>
-                                </div>
-                                <div>
-                                    Experience: {{player.selectedChar.Experience[1]}}
-                                </div>
-                                <div></div>
-                                <div>
-                                    Contitution: {{player.selectedChar.Con[1]}}
-                                </div>
-                                <div>
-                                    Hit Points: {{player.selectedChar.HitPoints[1]}}
-                                </div>
-                                <div></div>
-                                <div>
-                                    Charisma: {{player.selectedChar.Cha[1]}}
-                                </div>
-                                <div>
-                                    Dexterity: {{player.selectedChar.Dex[1]}}
-                                </div>
-                                <div>
-                                    Intelligence: {{player.selectedChar.Int[1]}}
-                                </div>
-                                <div>
-                                    Strength: {{player.selectedChar.Str[1]}}
-                                </div>
-                                <div>
-                                    Wisdom: {{player.selectedChar.Wis[1]}}
-                                </div>
-                                <div></div>
-                                <div>
-                                    Reflex: {{player.selectedChar.RefSaveThrow[1]}}
-                                </div>
-                                <div></div>
-                                <div>
-                                    Bonus: {{player.selectedChar.refbonus[1]}}
-                                </div>
-                                <div>
-                                    Will: {{player.selectedChar.WillSaveThrow[1]}}
-                                </div>
-                                <div>
-                                    Bonus: {{player.selectedChar.willbonus[1]}}
-                                </div>
-                                <div>
-                                    Fort: {{player.selectedChar.FortSaveThrow[1]}}
-                                </div>
-                                <div>
-                                    Bonus: {{player.selectedChar.fortbonus[1]}}
+                            </div>
+                            <div ng-show="player.selectedChar.dynSpells.length" style="cursor:pointer;" ng-click="playerSpellsExpand = !playerSpellsExpand">
+                                <i class="fa" ng-class="{'fa-angle-double-down':playerSpellsExpand, 'fa-angle-double-right':!playerSpellsExpand}"></i>
+                                Spells
+                            </div>
+                            <div ng-if="playerSpellsExpand" class="md-padding" style="border-radius:15px;" ng-style="{'background-color': getMaterialColor('sinfarRose','900'),}" layout="column">
+                                <div ng-repeat="spell in player.selectedChar.dynSpells">
+                                    {{spell.label}}
                                 </div>
                             </div>
 
-                            <div layout="column">
+                            <div layout="column" ng-if="0"><!--work for later update-->
                                 <form enctype="multipart/form-data" method="post" action="http://nwn.sinfar.net/portraits_upload.php">
                                     <input type="hidden" name="pc_id" value={{player.pcID}} />
                                     <md-button class="md-accent md-raised" type="file" name="file">Select Portrait Archive</md-button>
@@ -949,17 +986,16 @@
                             <span layout={{settings.inlineChat}}>
                                 <footer layout="row" style="display:inline-block;">
                                     <!--timestamp-->
-                                    <cite ng-show="settings.timestamps">
+                                    <cite ng-show="settings.timestamps" style="color:grey;">
                                         <span>{{msg.timestamp | date: 'shortTime'}} </span>
                                     </cite>
-                                    <span style="cursor: pointer;"
-                                          ng-click="setPM(msg)"
-                                          ng-class="{'md-padding': settings.inlineChat==='row'}">
+                                    <span style="cursor: pointer;padding-right:5px;padding-left:5px;"
+                                          ng-click="setPM(msg)">
                                         <span>
                                             <md-tooltip md-direction="right" ng-if="msg.fromPCName">
                                                 {{msg.fromPlayerName}}
                                             </md-tooltip>
-                                            <span ng-class="{sinfarfriend:settings.friends.indexOf(msg.fromPlayerId)!=-1}">
+                                            <span ng-class="{sinfarfriend:settings.friends.indexOf(msg.fromPlayerId)!=-1}" style="color:#d0b6ff;">
                                                 {{msg.fromName}}
                                                 <span ng-if="msg.toPlayerName">
                                                     <i> to {{msg.toPlayerName}}</i>
@@ -985,7 +1021,7 @@
                     </md-input-container>
                     <md-input-container flex>
                         <label>Message</label>
-                        <textarea id="msgBox" ng-model="$parent.chatMessageToSend" columns="1" rows="5" md-maxlength="8000" ng-keydown="$event.keyCode === 13 && sChat()"></textarea>
+                        <textarea id="msgBox" ng-model="$parent.chatMessageToSend" columns="1" rows="5" md-maxlength="2000" ng-keydown="$event.keyCode === 13 && sChat()"></textarea>
                     </md-input-container>
                 </div>
             </div>

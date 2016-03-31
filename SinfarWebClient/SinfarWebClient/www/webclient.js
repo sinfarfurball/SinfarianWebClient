@@ -33,16 +33,16 @@ function componentToHex(c) {
  * ---need to remove tells from chat flow (remove channel from all tabs)
  * ---new filter prevents muting tells.
  * PM Bell
- * Portrait Upload
- * char stats
  * Chat log export
+ * html in toasts
+ * 
+ * Portrait Upload - later update
  * Friend login/out notifications - hold for later update
  * profanity filter - hold for later update
  * rp notes - hold for later update
- * html in toasts
- * timestamp color
- * player name color
- * inline style name div height for clicking to pm (atleast with many messages/varying height messages)
+ * 
+ * group servers in player list
+ * group player chars by server
  * 
  * devautologin cookie setup
  * 
@@ -491,19 +491,19 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
 
         $scope.theme = theme;
     //initalize bases
-        $scope.player               = {}; //logged in player details {id:playerID,name:login,pwd:password,friends:[array of friends player IDs],ignores:[array of ignored player IDs]}
-        $scope.messages             = {}; //master message log. {channelsLog:[],pms:[],serverMsgs:[]}. array of objects {index:generatedIndexValue,visible:boolen,channel:messageChannel,fromID:playerID,toID:forPMsfromCurrentPlayer,msg:messageText}
+        $scope.player = {}; //logged in player details {id:playerID,name:login,pwd:password,friends:[array of friends player IDs],ignores:[array of ignored player IDs]}
+        $scope.messages = {}; //master message log. {channelsLog:[],pms:[],serverMsgs:[]}. array of objects {index:generatedIndexValue,visible:boolen,channel:messageChannel,fromID:playerID,toID:forPMsfromCurrentPlayer,msg:messageText}
         $scope.messages.channelsLog = [];
         $scope.messages.messageIndex = 1;
         $scope.settings = $localStorage.sinfarSettings || {};
-        $scope.playerList           = {}; //online players. {chatClient:serverPort:[{playerId:playerID,pcId:charID,playerName:playerLogin,pcName:charName,portrait:imageLinkPartial}]
-        $scope.servers              = [{ id: 1, port: 'web', prefix: 'web', name: "Web Client", expanded: false }]; //list of current servers offered. {id:index (not used),port:serverPort,prefix:shortName (not used),name:serverName}
+        $scope.playerList = {}; //online players. {chatClient:serverPort:[{playerId:playerID,pcId:charID,playerName:playerLogin,pcName:charName,portrait:imageLinkPartial}]
+        $scope.servers = [{ id: 1, port: 'web', prefix: 'web', name: "Web Client", expanded: false }]; //list of current servers offered. {id:index (not used),port:serverPort,prefix:shortName (not used),name:serverName}
         $scope.channels = {}; //array for channel lists
         $scope.channels.currentTab = 0;
         if (!$scope.settings.channelSelect) {
             $scope.settings.channelSelect = 'FFA';
         }
-        $scope.channels.full        = [
+        $scope.channels.full = [
 									    { code: '1', channel: 'Talk', prefix: '/tk', mute: false, ooc: false, tab: 0, dm: false },
                                         { code: '2', channel: 'Shout', prefix: '/shout', mute: false, ooc: false, tab: 0, dm: true },
 									    { code: '3', channel: 'Whisper', prefix: '/w', mute: false, ooc: false, tab: 0, dm: false },
@@ -564,18 +564,18 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
         $scope.player.pwd = $localStorage.sinfarPassword;
         $scope.player.rememberMe = $localStorage.sinfarRemember;
         $scope.player.authed = false;
-        $http.get(linkPrefix + "get_chat_servers.php?nocache=" + new Date().getTime())
+        $http.get(linkPrefix + "get_servers.php?nocache=" + new Date().getTime())
         .then(function (response) {
             if (angular.isArray(response.data)) {
                 $scope.servers = response.data;
-                $scope.servers.push({ id: $scope.servers.length + 1, port: 'web', prefix: 'web', name: "Web Client" });
+                $scope.servers.push({ id: $scope.servers.length + 1, port: 'web', prefix: 'web', name: "Web Client", devMasterServer: true });
                 angular.forEach($scope.servers, function (server, key) {
                     server.expanded = false;
                 })
                 getOnlinePlayers();
             }
         }, function () {
-            $scope.servers = [{ id: 1, port: 'web', prefix: 'web', name: "Web Client", expanded: false }];
+            $scope.servers = [{ id: 1, port: 'web', prefix: 'web', name: "Web Client", expanded: false, devMasterServer: true }];
             getOnlinePlayers();
         });
 
@@ -696,6 +696,9 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
         $scope.unmutePlayer = function (id) {
             $scope.settings.ignores.splice($scope.settings.ignores.indexOf(id), 1);
         }
+        $scope.downloadChar = function (id) {
+            $window.open(linkPrefix + "get_character.php?pc_id=" + id);
+        }
         $scope.clearPortrait = function () {
             $http({
                 method: 'POST',
@@ -772,9 +775,57 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
             });
         }
         $scope.pcCharSelect = function (pcid) {
-            $http.get(linkPrefix + "get_character_json.php?pc_id="+pcid).then(function (pcinfo) {
+            $http.get(linkPrefix + "get_character_json.php?pc_id=" + pcid).then(function (pcinfo) {
+                var classQry = [];
+                var featQry = [];
+                var spellQry = [];
                 $scope.player.selectedChar = pcinfo.data[1];
+
                 $scope.player.selectedChar.pcID = pcid;
+
+                $scope.player.selectedChar.dynClasses = [];
+                $scope.player.selectedChar.dynSkills = [];
+                $scope.player.selectedChar.dynFeats = [];
+                $scope.player.selectedChar.dynSpells = [];
+
+                angular.forEach($scope.player.selectedChar.ClassList[1], function (value, key) {
+                    classQry.push({ charclass: value[1].Class[1], level: value[1].ClassLevel[1] });
+                    angular.forEach(value[1], function (array, keyname) {
+                        if (angular.isArray(array[1]) && array[1][0][1].Spell) {
+                            angular.forEach(array[1], function (spell, spellkey) {
+                                if (spellQry.indexOf(spell[1].Spell[1]) == -1) {
+                                    spellQry.push(spell[1].Spell[1]);
+                                }
+                            });
+                        }
+                    });
+                });
+                $http.get(linkPrefix + "get_classes_info.php?rows=" + angular.toJson(_.map(classQry,'charclass'))).then(function (response) {
+                    angular.forEach(response.data,function(value,key){
+                        $scope.player.selectedChar.dynClasses.push({ label: value.name, level: $filter('filter')(classQry, {charclass:key})[0].level});
+                    });
+                });
+                $http.get(linkPrefix + "get_spells_info.php?rows=" + angular.toJson(spellQry)).then(function (response) {
+                    angular.forEach(response.data, function (value, key) {
+                        $scope.player.selectedChar.dynSpells.push({ label: value.name });
+                    });
+                });
+
+                angular.forEach($scope.player.selectedChar.FeatList[1], function (value, key) {
+                    featQry.push({ label: value[1].Feat[1] });
+                });
+                $http.get(linkPrefix + "get_feats_info.php?rows=" + angular.toJson(_.map(featQry, 'label'))).then(function (response) {
+                    angular.forEach(response.data, function (value, key) {
+                        $scope.player.selectedChar.dynFeats.push({ label: value.name });
+                    });
+                });
+
+                $http.get(linkPrefix + "get_skills_info.php").then(function (response) {
+                    angular.forEach(response.data, function (value, key) {
+                        $scope.player.selectedChar.dynSkills.push({ label: value.name, rank: $scope.player.selectedChar.SkillList[1][key][1].Rank[1] });
+                    });
+                });
+
             });
         }
     //watches
