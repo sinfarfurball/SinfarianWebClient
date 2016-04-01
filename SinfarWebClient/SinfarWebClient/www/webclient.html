@@ -39,7 +39,7 @@
             <div ng-if="player.authed" flex
                  layout="column"
                  ng-style="{'background-color': getMaterialColor('sinfarGold','500')}">
-                <span ng-if="player.authed" class="md-padding" layout-align="center center">
+                <span ng-if="player.authed" class="md-padding" style="text-align:center;">
                     {{player.name}}
                     <span ng-if="player.charName">
                         <i>({{player.charName}})</i>
@@ -47,6 +47,7 @@
                 </span>
             </div>
             <div flex layout="column">
+                <md-button ng-click="exportChatlog()">Export Chat Log</md-button>
                 <div ng-click="playerListExpand = !playerListExpand"
                      class="md-padding"
                      ng-style="{'background-color': playerListExpand ? getMaterialColor('sinfarGold','A700') : getMaterialColor('sinfarGold','900')}">
@@ -61,26 +62,31 @@
                     <!--list of players per server-->
                     <div layout="column" class="md-padding">
                         <!--server list-->
-                        <div ng-repeat="server in servers | filter:{useWebClient:true}" layout="column">
-                            <div class="settingsMenu"
-                                 layout="row"
-                                 layout-align="start center"
-                                 ng-click="server.expanded = !server.expanded" style="padding:10px;">
-                                <div flex style="text-align:left;">
-                                    <i class="fa" ng-class="{'fa-angle-double-right':!server.expanded,'fa-angle-double-down':server.expanded}">
-                                        {{server.name}}
-                                    </i>
+                        <div ng-repeat="masterServer in servers | filter:{devMasterServer:true,useWebClient:true}"
+                             layout="column">
+                            <div ng-click="masterServer.devGroupExpand = !masterServer.devGroupExpand" style="cursor:pointer;" class="md-padding">{{masterServer.name}} Servers</div>
+                            <div ng-show="masterServer.devGroupExpand"
+                                 ng-repeat="server in servers | filter:{vaultId:masterServer.vaultId,useWebClient:true}"
+                                 layout="column">
+                                <div class="settingsMenu"
+                                     layout="row"
+                                     layout-align="start center"
+                                     ng-click="server.expanded = !server.expanded" style="padding:10px;">
+                                    <div flex style="text-align:left;" layout-align="center center">
+                                        <i class="fa" ng-class="{'fa-angle-double-right':!server.expanded,'fa-angle-double-down':server.expanded}">
+                                            {{server.name}}
+                                        </i>
+                                    </div>
+                                    <div flex style="text-align:right;">
+                                        <span style="background-color:black;border-radius:15px;padding:5px;">
+                                            {{pfilter.length}}
+                                        </span>
+                                    </div>
                                 </div>
-                                <div flex style="text-align:right;">
-                                    <span style="background-color:black;border-radius:15px;padding:5px;">
-                                        {{pfilter.length}}
-                                    </span>
-                                </div>
-                            </div>
-                            <!--player list-->
-                            <div ng-show="server.expanded" class="md-padding" layout="column" layout-align="center start" flex>
-                                <div layout="column" ng-repeat="player in pfilter = ((server.players | filter:searchText) | orderBy:server.id)" ng-class="{igPlist:settings.ignores.indexOf(player.playerId)!=-1}">
-                                    <div layout="row" layout-align="center center">
+                                <div ng-show="server.expanded"
+                                     ng-repeat="player in pfilter = ((server.players | filter:searchText) | orderBy:server.id)"
+                                     ng-class="{igPlist:settings.ignores.indexOf(player.playerId)!=-1}">
+                                    <div layout="row" layout-align="start center" style="padding-left:15px">
                                         <!--functions menu-->
                                         <md-menu>
                                             <span class="padding-right:1em;" onmouseover="this.style.color='gold'" onmouseout="this.style.color='white'" aria-label="PC Menu" ng-click="openMenu($mdOpenMenu, $event)">
@@ -154,9 +160,13 @@
                         <md-switch ng-model="settings.timestamps" class="md-accent">
                             Timestamps <span ng-if="settings.timestamps">Visible</span><span ng-if="!settings.timestamps">Hidden</span>
                         </md-switch>
-                        <md-switch disabled ng-model="settings.bell" class="md-accent">
+                        <md-switch ng-model="settings.bell" class="md-accent">
                             Private Message Bell <span ng-if="settings.bell">On</span><span ng-if="!settings.bell">Off</span>
                         </md-switch>
+                        <md-input-container ng-if="settings.bell">
+                            <label>Sound URL</label>
+                            <input ng-model="settings.pmBell"/>
+                        </md-input-container>
                         <md-switch ng-model="settings.pmTabs" class="md-accent">
                             <!--toggles do not flip if ngmodel changes, but value reflects properly?-->
                             PM Tabs <span ng-if="settings.pmTabs">Active</span><span ng-if="!settings.pmTabs">Disabled</span>
@@ -164,6 +174,10 @@
                         <md-switch ng-model="settings.inlineChat" class="md-accent" ng-true-value="'column'" ng-false-value="'row'">
                             Message Style: <span ng-if="settings.inlineChat=='column'">Chat</span><span ng-if="settings.inlineChat=='row'">Inline</span>
                         </md-switch>
+                        <md-switch ng-model="settings.devToggle" class="md-accent">
+                            Development Features: <span ng-if="settings.devToggle">On</span><span ng-if="!settings.devToggle">Off</span>
+                        </md-switch>
+                        <span ng-if="settings.devToggle">Beware, not all features fully implemented.</span>
                     </div>
                     <div ng-click="expandChar = !expandChar" class="settingsMenu" style="padding-top:5px;padding-bottom:5px;" flex>
                         <i class="fa fa-user"> Charater Settings</i>
@@ -282,7 +296,8 @@
                                 </div>
                             </div>
 
-                            <div layout="column" ng-if="0"><!--work for later update-->
+                            <div layout="column" ng-show="player.selectedChar.pcID" ng-if="settings.devToggle">
+                                <!--work for later update-->
                                 <form enctype="multipart/form-data" method="post" action="http://nwn.sinfar.net/portraits_upload.php">
                                     <input type="hidden" name="pc_id" value={{player.pcID}} />
                                     <md-button class="md-accent md-raised" type="file" name="file">Select Portrait Archive</md-button>
@@ -868,7 +883,7 @@
                             </md-tab-label>
                         </md-tab><!--need to notify when player leaves? and they still have a pm tab so it can be cleaned.-->
                     </md-tabs>
-                    <span ng-if="player.authed" layout="center center"><i class="fa fa-paw"></i></span>
+                    <div ng-if="player.authed" layout="center center"><i class="fa fa-paw fa-2x"></i></div>
                     <md-button class="md-accent md-raised" ng-click="login()" ng-if="!player.authed">
                         Login
                     </md-button>
@@ -979,7 +994,7 @@
                             <!--from line-->
                             <i class="fa"
                                ng-class="{'fa-minus-square':!msg.mute, 'fa-plus-square':msg.mute}"
-                               ng-click="msg.mute = !msg.mute"></i>
+                               ng-click="msg.mute = !msg.mute" style="color:grey;"></i>
                             <span ng-if="settings.portraits && !msg.mute">
                                 <img ng-src="http://nwn.sinfar.net{{msg.fromPortrait}}" class="img-circle">
                             </span>

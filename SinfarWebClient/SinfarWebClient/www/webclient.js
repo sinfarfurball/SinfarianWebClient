@@ -32,23 +32,19 @@ function componentToHex(c) {
  * ---need to not create furball tab for all tells
  * ---need to remove tells from chat flow (remove channel from all tabs)
  * ---new filter prevents muting tells.
- * PM Bell
- * Chat log export
- * html in toasts
+ * ---when on a pmTab it should auto set the message field with the tp prefix
+ * When uploading a portrait, need to refresh the one in the char list... also need to error check for bad uploads
  * 
- * Portrait Upload - later update
  * Friend login/out notifications - hold for later update
  * profanity filter - hold for later update
  * rp notes - hold for later update
+ * option to only show players from certian servers?
  * 
- * group servers in player list
  * group player chars by server
  * 
  * devautologin cookie setup
  * 
  * character encoding issues for in game client
- * 
- * DM channels colors
  */
 
 app.config(function ($mdThemingProvider, $mdIconProvider) {
@@ -140,8 +136,24 @@ app.filter('inArray', function($filter){
         }
     };
 });
+app.filter('trustUrl', function ($sce) {
+    return function (url) {
+        return $sce.trustAsResourceUrl(url);
+    };
+});
+app.factory('audio', function ($document) {
+    var audioElement = $document[0].createElement('audio');
+    return {
+        audioElement: audioElement,
 
-app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, $timeout, $window, $filter, $mdMedia, $mdDialog, $mdToast, $mdSidenav, $localStorage, Upload) {
+        play: function (filename) {
+            audioElement.src = filename;
+            audioElement.play();
+        }
+    }
+});
+
+app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, $timeout, $window, $filter, $mdMedia, $mdDialog, $mdToast, $mdSidenav, $localStorage, Upload, audio) {
     var chatFailCount = 0;
     //callbacks
         function flattenSettings (data) {
@@ -190,9 +202,9 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
             var blob = new Blob([content], { type: mediaType });
             saveAs(blob, filename);
         }
-
         function addAlert(newType, newMsg) {
             if (newType == 'success') {
+                newMsg = '<md-toast>' + newMsg + '</md-toast';
                 $mdToast.show(
                     {
                         template: newMsg,
@@ -202,18 +214,17 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
                     });
 
             } else {
+                newMsg = '<md-toast>' + newMsg + '</md-toast>';
                 $mdToast.show(
-                    $mdToast.simple()
-                      .textContent(newMsg)
-                      .hideDelay(0)
-                      .position('top right')
-                      .highlightAction(false)
-                      .action('OK')
-                );
+                    {
+                        template: newMsg,
+                        autoWrap: true,
+                        hideDelay: 5000,
+                        position: 'top right'
+                    });
 
             }
         }
-    
         function tblScrape(table) {
             var rows = table.rows;
             var propCells = rows[0].cells;
@@ -316,12 +327,22 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
                     if ($scope.settings.pmTabs && $scope.pmTabs.indexOf(pmTabLabel) == -1) {
                         $scope.pmTabs.push(pmTabLabel);
                     }
+                    if (!windowFocused && $scope.settings.bell) {
+                        audio.play($scope.settings.pmBell);
+                    }
                 }
                 if ($scope.settings.ignores.indexOf(chatmsg.fromPlayerId) > -1 && $scope.channels.oocList.indexOf(chatmsg.channel)>-1) {
                     chatmsg.mute = true;
                 } else {
                     chatmsg.mute = false;
                 }
+                do {
+                    if ($scope.messages.channelsLog.length > 500) {
+                        $scope.messages.channelsArchive.push($scope.messages.channelsLog.shift());
+                    }
+                }
+                while ($scope.messages.channelsLog.length > 500);
+
                 $scope.messages.channelsLog.push(chatmsg);
                 $scope.missedMessgeCount = $scope.missedMessageCount + 1;
             });
@@ -494,6 +515,7 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
         $scope.player = {}; //logged in player details {id:playerID,name:login,pwd:password,friends:[array of friends player IDs],ignores:[array of ignored player IDs]}
         $scope.messages = {}; //master message log. {channelsLog:[],pms:[],serverMsgs:[]}. array of objects {index:generatedIndexValue,visible:boolen,channel:messageChannel,fromID:playerID,toID:forPMsfromCurrentPlayer,msg:messageText}
         $scope.messages.channelsLog = [];
+        $scope.messages.channelsArchive = [];
         $scope.messages.messageIndex = 1;
         $scope.settings = $localStorage.sinfarSettings || {};
         $scope.playerList = {}; //online players. {chatClient:serverPort:[{playerId:playerID,pcId:charID,playerName:playerLogin,pcName:charName,portrait:imageLinkPartial}]
@@ -558,6 +580,9 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
         if (!$scope.settings.ignores) {
             $scope.settings.ignores = [];
         }
+        if (!$scope.settings.pmBell) {
+            $scope.settings.pmBell = "http://sinfar.net/sounds/button-9.wav";
+        }
 
     //inital values
         $scope.player.name = $localStorage.sinfarPlayerName;
@@ -568,18 +593,84 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
         .then(function (response) {
             if (angular.isArray(response.data)) {
                 $scope.servers = response.data;
-                $scope.servers.push({ id: $scope.servers.length + 1, port: 'web', prefix: 'web', name: "Web Client", devMasterServer: true });
+                $scope.servers.push({ id: 'web', port: 'web', prefix: 'web', name: "Web Client", vaultId: 'web', useWebClient: true });
                 angular.forEach($scope.servers, function (server, key) {
                     server.expanded = false;
-                })
+                    server.devGroupExpand = false;
+                    server.devMasterServer = false;
+                    $filter('filter')($scope.servers, { vaultId: server.vaultId })[0].devMasterServer = true;
+                });
                 getOnlinePlayers();
             }
         }, function () {
-            $scope.servers = [{ id: 1, port: 'web', prefix: 'web', name: "Web Client", expanded: false, devMasterServer: true }];
+            $scope.servers = [{ id: 'web', port: 'web', prefix: 'web', name: "Web Client", expanded: false, devMasterServer: true, devGroupExpand: false, useWebClient: true, vaultId: 'web' }];
             getOnlinePlayers();
         });
 
+        var windowFocused = true;
+        angular.element($window).bind('focus', function () {
+            windowFocused = true;
+        }).bind('blur', function () {
+            windowFocused = false;
+        });
     //scoped functions
+        $scope.exportChatlog = function () {//adjust to join messages and archival messages for export.
+            var zip = new JSZip();
+            var channel = "";
+            var ecl = '"From","Channel","Timestamp","Message"\r\n';
+            angular.forEach($scope.messages.channelsArchive.concat($scope.messages.channelsLog), function (message, key) {
+                switch (message.channel) {
+                    case "1":
+                        channel = 'Talk';
+                        break;
+                    case "3":
+                        channel = 'Whisper';
+                        break;
+                    case "31":
+                        channel = 'Quiet';
+                        break;
+                    case "32":
+                        channel = 'Silent';
+                        break;
+                    case "30":
+                        channel = 'Yell';
+                        break;
+                    case "4":
+                        channel = 'Tell';
+                        break;
+                    case "6":
+                        channel = 'Party';
+                        break;
+                    case "164":
+                        channel = 'OOC';
+                        break;
+                    case "108":
+                        channel = 'Sex';
+                        break;
+                    case "228":
+                        channel = 'PVP';
+                        break;
+                    case "116":
+                        channel = 'Action';
+                        break;
+                    case "104":
+                        channel = 'Event';
+                        break;
+                    case "132":
+                        channel = 'FFA';
+                        break;
+                    case "102":
+                        channel = 'Build';
+                        break;
+                    default:
+                        channel = '';
+                }
+                ecl = ecl + '"' + message.fromName + '","' + channel + '","' + message.timestamp + '","' + message.message + '"\r\n'
+            });
+            zip.file("Sinfar Chat Log.csv", ecl);
+            var content = zip.generate({ type: "blob" });
+            saveAs(content, "SinfarChatLog.zip");
+        }
         $scope.pmMatch = function( player ) {
           return function( item ) {
               if (item.toPlayerName === player || item.fromPlayerName === player) {
@@ -587,7 +678,6 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
               }
           };
         };
-
         $scope.login = function () { loginCallback(); }
         $scope.sChat = function () {//need to add channel from selector (if channel not specified in the post)
             $scope.msgSending = true;
@@ -619,7 +709,11 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
         }
         $scope.getMsgStyle = function (channelcode) {
             channel = $filter('filter')($scope.channels.full, { code: channelcode })[0].channel;
-            cval = tinycolor('hsl(' + $scope.settings.msgColors[channel].hue + ',' + $scope.settings.msgColors[channel].sat + '%,' + $scope.settings.msgColors[channel].light + '%)').toHex();
+            if ($scope.settings.msgColors[channel]) {
+                cval = tinycolor('hsl(' + $scope.settings.msgColors[channel].hue + ',' + $scope.settings.msgColors[channel].sat + '%,' + $scope.settings.msgColors[channel].light + '%)').toHex();
+            } else {
+                cval = 'FFFFFF'
+            }
             return {
                 "color": '#'+cval
             };
@@ -716,11 +810,9 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
         }
         $scope.portraitUpload = function (files, file, newFiles, duplicateFiles, invalidFiles, event) {
             if (files.length == 1 && file.type == 'application/x-zip-compressed') {
-                $http({
-                    method: 'POST',
+                Upload.upload({
                     url: linkPrefix + "portraits_upload.php",
-                    data: $httpParamSerializerJQLike({ pc_id: $scope.player.pcID, file: file }),
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+                    data: { pc_id: $scope.player.selectedChar.pcID, file: file }
                 }).then(
                     function (response) {
                         angular.noop();
@@ -730,7 +822,6 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
                     });
             }
         }
-
         $scope.charInfo = function (pc) {
             var diagScope = {};
             diagScope.useFullScreen = ($mdMedia('sm') || $mdMedia('xs'));
