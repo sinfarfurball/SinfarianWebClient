@@ -329,12 +329,16 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
                     } else {
                         var pmTabLabel = chatmsg.fromPlayerName;
                     }
-                    if ($scope.settings.pmTabs) {
-                        if ($filter('filter')($scope.pmTabs, { label: pmTabLabel }, true).length == 0 && pmTabLabel != $scope.player.name) {
+                    if ($scope.settings.pmTabs && pmTabLabel != $scope.player.name) {
+                        if ($filter('filter')($scope.pmTabs, { label: pmTabLabel }, true).length == 0) {
                             $scope.pmTabs.push({ label: pmTabLabel, newMsgs: false });
                         }
-                        if ((!$scope.onPMTab)||(pmTabLabel != $scope.pmPlayer.label && pmTabLabel != $scope.player.name)) {
+                        if (!$scope.onPMTab) {
                             $filter('filter')($scope.pmTabs, { label: pmTabLabel }, true)[0].newMsgs = true;
+                        } else {
+                            if (pmTabLabel != $scope.pmPlayer.label) {
+                                $filter('filter')($scope.pmTabs, { label: pmTabLabel }, true)[0].newMsgs = true;
+                            }
                         }
                     }
                     if (!windowFocused && $scope.settings.bell) {
@@ -714,7 +718,7 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
                     //check if message accepted. if not display error. if accepted clear and reset inputs
                     $scope.chatMessageToSend = "";
                     if ($scope.onPMTab) {
-                        $scope.chatMessageToSend = "/tp '" + $scope.pmPlayer.label + "'";
+                        $scope.chatMessageToSend = '/tp "' + $scope.pmPlayer.label + '"';
                     }
                     $scope.msgSending = false;
                     $timeout(function () { angular.element('#msgBox').focus(); }, 500);
@@ -789,7 +793,7 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
             $scope.pmPlayer = player;
             player.newMsgs = false;
             $scope.onPMTab = true;
-            $scope.chatMessageToSend = "/tp '" + player.label + "'";
+            $scope.chatMessageToSend = '/tp "' + player.label + '"';
         }
         $scope.setPM = function (player) {
             var p = "";
