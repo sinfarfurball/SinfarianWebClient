@@ -1022,7 +1022,7 @@
                                             <md-tooltip md-direction="right" ng-if="msg.fromPCName">
                                                 {{msg.fromPlayerName}}
                                             </md-tooltip>
-                                            <span ng-class="{sinfarfriend:settings.friends.indexOf(msg.fromPlayerId)!=-1}" style="color:#d0b6ff;">
+                                            <span ng-style="{'color': settings.friends.indexOf(msg.fromPlayerId)!=-1 ? 'gold' : '#d0b6ff'}">
                                                 {{msg.fromName}}
                                                 <span ng-if="msg.toPlayerName">
                                                     <i> to {{msg.toPlayerName}}</i>
