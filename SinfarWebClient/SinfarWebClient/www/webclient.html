@@ -167,9 +167,15 @@
                             <input ng-model="settings.pmBell"/>
                         </md-input-container>
                         <md-switch ng-model="settings.pmTabs" class="md-accent">
-                            <!--toggles do not flip if ngmodel changes, but value reflects properly?-->
                             PM Tabs <span ng-if="settings.pmTabs">Active</span><span ng-if="!settings.pmTabs">Disabled</span>
                         </md-switch>
+                        <md-switch ng-model="settings.awayPM" class="md-accent">
+                            Away Message <span ng-if="settings.awayPM">Active</span><span ng-if="!settings.awayPM">Disabled</span>
+                        </md-switch>
+                        <md-input-container ng-if="settings.awayPM">
+                            <label>Away Message</label>
+                            <input ng-model="settings.awayPMMessage" />
+                        </md-input-container>
                         <md-switch ng-model="settings.inlineChat" class="md-accent" ng-true-value="'column'" ng-false-value="'row'">
                             Message Style: <span ng-if="settings.inlineChat=='column'">Chat</span><span ng-if="settings.inlineChat=='row'">Inline</span>
                         </md-switch>

@@ -341,6 +341,10 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
                             }
                         }
                     }
+                    if ($scope.settings.awayPM && pmTabLabel != $scope.player.name) {
+                        $scope.chatMessageToSend = '/tp "' + pmTabLabel + '" ' + $scope.settings.awayPMMessage;
+                        $scope.sChat();
+                    }
                     if (!windowFocused && $scope.settings.bell) {
                         audio.play($scope.settings.pmBell);
                     }
@@ -599,6 +603,9 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
         if (!$scope.settings.pmBell) {
             $scope.settings.pmBell = "http://sinfar.net/sounds/button-9.wav";
         }
+        if (!$scope.settings.awayPMMessage) {
+            $scope.settings.awayPMMessage = "I'm currently away, but will respond when I return. Thank you.";
+        }
         $scope.onPMTab = false;
 
     //inital values
@@ -634,9 +641,6 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
             windowFocused = false;
         });
     //scoped functions
-        $scope.settingsChange = function (ev) {
-            ev = ev;
-        }
         $scope.exportChatlog = function () {//adjust to join messages and archival messages for export.
             var zip = new JSZip();
             var channel = "";
