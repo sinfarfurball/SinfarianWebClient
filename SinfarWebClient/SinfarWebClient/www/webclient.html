@@ -240,26 +240,6 @@
                                 <div layout="row">
                                     <span>Wisdom:</span><span flex></span><span>{{player.selectedChar.Wis[1]}}</span>
                                 </div>
-                                <div></div>
-                                <div layout="row">
-                                    <span>Reflex:</span><span flex></span><span>{{player.selectedChar.RefSaveThrow[1]}}</span>
-                                </div>
-                                <div></div>
-                                <div layout="row">
-                                    <span>Bonus:</span><span flex></span><span>{{player.selectedChar.refbonus[1]}}</span>
-                                </div>
-                                <div layout="row">
-                                    <span>Will:</span><span flex></span><span>{{player.selectedChar.WillSaveThrow[1]}}</span>
-                                </div>
-                                <div layout="row">
-                                    <span>Bonus:</span><span flex></span><span>{{player.selectedChar.willbonus[1]}}</span>
-                                </div>
-                                <div layout="row">
-                                    <span>Fort:</span><span flex></span><span>{{player.selectedChar.FortSaveThrow[1]}}</span>
-                                </div>
-                                <div layout="row">
-                                    <span>Bonus:</span><span flex></span><span>{{player.selectedChar.fortbonus[1]}}</span>
-                                </div>
                             </div>
                             <div style="cursor:pointer;" ng-click="playerDescExpand = !playerDescExpand">
                                 <i class="fa" ng-class="{'fa-angle-double-down':playerDescExpand, 'fa-angle-double-right':!playerDescExpand}"></i>
@@ -268,7 +248,7 @@
                             <div ng-if="playerDescExpand" layout="column">
                                 <md-input-container style="overflow-y:auto;background-color:hsla(0, 0%, 0%, 0.7);border-radius:15px;" class="md-padding md-block">
                                     <label></label>
-                                    <textarea ng-disabled="!player.authed" ng-model="player.selectedChar.DescriptionOverr[1]" columns="1" md-maxlength="8000" rows="10"></textarea>
+                                    <textarea ng-disabled="!player.authed" ng-model="player.selectedChar.DescriptionOverr[1]" columns="1" md-maxlength="2000" rows="10"></textarea>
                                 </md-input-container>
                                 <md-button ng-disabled="!player.authed" class="md-accent md-raised" ng-click="saveBio()">Save</md-button>
                             </div>
