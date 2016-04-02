@@ -31,6 +31,8 @@ function componentToHex(c) {
  * ---Need to destroy tabs on disable of toggle
  * ---when on a pmTab it should auto set the message field with the tp prefix
  * 
+ * Dolphin -Android LGV10 Chrome - message display size issues
+ * 
  * When uploading a portrait, need to refresh the one in the char list... also need to error check for bad uploads
  * 
  * Friend login/out notifications - hold for later update
@@ -526,7 +528,8 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
         $scope.messages.channelsLog = [];
         $scope.messages.channelsArchive = [];
         $scope.messages.messageIndex = 1;
-        $scope.settings = $localStorage.sinfarSettings || {};
+        if (!$localStorage.sinfarSettings) { $localStorage.sinfarSettings = {};}
+        $scope.settings = $localStorage.sinfarSettings;
         $scope.playerList = {}; //online players. {chatClient:serverPort:[{playerId:playerID,pcId:charID,playerName:playerLogin,pcName:charName,portrait:imageLinkPartial}]
         $scope.servers = [{ id: 1, port: 'web', prefix: 'web', name: "Web Client", expanded: false }]; //list of current servers offered. {id:index (not used),port:serverPort,prefix:shortName (not used),name:serverName}
         $scope.channels = {}; //array for channel lists
@@ -578,7 +581,7 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
         $scope.channels.oocList = _.map($filter('filter')($scope.channels.full, { ooc: true }), 'code');//ooc channels (used with the player ignore)
         $scope.channels.icList = _.map($filter('filter')($scope.channels.full, { ooc: false }), 'code');//ic channels
         $scope.tabs = [{ id: 0, label: 'Chat', newMsgs: false }]; 
-        $scope.settings.pmTabs = false;
+        if(!$scope.settings.pmTabs){$scope.settings.pmTabs = false;}
         $scope.pmTabs = [];
         $scope.inFocus = true;
         $scope.msgSending = false;
@@ -627,6 +630,9 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
             windowFocused = false;
         });
     //scoped functions
+        $scope.settingsChange = function (ev) {
+            ev = ev;
+        }
         $scope.exportChatlog = function () {//adjust to join messages and archival messages for export.
             var zip = new JSZip();
             var channel = "";
@@ -941,10 +947,9 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
             });
         }
     //watches
-        $scope.$watch('settings', function (newSettings, oldSettings) {//this is much to often.... like with color scrolls
-            var settingsTxt = flattenSettings(newSettings);
-            if (!newSettings.pmTabs) { $scope.pmTabs = [];}
-            $localStorage.sinfarSettings = newSettings;
+        $scope.syncSettings = function(){
+            var settingsTxt = flattenSettings($scope.settings);
+            if (!$scope.settings.pmTabs) { $scope.pmTabs = []; }
             $http({
                 method: 'POST',
                 url: linkPrefix + "save_settings.php",
@@ -952,14 +957,11 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
                 }).then(
                     function (response) {
-                        $localStorage.sinfarSettings = newSettings;
+                        $localStorage.sinfarSettings = $scope.settings;
                     },
                     function () {
                         addAlert('warn', 'Error saving settings.');
                     }
                 );
-        }, true);
-        $scope.$watch('channels', function (newSettings, oldSettings) {
-            $scope.currentChannels = _.map($filter('filter')($scope.channels.full, { tab: $scope.channels.currentTab, mute: false }), 'code');
-        }, true);
+        };
 });

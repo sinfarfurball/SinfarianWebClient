@@ -146,12 +146,14 @@
                 </div>
                 <div ng-show="sidenavSettingsExpand"
                      class="md-padding"
+                     layout="column"
                      ng-style="{'background-color': getMaterialColor('sinfarGold','A700')}">
+                    <md-button class="md-primary md-raised" ng-click="saveSettings()">Sync Settings to Server</md-button>
                     <div ng-click="expandSettings = !expandSettings" class="settingsMenu" flex>
                         <i class="fa fa-comments-o"> Chat Settings</i>
                     </div>
                     <div ng-show="expandSettings" class="md-padding">
-                        <md-switch ng-model="settings.portraits" class="md-accent">
+                        <md-switch ng-model="settings.portraits" class="md-accent" ng-click="settingsChange($event)">
                             Portraits <span ng-if="settings.portraits">Visible</span><span ng-if="!settings.portraits">Hidden</span>
                         </md-switch>
                         <md-switch ng-model="settings.timestamps" class="md-accent">
