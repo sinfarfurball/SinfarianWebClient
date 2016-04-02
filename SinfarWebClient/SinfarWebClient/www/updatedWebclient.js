@@ -29,10 +29,8 @@ function componentToHex(c) {
  * ----------
  * PM Tabs
  * ---Need to destroy tabs on disable of toggle
- * ---need to not create furball tab for all tells
- * ---need to remove tells from chat flow (remove channel from all tabs)
- * ---new filter prevents muting tells.
  * ---when on a pmTab it should auto set the message field with the tp prefix
+ * 
  * When uploading a portrait, need to refresh the one in the char list... also need to error check for bad uploads
  * 
  * Friend login/out notifications - hold for later update
@@ -316,6 +314,11 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
                 $scope.messages.messageIndex = $scope.messages.messageIndex + 1;
                 chatmsg.message = Autolinker.link(chatmsg.message, { className: "messageLink" });
 
+                var msgChannelSettings = $filter('filter')($scope.channels.full, { code: chatmsg.channel }, true)[0]
+                if ($scope.currentChannels.indexOf(chatmsg.channel) == -1 && msgChannelSettings.mute == false) {
+                    $scope.tabs[msgChannelSettings.tab].newMsgs = true;
+                }
+
                 if (chatmsg.channel == 4) {
                     chatmsg.toPlayerName = chatmsg.toPlayerName || $scope.player.name;
 
@@ -324,8 +327,13 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
                     } else {
                         var pmTabLabel = chatmsg.fromPlayerName;
                     }
-                    if ($scope.settings.pmTabs && $scope.pmTabs.indexOf(pmTabLabel) == -1) {
-                        $scope.pmTabs.push(pmTabLabel);
+                    if ($scope.settings.pmTabs) {
+                        if ($scope.pmTabs.indexOf(pmTabLabel) == -1 && pmTabLabel != $scope.player.name) {
+                            $scope.pmTabs.push({ label: pmTabLabel, newMsgs: false });
+                        }
+                        if (pmTabLabel != $scope.pmPlayer && pmTabLabel != $scope.player.name) {
+                            $filter('filter')($scope.pmTabs, { label: pmTabLabel }, true)[0].newMsgs = true;
+                        }
                     }
                     if (!windowFocused && $scope.settings.bell) {
                         audio.play($scope.settings.pmBell);
@@ -336,6 +344,7 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
                 } else {
                     chatmsg.mute = false;
                 }
+
                 do {
                     if ($scope.messages.channelsLog.length > 500) {
                         $scope.messages.channelsArchive.push($scope.messages.channelsLog.shift());
@@ -568,7 +577,7 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
         $scope.currentChannels = _.map($filter('filter')($scope.channels.full, { tab: $scope.channels.currentTab, mute: false }), 'code');
         $scope.channels.oocList = _.map($filter('filter')($scope.channels.full, { ooc: true }), 'code');//ooc channels (used with the player ignore)
         $scope.channels.icList = _.map($filter('filter')($scope.channels.full, { ooc: false }), 'code');//ic channels
-        $scope.tabs = [{ id: 0, label: 'Chat' }]; //list of tab objects. {index:tabPosition, label:textOnTab, channels:[array of channels to add to tab]}.
+        $scope.tabs = [{ id: 0, label: 'Chat', newMsgs: false }]; 
         $scope.settings.pmTabs = false;
         $scope.pmTabs = [];
         $scope.inFocus = true;
@@ -583,6 +592,7 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
         if (!$scope.settings.pmBell) {
             $scope.settings.pmBell = "http://sinfar.net/sounds/button-9.wav";
         }
+        $scope.onPMTab = false;
 
     //inital values
         $scope.player.name = $localStorage.sinfarPlayerName;
@@ -606,6 +616,9 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
             $scope.servers = [{ id: 'web', port: 'web', prefix: 'web', name: "Web Client", expanded: false, devMasterServer: true, devGroupExpand: false, useWebClient: true, vaultId: 'web' }];
             getOnlinePlayers();
         });
+        $http.get(linkPrefix + "get_races_info.php").then(function (response) {
+            $scope.sinfarRaces = response.data;
+        })
 
         var windowFocused = true;
         angular.element($window).bind('focus', function () {
@@ -673,7 +686,7 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
         }
         $scope.pmMatch = function( player ) {
           return function( item ) {
-              if (item.toPlayerName === player || item.fromPlayerName === player) {
+              if (item.toPlayerName === player.label || item.fromPlayerName === player.label) {
                   return item;
               }
           };
@@ -727,16 +740,17 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
             }).then(function (response) { console.log(response.data); });
         }
         $scope.muteChannel = function (muter) {
-            $filter('filter')($scope.channels.full, { channel: muter })[0].mute = !$filter('filter')($scope.channels.full, { channel: muter })[0].mute;
+            $filter('filter')($scope.channels.full, { channel: muter },true)[0].mute = !$filter('filter')($scope.channels.full, { channel: muter }, true)[0].mute;
             $scope.channels.muted = _.map($filter('filter')($scope.channels.full, { tab: $scope.channels.currentTab, mute: true }), 'code');
             $scope.currentChannels = _.map($filter('filter')($scope.channels.full, { tab: $scope.channels.currentTab, mute: false }), 'code');
         }
         $scope.addCustomChannel = function () {
-            $scope.tabs.push({ id: $scope.tabs.length, label: $scope.customChannelTitle });
+            $scope.tabs.push({ id: $scope.tabs.length, label: $scope.customChannelTitle, newMsgs: false });
             $scope.customChannelTitle = '';
         }
         $scope.tabSelect = function (id) {
             $scope.channels.currentTab = id;
+            $scope.tabs[id].newMsgs = false;
             $scope.currentChannels = _.map($filter('filter')($scope.channels.full, { tab: $scope.channels.currentTab, mute: false }), 'code');
             $scope.onPMTab = false;
         }
@@ -763,6 +777,7 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
         $scope.pmTabSelect = function (player) {
             $scope.currentChannels = ['4'];
             $scope.pmPlayer = player;
+            player.newMsgs = false;
             $scope.onPMTab = true;
         }
         $scope.setPM = function (player) {
@@ -873,6 +888,7 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
                 $scope.player.selectedChar = pcinfo.data[1];
 
                 $scope.player.selectedChar.pcID = pcid;
+                $scope.player.selectedChar.selRace = $scope.sinfarRaces[$scope.player.selectedChar.Race[1]];
 
                 $scope.player.selectedChar.dynClasses = [];
                 $scope.player.selectedChar.dynSkills = [];

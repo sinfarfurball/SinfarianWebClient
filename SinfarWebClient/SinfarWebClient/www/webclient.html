@@ -5,7 +5,7 @@
     <link rel="stylesheet" href="assets/css/angular/angular-material.min.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="assets/css/angular/ng-img-crop.css" />
-    <link rel="stylesheet" href="assets/css/material.css">
+    <link rel="stylesheet" href="assets/css/updatedWebclient.css">
 
     <script src="assets/js/libs/jquery-2.1.4.min.js"></script>
     <script src="assets/js/libs/lodash.js"></script>
@@ -41,9 +41,6 @@
                  ng-style="{'background-color': getMaterialColor('sinfarGold','500')}">
                 <span ng-if="player.authed" class="md-padding" style="text-align:center;">
                     {{player.name}}
-                    <span ng-if="player.charName">
-                        <i>({{player.charName}})</i>
-                    </span>
                 </span>
             </div>
             <div flex layout="column">
@@ -195,7 +192,7 @@
                                 </div>
                             </div>
                             <div>
-                                Race: {{player.selectedChar.Race[1]}}
+                                Race: {{player.selectedChar.selRace.name}}
                             </div>
                             <div>
                                 Subrace: {{player.selectedChar.Subrace[1]}}
@@ -323,7 +320,7 @@
                                 <input ng-model="customChannelTitle">
                             </md-input-container>
                             <md-button ng-click="addCustomChannel()" class="md-accent md-raised" ng-disabled="!customChannelTitle">
-                                Add Channel Tab
+                                Add Tab
                             </md-button>
                         </div>
                         <div layout="row" layout-align="center center">
@@ -862,10 +859,14 @@
                     <span flex ng-if="!player.authed">
                         Sinfar Webclient
                     </span>
-                    <md-tabs flex md-selected="selTabIndex" md-border-bottom md-autoselect ng-if="player.authed">
+                    <md-tabs flex md-selected="selTabIndex" md-border-bottom ng-if="player.authed">
                         <md-tab ng-repeat="tab in tabs"
-                                md-on-select="tabSelect(tab.id)">
+                                md-on-select="tabSelect(tab.id)" 
+                                ng-style="{'background-color': tab.newMsgs ? getMaterialColor('sinfarCold','900') : getMaterialColor('sinfarGold','900')}">
                             <md-tab-label>
+                                <span ng-if="tab.newMsgs">
+                                    <i class="fa fa-commenting"></i> 
+                                </span>
                                 {{tab.label}}
                                 <span ng-if="!$first" ng-click="removeTab(tab.id)">
                                     <i class="fa fa-times-circle"></i>
@@ -876,7 +877,10 @@
                                 ng-repeat="pm in pmTabs"
                                 md-on-select="pmTabSelect(pm)">
                             <md-tab-label>
-                                {{pm}}
+                                <span ng-if="pm.newMsgs">
+                                    <i class="fa fa-commenting"></i>
+                                </span>
+                                {{pm.label}}
                                 <span ng-click="removePMTab(pm)">
                                     <i class="fa fa-times-circle"></i>
                                 </span>
@@ -988,7 +992,7 @@
                      layout="column"
                      flex
                      scroll-glue>
-                    <blockquote ng-repeat='msg in messages.channelsLog | filter:(onPMTab || "") && pmMatch(pmPlayer) | inArray:currentChannels:"channel" as filtered_messages track by msg.logIndex'
+                    <blockquote ng-repeat='msg in messages.channelsLog | inArray:currentChannels:"channel" | filter:(onPMTab || "") && pmMatch(pmPlayer) as filtered_messages track by msg.logIndex'
                                 style="padding:0 10px; margin:0 0 5px">
                         <div layout="row" layout-align="start none">
                             <!--from line-->
@@ -1042,6 +1046,6 @@
             </div>
         </div>
     </div>
-    <script src="webclient.js" type="text/javascript"></script>
+    <script src="updatedWebclient.js" type="text/javascript"></script>
 </body>
 </html>
