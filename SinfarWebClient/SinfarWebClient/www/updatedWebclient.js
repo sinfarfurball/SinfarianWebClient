@@ -328,10 +328,10 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
                         var pmTabLabel = chatmsg.fromPlayerName;
                     }
                     if ($scope.settings.pmTabs) {
-                        if ($scope.pmTabs.indexOf(pmTabLabel) == -1 && pmTabLabel != $scope.player.name) {
+                        if ($filter('filter')($scope.pmTabs, { label: pmTabLabel }, true).length == 0 && pmTabLabel != $scope.player.name) {
                             $scope.pmTabs.push({ label: pmTabLabel, newMsgs: false });
                         }
-                        if (pmTabLabel != $scope.pmPlayer && pmTabLabel != $scope.player.name) {
+                        if ((!$scope.onPMTab)||(pmTabLabel != $scope.pmPlayer.label && pmTabLabel != $scope.player.name)) {
                             $filter('filter')($scope.pmTabs, { label: pmTabLabel }, true)[0].newMsgs = true;
                         }
                     }
@@ -536,14 +536,14 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
         }
         $scope.channels.full = [
 									    { code: '1', channel: 'Talk', prefix: '/tk', mute: false, ooc: false, tab: 0, dm: false },
-                                        { code: '2', channel: 'Shout', prefix: '/shout', mute: false, ooc: false, tab: 0, dm: true },
+                                        { code: '2', channel: 'Shout', prefix: '/s', mute: false, ooc: false, tab: 0, dm: true },
 									    { code: '3', channel: 'Whisper', prefix: '/w', mute: false, ooc: false, tab: 0, dm: false },
                                         { code: '18', channel: 'DM Shout', prefix: '', mute: false, ooc: false, tab: 0, dm: true },
                                         { code: '19', channel: 'DM Whisper', prefix: '', mute: false, ooc: false, tab: 0, dm: true },
                                         { code: '20', channel: 'DM Tell', prefix: '', mute: false, ooc: false, tab: 0, dm: true },
-									    { code: '31', channel: 'Quiet', prefix: '/q', mute: false, ooc: false, tab: 0, dm: false },
-									    { code: '32', channel: 'Silent', prefix: '/s', mute: false, ooc: false, tab: 0, dm: false },
-									    { code: '30', channel: 'Yell', prefix: '/y', mute: false, ooc: false, tab: 0, dm: false },
+									    { code: '31', channel: 'Quiet', prefix: '/quiet', mute: false, ooc: false, tab: 0, dm: false },
+									    { code: '32', channel: 'Silent', prefix: '/silent', mute: false, ooc: false, tab: 0, dm: false },
+									    { code: '30', channel: 'Yell', prefix: '/yell', mute: false, ooc: false, tab: 0, dm: false },
 									    { code: '4', channel: 'Tell', prefix: '/tp', mute: false, ooc: true, tab: 0, dm: false },
 									    { code: '6', channel: 'Party', prefix: '/p', mute: false, ooc: true, tab: 0, dm: false },
 									    { code: '164', channel: 'OOC', prefix: '/ooc', mute: false, ooc: true, tab: 0, dm: false },
@@ -707,6 +707,9 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
                 function (response) {
                     //check if message accepted. if not display error. if accepted clear and reset inputs
                     $scope.chatMessageToSend = "";
+                    if ($scope.onPMTab) {
+                        $scope.chatMessageToSend = "/tp '" + $scope.pmPlayer.label + "'";
+                    }
                     $scope.msgSending = false;
                     $timeout(function () { angular.element('#msgBox').focus(); }, 500);
                 },
@@ -753,6 +756,7 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
             $scope.tabs[id].newMsgs = false;
             $scope.currentChannels = _.map($filter('filter')($scope.channels.full, { tab: $scope.channels.currentTab, mute: false }), 'code');
             $scope.onPMTab = false;
+            $scope.chatMessageToSend = "";
         }
         $scope.removeTab = function (id) {
             var tabChannels = _.map($filter('filter')($scope.channels.full, { tab: id}), 'code');
@@ -779,6 +783,7 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
             $scope.pmPlayer = player;
             player.newMsgs = false;
             $scope.onPMTab = true;
+            $scope.chatMessageToSend = "/tp '" + player.label + "'";
         }
         $scope.setPM = function (player) {
             var p = "";
