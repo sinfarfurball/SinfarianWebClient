@@ -27,10 +27,6 @@ function componentToHex(c) {
 
 /* Need to fix
  * ----------
- * PM Tabs
- * ---Need to destroy tabs on disable of toggle
- * ---when on a pmTab it should auto set the message field with the tp prefix
- * 
  * Dolphin -Android LGV10 Chrome - message display size issues
  * 
  * When uploading a portrait, need to refresh the one in the char list... also need to error check for bad uploads
@@ -127,10 +123,19 @@ app.config(function ($mdThemingProvider, $mdIconProvider) {
     theme = $mdThemingProvider._PALETTES;
 });
 
-app.filter('inArray', function($filter){
-    return function(list, arrayFilter, element){
-        if(arrayFilter){
-            return $filter("filter")(list, function(listItem){
+app.filter('playerListFilter', function ($filter) {
+    return function (list, arrayFilter, element) {
+        if (arrayFilter) {
+            return $filter("filter")(list, function (listItem) {
+                return arrayFilter.indexOf(listItem[element]) != -1;
+            });
+        }
+    };
+});
+app.filter('inArray', function ($filter) {
+    return function (list, arrayFilter, element) {
+        if (arrayFilter) {
+            return $filter("filter")(list, function (listItem) {
                 return arrayFilter.indexOf(listItem[element]) != -1;
             });
         }
@@ -866,6 +871,7 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
         $scope.charInfo = function (pc) {
             var diagScope = {};
             diagScope.useFullScreen = ($mdMedia('sm') || $mdMedia('xs'));
+            diagScope.serverList = angular.copy($scope.servers);
             $http.get(linkPrefix + "getpcs.php?player_id=" + pc.playerId)
             .then(function (response) {
                 diagScope.charList = response.data.pcs;
@@ -878,11 +884,12 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
                     locals: diagScope,
                     templateUrl: 'partials/moreInfo.html',
                     clickOutsideToClose: true,
-                    controller: function DialogController($scope, $mdDialog, charList) {
+                    controller: function DialogController($scope, $mdDialog, charList, serverList) {
                         $scope.charList = charList;
+                        $scope.serverList = serverList;
                         $scope.currentChar = charList[0];
                         $scope.charSelect = function (id) {
-                            $scope.currentChar = charList[id];
+                            $scope.currentChar = $filter('filter')($scope.charList, {pcId:id})[0];
                             $http.get(linkPrefix + "getcharbio.php?pc_id=" + $scope.currentChar.pcId).then(
                                 function (response) {
                                     $scope.currentBio = response.data;

@@ -196,8 +196,12 @@
                                     <img ng-src="http://nwn.sinfar.net/getcharportrait.php?pc_id={{player.selectedChar.pcID}}&res=m" />
                                 </div>
                                 <div flex="66" style="overflow-y:auto;">
-                                    <div ng-repeat="char in player.pcs" style="cursor:pointer;padding-bottom:5px;" ng-click="pcCharSelect(char.pcId)" layout="row">
-                                        {{char.pcName}}<span flex></span><i ng-click="downloadChar(char.pcId)" class="fa fa-download"></i>
+                                    <div ng-repeat="charServer in servers | filter:{devMasterServer:true}" ng-show="serverCharFilter.length">
+                                        <u>{{charServer.name}} Characters</u>
+                                        <div ng-repeat="char in serverCharFilter = (player.pcs | filter:{vaultId:charServer.vaultId})" style="cursor:pointer;padding-bottom:5px;padding-left:5px;" ng-click="pcCharSelect(char.pcId)" layout="row">
+                                            {{char.pcName}}<span flex></span><i ng-click="downloadChar(char.pcId)" class="fa fa-download"></i>
+                                        </div>
+
                                     </div>
                                 </div>
                             </div>
@@ -250,7 +254,7 @@
                             <div ng-if="playerDescExpand" layout="column">
                                 <md-input-container style="overflow-y:auto;background-color:hsla(0, 0%, 0%, 0.7);border-radius:15px;" class="md-padding md-block">
                                     <label></label>
-                                    <textarea ng-disabled="!player.authed" ng-model="player.selectedChar.DescriptionOverr[1]" columns="1" md-maxlength="2000" rows="10"></textarea>
+                                    <textarea ng-disabled="!player.authed" ng-model="player.selectedChar.DescriptionOverr[1]" columns="1" md-maxlength="8000" rows="10"></textarea>
                                 </md-input-container>
                                 <md-button ng-disabled="!player.authed" class="md-accent md-raised" ng-click="saveBio()">Save</md-button>
                             </div>
