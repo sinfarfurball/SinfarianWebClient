@@ -889,7 +889,13 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
                         $scope.serverList = serverList;
                         $scope.currentChar = charList[0];
                         $scope.charSelect = function (id) {
-                            $scope.currentChar = $filter('filter')($scope.charList, {pcId:id})[0];
+                            $scope.currentChar = $filter('filter')($scope.charList, { pcId: id })[0];
+                            var portTest = $scope.currentChar.portrait.split("/").slice(-1)[0].slice(0, 3);
+                            if (portTest == 'po_'){
+                                $scope.currentChar.dlOption = false;
+                            } else {
+                                $scope.currentChar.dlOption = true;
+                            }
                             $http.get(linkPrefix + "getcharbio.php?pc_id=" + $scope.currentChar.pcId).then(
                                 function (response) {
                                     $scope.currentBio = response.data;
@@ -900,11 +906,9 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
                             );
                         }
                         $scope.dlport = function () {
-                            var linker = $scope.currentChar.portrait.split("/").slice(-1)[0].slice(0,-5);
-                            if (linker != 'po_hu_f_99_' && linker != 'po_hu_m_99_') {
-                                //needs to be reworked to handle through angular... window popup = bad juju
-                                $window.open(linkPrefix + "portraits_download_one.php?resref=" + linker);
-                            }
+                            var linker = $scope.currentChar.portrait.split("/").slice(-1)[0].slice(0, -5);
+                            //needs to be reworked to handle through angular... window popup = bad juju
+                            $window.open(linkPrefix + "portraits_download_one.php?resref=" + linker);
                         }
                     },
                 });
