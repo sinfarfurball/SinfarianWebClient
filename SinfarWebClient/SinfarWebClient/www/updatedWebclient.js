@@ -271,7 +271,13 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
                                 }
                             }
                         });
-                        $scope.player.charName = $filter('filter')(response.data, { playerId: $scope.player.id },true)[0].pcName || null;
+                        var tmpplyrpc = $filter('filter')(response.data, { playerId: $scope.player.id }, true);
+                        var tmpplyrpcName = null;
+                        if (tmpplyrpc){
+                            if (tmpplyrpc.pcName) {
+                                tmpplyrpcName = tmpplyrpc.pcName;
+                            }
+                        }
                     }
                     $timeout(function () {
                         getOnlinePlayers();
