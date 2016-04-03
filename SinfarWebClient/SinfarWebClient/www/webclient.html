@@ -81,7 +81,7 @@
                                     </div>
                                 </div>
                                 <div ng-show="server.expanded"
-                                     ng-repeat="player in pfilter = ((server.players | filter:searchText) | orderBy:server.id)"
+                                     ng-repeat="player in pfilter = ((playerList | filter:{chatClient:server.port} | filter:searchText) | orderBy:['pcName', 'playerName'])"
                                      ng-class="{igPlist:settings.ignores.indexOf(player.playerId)!=-1}">
                                     <div layout="row" layout-align="start center" style="padding-left:15px">
                                         <!--functions menu-->

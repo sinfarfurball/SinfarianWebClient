@@ -251,11 +251,12 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
             $http.get(linkPrefix + "getonlineplayers.php?nocache=" + new Date().getTime())
                 .then(function (response) {
                     if (angular.isArray(response.data)) {
-                        var pList = {};
+                        $scope.playerList =  response.data;
+                        /*var pList = {};
                         var orderID = ['pcName','playerName'];
                         angular.forEach($scope.servers, function (server, key) {
                             server.players = $filter('orderBy')($filter('filter')(response.data, { chatClient: server.port }),orderID);
-                        });
+                        });*/
                         angular.forEach(response.data, function (player, key) {
                             if (player.playerId == $scope.player.id) {
                                 $scope.player.charName = player.pcName;
@@ -270,7 +271,7 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
                                 }
                             }
                         });
-                        $scope.player.charName = $filter('filter')(response.data, { playerId: $scope.player.id })[0].pcName || null;
+                        $scope.player.charName = $filter('filter')(response.data, { playerId: $scope.player.id },true)[0].pcName || null;
                     }
                     $timeout(function () {
                         getOnlinePlayers();
