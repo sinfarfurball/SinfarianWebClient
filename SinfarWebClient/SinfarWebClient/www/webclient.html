@@ -995,7 +995,7 @@
                      layout="column"
                      flex
                      scroll-glue>
-                    <blockquote ng-repeat='msg in messages.channelsLog | inArray:currentChannels:"channel" | filter:(onPMTab || "") && pmMatch(pmPlayer) as filtered_messages track by msg.logIndex'
+                    <div ng-repeat='msg in messages.channelsLog | inArray:currentChannels:"channel" | filter:(onPMTab || "") && pmMatch(pmPlayer) as filtered_messages track by msg.logIndex'
                                 style="padding:0 10px; margin:0 0 5px">
                         <div layout="row" layout-align="start none">
                             <!--from line-->
@@ -1006,11 +1006,11 @@
                                 <img ng-src="http://nwn.sinfar.net{{msg.fromPortrait}}" class="img-circle">
                             </span>
                             <span layout={{settings.inlineChat}}>
-                                <footer layout="row" style="display:inline-block;">
+                                <div layout="row" style="display:inline-block;">
                                     <!--timestamp-->
-                                    <cite ng-show="settings.timestamps" style="color:grey;">
-                                        <span>{{msg.timestamp | date: 'shortTime'}} </span>
-                                    </cite>
+                                    <span ng-show="settings.timestamps" style="color:grey;">
+                                        <span><i>{{msg.timestamp | date: 'shortTime'}} </i></span>
+                                    </span>
                                     <span style="cursor: pointer;padding-right:5px;padding-left:5px;"
                                           ng-click="setPM(msg)">
                                         <span>
@@ -1025,12 +1025,12 @@
                                             </span>
                                         </span>
                                     </span>
-                                </footer>
+                                </div>
                                 <!--message-->
                                 <span ng-if="!msg.mute" ng-style=getMsgStyle(msg.channel) ng-bind-html="msg.message" flex></span>
                             </span>
                         </div>
-                    </blockquote>
+                    </div>
                 </div>
                 <div ng-if="player.authed && !msgSending" layout="row">
                     <md-input-container>
