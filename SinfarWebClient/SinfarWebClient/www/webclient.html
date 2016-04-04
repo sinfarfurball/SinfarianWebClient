@@ -166,7 +166,7 @@
                         </md-switch>
                         <md-input-container ng-if="settings.bell">
                             <label>Sound URL</label>
-                            <input ng-model="settings.pmBell"/>
+                            <input ng-model="settings.pmBell" />
                         </md-input-container>
                         <md-switch ng-model="settings.pmTabs" class="md-accent">
                             PM Tabs <span ng-if="settings.pmTabs">Active</span><span ng-if="!settings.pmTabs">Disabled</span>
@@ -855,11 +855,11 @@
                     </span>
                     <md-tabs flex md-selected="selTabIndex" md-border-bottom ng-if="player.authed">
                         <md-tab ng-repeat="tab in tabs"
-                                md-on-select="tabSelect(tab.id)" 
+                                md-on-select="tabSelect(tab.id)"
                                 ng-style="{'background-color': tab.newMsgs ? getMaterialColor('sinfarCold','900') : getMaterialColor('sinfarGold','900')}">
                             <md-tab-label>
                                 <span ng-if="tab.newMsgs">
-                                    <i class="fa fa-commenting"></i> 
+                                    <i class="fa fa-commenting"></i>
                                 </span>
                                 {{tab.label}}
                                 <span ng-if="!$first" ng-click="removeTab(tab.id)">
@@ -889,7 +889,16 @@
             </md-toolbar>
             <div flex style="background-color:black;" layout="column" layout-fill>
                 <div ng-if="!player.authed" class="md-padding" style="font-family:arial;font-weight:bold;color:#FFF;background-color:#000;overflow-y:auto;" flex layout-fill>
-                    <center><h1></h1></center><font color=#fefe20>Sinfar uses all default chat channels plus many new ones.</font><br />
+                    <h2>New Standalone Chat Client:</h2>
+                    <div class="md-padding">
+                        <a class="messageLink" href="windows-x32.zip">Windows 32 bit</a><br />
+                        <a class="messageLink" href="windows-x64.zip">Windows 64 bit</a><br />
+                        <a class="messageLink" href="linux-x32.zip">Linux 32 bit</a><br />
+                        <a class="messageLink" href="linux-x64.zip">Linux 64 bit</a><br />
+                        <a class="messageLink" href="mac-x32.zip">Mac 32 bit</a><br />
+                        <a class="messageLink" href="mac-x64.zip">Mac 64 bit</a>
+                    </div>
+                    <center><h3><font color=#fefe20>Sinfar uses all default chat channels plus many new ones.</font></h3></center>
                     <br />
                     <font color=#fefe20>Here's the list of them with:</font><br />
                     - Who can see and use them<br />

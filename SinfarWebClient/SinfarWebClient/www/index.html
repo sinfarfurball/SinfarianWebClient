@@ -1,0 +1,1054 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>Sinfarian Web Client</title>
+    <link rel="stylesheet" href="assets/css/angular/angular-material.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="assets/css/angular/ng-img-crop.css" />
+    <link rel="stylesheet" href="assets/css/updatedWebclient.css">
+
+    <script src="assets/js/libs/jquery-2.1.4.min.js"></script>
+    <script src="assets/js/libs/lodash.js"></script>
+
+    <script src="assets/js/angular/angular.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular-animate.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular-aria.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular-messages.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular-sanitize.js"></script>
+
+    <script src="assets/js/angular/ngStorage.js" type="text/javascript"></script>
+    <script src="assets/js/angular/scrollglue.js" type="text/javascript"></script>
+    <script src="assets/js/angular/ng-file-upload-shim.min.js"></script>
+    <script src="assets/js/angular/ng-file-upload.min.js"></script>
+    <script src="assets/js/angular/ng-img-crop.js"></script>
+
+    <script src="assets/js/angular/angular-material.js"></script>
+
+    <script src="assets/js/libs/autolinker.js" type="text/javascript"></script>
+    <script src="assets/js/libs/tinyColor.js" type="text/javascript"></script>
+    <script src="assets/js/FileSaver.min.js" type="text/javascript"></script>
+    <script src="assets/js/jszip.min.js" type="text/javascript"></script>
+
+</head>
+<body ng-app="sinfarWebclient" ng-controller="mainCtrl" ng-cloak>
+    <div layout="row" layout-fill flex>
+        <div flex layout="column"
+             class="sidenav"
+             ng-style="{'background-color': getMaterialColor('sinfarGold','900')}"
+             ng-class="{'active': sidenavActive}">
+            <div ng-if="player.authed" flex
+                 layout="column"
+                 ng-style="{'background-color': getMaterialColor('sinfarGold','500')}">
+                <span ng-if="player.authed" class="md-padding" style="text-align:center;">
+                    {{player.name}}
+                </span>
+            </div>
+            <div flex layout="column">
+                <md-button ng-click="exportChatlog()">Export Chat Log</md-button>
+                <div ng-click="playerListExpand = !playerListExpand"
+                     class="md-padding"
+                     ng-style="{'background-color': playerListExpand ? getMaterialColor('sinfarGold','A700') : getMaterialColor('sinfarGold','900')}">
+                    <i class="fa fa-users"> Online Player List</i>
+                </div>
+                <div class="md-padding" ng-show="playerListExpand"
+                     ng-style="{'background-color': getMaterialColor('sinfarGold','A700')}">
+                    <!--player list search-->
+                    <div layout="row" flex>
+                        <input ng-model="searchText" class="form-control" placeholder="Player Search" flex>
+                    </div>
+                    <!--list of players per server-->
+                    <div ng-if="playerList.length" layout="column" class="md-padding">
+                        <!--server list-->
+                        <div ng-repeat="masterServer in servers | filter:{devMasterServer:true,useWebClient:true}"
+                             layout="column">
+                            <div ng-click="masterServer.devGroupExpand = !masterServer.devGroupExpand" style="cursor:pointer;" class="md-padding">{{masterServer.name}} Servers</div>
+                            <div ng-show="masterServer.devGroupExpand"
+                                 ng-repeat="server in servers | filter:{vaultId:masterServer.vaultId,useWebClient:true}"
+                                 layout="column">
+                                <div class="settingsMenu"
+                                     layout="row"
+                                     layout-align="start center"
+                                     ng-click="server.expanded = !server.expanded" style="padding:10px;">
+                                    <div flex style="text-align:left;" layout-align="center center">
+                                        <i class="fa" ng-class="{'fa-angle-double-right':!server.expanded,'fa-angle-double-down':server.expanded}">
+                                            {{server.name}}
+                                        </i>
+                                    </div>
+                                    <div flex style="text-align:right;">
+                                        <span style="background-color:black;border-radius:15px;padding:5px;">
+                                            {{pfilter.length}}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div ng-show="server.expanded"
+                                         ng-repeat="player in pfilter = ((playerList | filter:{chatClient:server.port} | filter:searchText) | orderBy:['pcName', 'playerName'])"
+                                         ng-class="{igPlist:settings.ignores.indexOf(player.playerId)!=-1}">
+                                        <div layout="row" layout-align="start center" style="padding-left:15px">
+                                            <!--functions menu-->
+                                            <md-menu>
+                                                <span class="padding-right:1em;" onmouseover="this.style.color='gold'" onmouseout="this.style.color='white'" aria-label="PC Menu" ng-click="openMenu($mdOpenMenu, $event)">
+                                                    <i class="fa fa-angle-down"></i>
+                                                </span>
+                                                <md-menu-content>
+                                                    <md-menu-item>
+                                                        <md-button aria-label="More Info">
+                                                            <i class="fa fa-search" ng-click="charInfo(player)"> More Info</i>
+                                                        </md-button>
+                                                    </md-menu-item>
+                                                    <md-menu-item ng_if="settings.friends.indexOf(player.playerId)==-1">
+                                                        <md-button aria-label="Friend">
+                                                            <i class="fa fa-heart-o" ng-click="addFriend(player.playerId)"> Add Friend.</i>
+                                                        </md-button>
+                                                    </md-menu-item>
+                                                    <md-menu-item ng_if="settings.friends.indexOf(player.playerId)!=-1">
+                                                        <md-button aria-label="Unfriend">
+                                                            <i class="fa fa-heart" ng-click="remFriend(player.playerId)"> Remove Friend</i>
+                                                        </md-button>
+                                                    </md-menu-item>
+                                                    <md-menu-item ng_if="settings.ignores.indexOf(player.playerId)==-1">
+                                                        <md-button aria-label="Ignore">
+                                                            <i class="fa fa-minus" ng-click="mutePlayer(player.playerId)"> OOC Ignore</i>
+                                                        </md-button>
+                                                    </md-menu-item>
+                                                    <md-menu-item ng_if="settings.ignores.indexOf(player.playerId)!=-1">
+                                                        <md-button aria-label="Un-Ignore">
+                                                            <i class="fa fa-check" ng-click="unmutePlayer(player.playerId)"> Un-Ignore</i>
+                                                        </md-button>
+                                                    </md-menu-item>
+                                                </md-menu-content>
+                                            </md-menu>
+                                            <!--player/char-->
+                                            <img ng-src="http://nwn.sinfar.net{{ player.portrait }}" class="img-circle" style="margin-left:5px;" ng-if="settings.portraits" />
+                                            <span style="cursor: pointer; margin-left:5px;"
+                                                  ng-class="{sinfarfriend:settings.friends.indexOf(player.playerId)!=-1}"
+                                                  ng-show="!player.pcName.length"
+                                                  ng-click="setPM(player)">
+                                                {{player.playerName}}
+                                            </span>
+                                            <span style="cursor: pointer; margin-left:5px;"
+                                                  ng-class="{'sinfarfriend':settings.friends.indexOf(player.playerId)!=-1}"
+                                                  ng-click="setPM(player)"
+                                                  ng-if="player.pcName.length">
+                                                <md-tooltip md-direction="right">
+                                                    {{player.playerName}}
+                                                </md-tooltip>
+                                                {{player.pcName}}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div ng-click="sidenavSettingsExpand = !sidenavSettingsExpand"
+                     class="md-padding" ng-style="{'background-color': sidenavSettingsExpand ? getMaterialColor('sinfarGold','A700') : getMaterialColor('sinfarGold','900')}">
+                    <i class="fa fa-cogs"> Settings</i>
+                </div>
+                <div ng-show="sidenavSettingsExpand"
+                     class="md-padding"
+                     layout="column"
+                     ng-style="{'background-color': getMaterialColor('sinfarGold','A700')}">
+                    <md-button class="md-primary md-raised" ng-click="saveSettings()">Sync Settings to Server</md-button>
+                    <div ng-click="expandSettings = !expandSettings" class="settingsMenu" flex>
+                        <i class="fa fa-comments-o"> Chat Settings</i>
+                    </div>
+                    <div ng-show="expandSettings" class="md-padding">
+                        <md-switch ng-model="settings.portraits" class="md-accent" ng-click="settingsChange($event)">
+                            Portraits <span ng-if="settings.portraits">Visible</span><span ng-if="!settings.portraits">Hidden</span>
+                        </md-switch>
+                        <md-switch ng-model="settings.timestamps" class="md-accent">
+                            Timestamps <span ng-if="settings.timestamps">Visible</span><span ng-if="!settings.timestamps">Hidden</span>
+                        </md-switch>
+                        <md-switch ng-model="settings.bell" class="md-accent">
+                            Private Message Bell <span ng-if="settings.bell">On</span><span ng-if="!settings.bell">Off</span>
+                        </md-switch>
+                        <md-input-container ng-if="settings.bell">
+                            <label>Sound URL</label>
+                            <input ng-model="settings.pmBell" />
+                        </md-input-container>
+                        <md-switch ng-model="settings.pmTabs" class="md-accent">
+                            PM Tabs <span ng-if="settings.pmTabs">Active</span><span ng-if="!settings.pmTabs">Disabled</span>
+                        </md-switch>
+                        <md-switch ng-model="settings.awayPM" class="md-accent">
+                            Away Message <span ng-if="settings.awayPM">Active</span><span ng-if="!settings.awayPM">Disabled</span>
+                        </md-switch>
+                        <md-input-container ng-if="settings.awayPM">
+                            <label>Away Message</label>
+                            <input ng-model="settings.awayPMMessage" />
+                        </md-input-container>
+                        <md-switch ng-model="settings.inlineChat" class="md-accent" ng-true-value="'column'" ng-false-value="'row'">
+                            Message Style: <span ng-if="settings.inlineChat=='column'">Chat</span><span ng-if="settings.inlineChat=='row'">Inline</span>
+                        </md-switch>
+                        <md-switch ng-model="settings.devToggle" class="md-accent">
+                            Development Features: <span ng-if="settings.devToggle">On</span><span ng-if="!settings.devToggle">Off</span>
+                        </md-switch>
+                        <span ng-if="settings.devToggle">Beware, not all features fully implemented.</span>
+                    </div>
+                    <div ng-click="expandChar = !expandChar" class="settingsMenu" style="padding-top:5px;padding-bottom:5px;" flex>
+                        <i class="fa fa-user"> Charater Settings</i>
+                    </div>
+                    <div ng-show="expandChar" class="md-padding" layout="column">
+                        <div layout="column">
+                            <div class="md-padding" layout="row">
+                                <div flex="33" layout="column" layout-align="start center">
+                                    <img ng-src="http://nwn.sinfar.net/getcharportrait.php?pc_id={{player.selectedChar.pcID}}&res=m" />
+                                </div>
+                                <div flex="66" style="overflow-y:auto;">
+                                    <div ng-repeat="charServer in servers | filter:{devMasterServer:true}" ng-show="serverCharFilter.length">
+                                        <u>{{charServer.name}} Characters</u>
+                                        <div ng-repeat="char in serverCharFilter = (player.pcs | filter:{vaultId:charServer.vaultId})" style="cursor:pointer;padding-bottom:5px;padding-left:5px;" ng-click="pcCharSelect(char.pcId)" layout="row">
+                                            {{char.pcName}}<span flex></span><i ng-click="downloadChar(char.pcId)" class="fa fa-download"></i>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                Race: {{player.selectedChar.selRace.name}}
+                            </div>
+                            <div>
+                                Subrace: {{player.selectedChar.Subrace[1]}}
+                            </div>
+                            <div layout="column" class="md-padding" style="padding-top:0!important">
+                                <div ng-repeat="class in player.selectedChar.dynClasses">
+                                    {{class.label}} ({{class.level}})
+                                </div>
+                            </div>
+                            <div style="cursor:pointer;" ng-click="playerStatsExpand = !playerStatsExpand">
+                                <i class="fa" ng-class="{'fa-angle-double-down':playerStatsExpand, 'fa-angle-double-right':!playerStatsExpand}"></i>
+                                Stats
+                            </div>
+                            <div ng-if="playerStatsExpand" class="md-padding" style="border-radius:15px;" ng-style="{'background-color': getMaterialColor('sinfarRose','900'),}" layout="column">
+                                <div layout="row">
+                                    <span>Experience:</span><span flex></span><span>{{player.selectedChar.Experience[1]}}</span>
+                                </div>
+                                <div layout="row">
+                                    <span>Contitution:</span><span flex></span><span>{{player.selectedChar.Con[1]}}</span>
+                                </div>
+                                <div layout="row">
+                                    <span> Hit Points:</span><span flex></span><span>{{player.selectedChar.HitPoints[1]}}</span>
+                                </div>
+                                <div></div>
+                                <div layout="row">
+                                    <span>Charisma:</span><span flex></span><span>{{player.selectedChar.Cha[1]}}</span>
+                                </div>
+                                <div layout="row">
+                                    <span>Dexterity:</span><span flex></span><span>{{player.selectedChar.Dex[1]}}</span>
+                                </div>
+                                <div layout="row">
+                                    <span>Intelligence:</span><span flex></span><span>{{player.selectedChar.Int[1]}}</span>
+                                </div>
+                                <div layout="row">
+                                    <span>Strength:</span><span flex></span><span>{{player.selectedChar.Str[1]}}</span>
+                                </div>
+                                <div layout="row">
+                                    <span>Wisdom:</span><span flex></span><span>{{player.selectedChar.Wis[1]}}</span>
+                                </div>
+                            </div>
+                            <div style="cursor:pointer;" ng-click="playerDescExpand = !playerDescExpand">
+                                <i class="fa" ng-class="{'fa-angle-double-down':playerDescExpand, 'fa-angle-double-right':!playerDescExpand}"></i>
+                                Description
+                            </div>
+                            <div ng-if="playerDescExpand" layout="column">
+                                <md-input-container style="overflow-y:auto;background-color:hsla(0, 0%, 0%, 0.7);border-radius:15px;" class="md-padding md-block">
+                                    <label></label>
+                                    <textarea ng-disabled="!player.authed" ng-model="player.selectedChar.DescriptionOverr[1]" columns="1" md-maxlength="8000" rows="10"></textarea>
+                                </md-input-container>
+                                <md-button ng-disabled="!player.authed" class="md-accent md-raised" ng-click="saveBio()">Save</md-button>
+                            </div>
+
+                            <div style="cursor:pointer;" ng-click="playerSkillsExpand = !playerSkillsExpand">
+                                <i class="fa" ng-class="{'fa-angle-double-down':playerSkillsExpand, 'fa-angle-double-right':!playerSkillsExpand}"></i>
+                                Skills
+                            </div>
+                            <div ng-if="playerSkillsExpand" class="md-padding" style="border-radius:15px;" ng-style="{'background-color': getMaterialColor('sinfarRose','900'),}" layout="column">
+                                <div ng-repeat="skill in player.selectedChar.dynSkills | orderBy:'label'" layout="row">
+                                    <span>{{skill.label}}</span><span flex></span><span>({{skill.rank}})</span>
+                                </div>
+                            </div>
+                            <div style="cursor:pointer;" ng-click="playerFeatsExpand = !playerFeatsExpand">
+                                <i class="fa" ng-class="{'fa-angle-double-down':playerFeatsExpand, 'fa-angle-double-right':!playerFeatsExpand}"></i>
+                                Feats
+                            </div>
+                            <div ng-if="playerFeatsExpand" class="md-padding" style="border-radius:15px;" ng-style="{'background-color': getMaterialColor('sinfarRose','900'),}" layout="column">
+                                <div ng-repeat="feat in player.selectedChar.dynFeats | orderBy:'label'">
+                                    {{feat.label}}
+                                </div>
+                            </div>
+                            <div ng-show="player.selectedChar.dynSpells.length" style="cursor:pointer;" ng-click="playerSpellsExpand = !playerSpellsExpand">
+                                <i class="fa" ng-class="{'fa-angle-double-down':playerSpellsExpand, 'fa-angle-double-right':!playerSpellsExpand}"></i>
+                                Spells
+                            </div>
+                            <div ng-if="playerSpellsExpand" class="md-padding" style="border-radius:15px;" ng-style="{'background-color': getMaterialColor('sinfarRose','900'),}" layout="column">
+                                <div ng-repeat="spell in player.selectedChar.dynSpells">
+                                    {{spell.label}}
+                                </div>
+                            </div>
+
+                            <div layout="column" ng-show="player.selectedChar.pcID" ng-if="settings.devToggle">
+                                <!--work for later update-->
+                                <form enctype="multipart/form-data" method="post" action="http://nwn.sinfar.net/portraits_upload.php">
+                                    <input type="hidden" name="pc_id" value={{player.pcID}} />
+                                    <md-button class="md-accent md-raised" type="file" name="file">Select Portrait Archive</md-button>
+                                    <md-button class="md-accent md-raised" type="submit">Upload Archive</md-button>
+                                </form>
+                                <div flex layout-align="center center" ngf-drop ngf-select class="drop-box"
+                                     ngf-change="portraitUpload($files, $file, $newFiles, $duplicateFiles, $invalidFiles, $event)"
+                                     ngf-drag-over-class="'dragover'" ngf-multiple="false" ngf-allow-dir="false"
+                                     accept=".zip">Drop zip archive here or click to upload</div>
+                                <div ngf-no-file-drop>File Drag/Drop is not supported for this browser</div>
+                                <md-button flex class="md-accent md-raised" ng-click="clearPortrait()">Clear Saved Portrait</md-button>
+                            </div>
+                        </div>
+                    </div>
+                    <div ng-click="expandColor = !expandColor" class="settingsMenu" style="padding-top:5px;padding-bottom:5px;" flex>
+                        <i class="fa fa-sliders"> Channel Settings</i>
+                    </div>
+                    <div ng-show="expandColor" class="md-padding" class="md-padding">
+                        <div layout="row">
+                            <span flex></span>
+                            <md-input-container class="md-accent">
+                                <label>Custom Tab Label</label>
+                                <input ng-model="customChannelTitle">
+                            </md-input-container>
+                            <md-button ng-click="addCustomChannel()" class="md-accent md-raised" ng-disabled="!customChannelTitle">
+                                Add Tab
+                            </md-button>
+                        </div>
+                        <div layout="row" layout-align="center center">
+                            <div flex ng-click="expandColorTalk = !expandColorTalk" class="settingsMenu">
+                                <span flex>
+                                    <span ng-attr-style="background-color: hsl({{settings.msgColors.Talk.hue}},{{settings.msgColors.Talk.sat}}%,{{settings.msgColors.Talk.light}}%)">&nbsp; &nbsp;</span> Talk
+                                </span>
+                            </div>
+                            <md-input-container>
+                                <md-select aria-label="Channel Assignment" style="margin:0 !important" ng-model="channels.full[0].tab">
+                                    <md-option ng-repeat="tab in tabs" value="{{tab.id}}">
+                                        {{tab.label}}
+                                    </md-option>
+                                </md-select>
+                            </md-input-container>
+                            Mute: <md-checkbox ng-click="muteChannel('Talk')" aria-label="Talk Channel Mute"></md-checkbox>
+                        </div>
+                        <div ng-show="expandColorTalk" layout="row" class="md-padding">
+                            <div layout="column" flex="20">
+                                <span flex>
+                                    Hue
+                                </span>
+                                <span flex>
+                                    Saturation
+                                </span>
+                                <span flex>
+                                    Lightness
+                                </span>
+                            </div>
+                            <div layout="column" flex>
+                                <span flex>
+                                    <md-slider aria-label="channel color slider" flex="" ng-model="settings.msgColors.Talk.hue" min="0" max="259" class="md-primary"></md-slider>
+                                </span>
+                                <span flex>
+                                    <md-slider aria-label="channel color slider" flex="" ng-model="settings.msgColors.Talk.sat" min="0" max="100" class="md-primary"></md-slider>
+                                </span>
+                                <span flex>
+                                    <md-slider aria-label="channel color slider" flex="" ng-model="settings.msgColors.Talk.light" min="0" max="100" class="md-primary"></md-slider>
+                                </span>
+                            </div>
+                        </div>
+                        <div layout="row" layout-align="center center">
+                            <div flex ng-click="expandColorWhisper = !expandColorWhisper" class="settingsMenu">
+                                <span flex>
+                                    <span ng-attr-style="background-color: hsl({{settings.msgColors.Whisper.hue}},{{settings.msgColors.Whisper.sat}}%,{{settings.msgColors.Whisper.light}}%)">&nbsp; &nbsp;</span> Whisper
+                                </span>
+                            </div>
+                            <md-input-container>
+                                <md-select aria-label="Channel Assignment" style="margin:0 !important" ng-model="channels.full[2].tab">
+                                    <md-option ng-repeat="tab in tabs" value="{{tab.id}}">
+                                        {{tab.label}}
+                                    </md-option>
+                                </md-select>
+                            </md-input-container>
+                            Mute: <md-checkbox ng-click="muteChannel('Whisper')" aria-label="Whisper Channel Mute"></md-checkbox>
+                        </div>
+                        <div ng-show="expandColorWhisper" layout="row" class="md-padding">
+                            <div layout="column" flex="20">
+                                <span flex>
+                                    Hue
+                                </span>
+                                <span flex>
+                                    Saturation
+                                </span>
+                                <span flex>
+                                    Lightness
+                                </span>
+                            </div>
+                            <div layout="column" flex>
+                                <span flex>
+                                    <md-slider aria-label="channel color slider" flex="" ng-model="settings.msgColors.Whisper.hue" min="0" max="259" class="md-primary"></md-slider>
+                                </span>
+                                <span flex>
+                                    <md-slider aria-label="channel color slider" flex="" ng-model="settings.msgColors.Whisper.sat" min="0" max="100" class="md-primary"></md-slider>
+                                </span>
+                                <span flex>
+                                    <md-slider aria-label="channel color slider" flex="" ng-model="settings.msgColors.Whisper.light" min="0" max="100" class="md-primary"></md-slider>
+                                </span>
+                            </div>
+                        </div>
+                        <div layout="row" layout-align="center center">
+                            <div ng-click="expandColorQuiet = !expandColorQuiet" class="settingsMenu" flex>
+                                <span flex><span ng-attr-style="background-color: hsl({{settings.msgColors.Quiet.hue}},{{settings.msgColors.Quiet.sat}}%,{{settings.msgColors.Quiet.light}}%)">&nbsp; &nbsp;</span> Quiet</span>
+                            </div>
+                            <md-input-container>
+                                <md-select aria-label="Channel Assignment" style="margin:0 !important" ng-model="channels.full[6].tab">
+                                    <md-option ng-repeat="tab in tabs" value="{{tab.id}}">
+                                        {{tab.label}}
+                                    </md-option>
+                                </md-select>
+                            </md-input-container>
+                            Mute: <md-checkbox ng-click="muteChannel('Quiet')" aria-label="Quiet Channel Mute"></md-checkbox>
+                        </div>
+                        <div ng-show="expandColorQuiet" layout="row" class="md-padding">
+                            <div layout="column" flex="20">
+                                <span flex>
+                                    Hue
+                                </span>
+                                <span flex>
+                                    Saturation
+                                </span>
+                                <span flex>
+                                    Lightness
+                                </span>
+                            </div>
+                            <div layout="column" flex>
+                                <span flex>
+                                    <md-slider aria-label="channel color slider" flex="" ng-model="settings.msgColors.Quiet.hue" min="0" max="259" class="md-primary"></md-slider>
+                                </span>
+                                <span flex>
+                                    <md-slider aria-label="channel color slider" flex="" ng-model="settings.msgColors.Quiet.sat" min="0" max="100" class="md-primary"></md-slider>
+                                </span>
+                                <span flex>
+                                    <md-slider aria-label="channel color slider" flex="" ng-model="settings.msgColors.Quiet.light" min="0" max="100" class="md-primary"></md-slider>
+                                </span>
+                            </div>
+                        </div>
+                        <div layout="row" layout-align="center center">
+                            <div flex ng-click="expandColorSilent = !expandColorSilent" class="settingsMenu">
+                                <span flex><span ng-attr-style="background-color: hsl({{settings.msgColors.Silent.hue}},{{settings.msgColors.Silent.sat}}%,{{settings.msgColors.Silent.light}}%)">&nbsp; &nbsp;</span> Silent</span>
+                            </div>
+                            <md-input-container>
+                                <md-select aria-label="Channel Assignment" style="margin:0 !important" ng-model="channels.full[7].tab">
+                                    <md-option ng-repeat="tab in tabs" value="{{tab.id}}">
+                                        {{tab.label}}
+                                    </md-option>
+                                </md-select>
+                            </md-input-container>
+                            Mute: <md-checkbox ng-click="muteChannel('Silent')" aria-label="Silent Channel Mute"></md-checkbox>
+                        </div>
+                        <div ng-show="expandColorSilent" layout="row" class="md-padding">
+                            <div layout="column" flex="20">
+                                <span flex>
+                                    Hue
+                                </span>
+                                <span flex>
+                                    Saturation
+                                </span>
+                                <span flex>
+                                    Lightness
+                                </span>
+                            </div>
+                            <div layout="column" flex>
+                                <span flex>
+                                    <md-slider aria-label="channel color slider" flex="" ng-model="settings.msgColors.Silent.hue" min="0" max="259" class="md-primary"></md-slider>
+                                </span>
+                                <span flex>
+                                    <md-slider aria-label="channel color slider" flex="" ng-model="settings.msgColors.Silent.sat" min="0" max="100" class="md-primary"></md-slider>
+                                </span>
+                                <span flex>
+                                    <md-slider aria-label="channel color slider" flex="" ng-model="settings.msgColors.Silent.light" min="0" max="100" class="md-primary"></md-slider>
+                                </span>
+                            </div>
+                        </div>
+                        <div layout="row" layout-align="center center">
+                            <div flex ng-click="expandColorYell = !expandColorYell" class="settingsMenu">
+                                <span flex><span ng-attr-style="background-color: hsl({{settings.msgColors.Yell.hue}},{{settings.msgColors.Yell.sat}}%,{{settings.msgColors.Yell.light}}%)">&nbsp; &nbsp;</span> Yell</span>
+                            </div>
+                            <md-input-container>
+                                <md-select aria-label="Channel Assignment" style="margin:0 !important" ng-model="channels.full[8].tab">
+                                    <md-option ng-repeat="tab in tabs" value="{{tab.id}}">
+                                        {{tab.label}}
+                                    </md-option>
+                                </md-select>
+                            </md-input-container>
+                            Mute: <md-checkbox ng-click="muteChannel('Yell')" aria-label="Yell Channel Mute"></md-checkbox>
+                        </div>
+                        <div ng-show="expandColorYell" layout="row" class="md-padding">
+                            <div layout="column" flex="20">
+                                <span flex>
+                                    Hue
+                                </span>
+                                <span flex>
+                                    Saturation
+                                </span>
+                                <span flex>
+                                    Lightness
+                                </span>
+                            </div>
+                            <div layout="column" flex>
+                                <span flex>
+                                    <md-slider aria-label="channel color slider" flex="" ng-model="settings.msgColors.Yell.hue" min="0" max="259" class="md-primary"></md-slider>
+                                </span>
+                                <span flex>
+                                    <md-slider aria-label="channel color slider" flex="" ng-model="settings.msgColors.Yell.sat" min="0" max="100" class="md-primary"></md-slider>
+                                </span>
+                                <span flex>
+                                    <md-slider aria-label="channel color slider" flex="" ng-model="settings.msgColors.Yell.light" min="0" max="100" class="md-primary"></md-slider>
+                                </span>
+                            </div>
+                        </div>
+                        <div layout="row" layout-align="center center">
+                            <div flex ng-click="expandColorTell = !expandColorTell" class="settingsMenu">
+                                <span flex><span ng-attr-style="background-color: hsl({{settings.msgColors.Tell.hue}},{{settings.msgColors.Tell.sat}}%,{{settings.msgColors.Tell.light}}%)">&nbsp; &nbsp;</span> Tell</span>
+                            </div>
+                            <md-input-container>
+                                <md-select aria-label="Channel Assignment" style="margin:0 !important" ng-model="channels.full[9].tab">
+                                    <md-option ng-repeat="tab in tabs" value="{{tab.id}}">
+                                        {{tab.label}}
+                                    </md-option>
+                                </md-select>
+                            </md-input-container>
+                            Mute: <md-checkbox ng-click="muteChannel('Tell')" aria-label="Tell Channel Mute"></md-checkbox>
+                        </div>
+                        <div ng-show="expandColorTell" layout="row" class="md-padding">
+                            <div layout="column" flex="20">
+                                <span flex>
+                                    Hue
+                                </span>
+                                <span flex>
+                                    Saturation
+                                </span>
+                                <span flex>
+                                    Lightness
+                                </span>
+                            </div>
+                            <div layout="column" flex>
+                                <span flex>
+                                    <md-slider aria-label="channel color slider" flex="" ng-model="settings.msgColors.Tell.hue" min="0" max="259" class="md-primary"></md-slider>
+                                </span>
+                                <span flex>
+                                    <md-slider aria-label="channel color slider" flex="" ng-model="settings.msgColors.Tell.sat" min="0" max="100" class="md-primary"></md-slider>
+                                </span>
+                                <span flex>
+                                    <md-slider aria-label="channel color slider" flex="" ng-model="settings.msgColors.Tell.light" min="0" max="100" class="md-primary"></md-slider>
+                                </span>
+                            </div>
+                        </div>
+                        <div layout="row" layout-align="center center">
+                            <div flex ng-click="expandColorParty = !expandColorParty" class="settingsMenu">
+                                <span flex><span ng-attr-style="background-color: hsl({{settings.msgColors.Party.hue}},{{settings.msgColors.Party.sat}}%,{{settings.msgColors.Party.light}}%)">&nbsp; &nbsp;</span> Party</span>
+                            </div>
+                            <md-input-container>
+                                <md-select aria-label="Channel Assignment" style="margin:0 !important" ng-model="channels.full[10].tab">
+                                    <md-option ng-repeat="tab in tabs" value="{{tab.id}}">
+                                        {{tab.label}}
+                                    </md-option>
+                                </md-select>
+                            </md-input-container>
+                            Mute: <md-checkbox ng-click="muteChannel('Party')" aria-label="Party Channel Mute"></md-checkbox>
+                        </div>
+                        <div ng-show="expandColorParty" layout="row" class="md-padding">
+                            <div layout="column" flex="20">
+                                <span flex>
+                                    Hue
+                                </span>
+                                <span flex>
+                                    Saturation
+                                </span>
+                                <span flex>
+                                    Lightness
+                                </span>
+                            </div>
+                            <div layout="column" flex>
+                                <span flex>
+                                    <md-slider aria-label="channel color slider" flex="" ng-model="settings.msgColors.Party.hue" min="0" max="259" class="md-primary"></md-slider>
+                                </span>
+                                <span flex>
+                                    <md-slider aria-label="channel color slider" flex="" ng-model="settings.msgColors.Party.sat" min="0" max="100" class="md-primary"></md-slider>
+                                </span>
+                                <span flex>
+                                    <md-slider aria-label="channel color slider" flex="" ng-model="settings.msgColors.Party.light" min="0" max="100" class="md-primary"></md-slider>
+                                </span>
+                            </div>
+                        </div>
+                        <div layout="row" layout-align="center center">
+                            <div flex ng-click="expandColorOOC = !expandColorOOC" class="settingsMenu">
+                                <span flex><span ng-attr-style="background-color: hsl({{settings.msgColors.OOC.hue}},{{settings.msgColors.OOC.sat}}%,{{settings.msgColors.OOC.light}}%)">&nbsp; &nbsp;</span> OOC</span>
+                            </div>
+                            <md-input-container>
+                                <md-select aria-label="Channel Assignment" style="margin:0 !important" ng-model="channels.full[11].tab">
+                                    <md-option ng-repeat="tab in tabs" value="{{tab.id}}">
+                                        {{tab.label}}
+                                    </md-option>
+                                </md-select>
+                            </md-input-container>
+                            Mute: <md-checkbox ng-click="muteChannel('OOC')" aria-label="OOC Channel Mute"></md-checkbox>
+                        </div>
+                        <div ng-show="expandColorOOC" layout="row" class="md-padding">
+                            <div layout="column" flex="20">
+                                <span flex>
+                                    Hue
+                                </span>
+                                <span flex>
+                                    Saturation
+                                </span>
+                                <span flex>
+                                    Lightness
+                                </span>
+                            </div>
+                            <div layout="column" flex>
+                                <span flex>
+                                    <md-slider aria-label="channel color slider" flex="" ng-model="settings.msgColors.OOC.hue" min="0" max="259" class="md-primary"></md-slider>
+                                </span>
+                                <span flex>
+                                    <md-slider aria-label="channel color slider" flex="" ng-model="settings.msgColors.OOC.sat" min="0" max="100" class="md-primary"></md-slider>
+                                </span>
+                                <span flex>
+                                    <md-slider aria-label="channel color slider" flex="" ng-model="settings.msgColors.OOC.light" min="0" max="100" class="md-primary"></md-slider>
+                                </span>
+                            </div>
+                        </div>
+                        <div layout="row" layout-align="center center">
+                            <div flex ng-click="expandColorSex = !expandColorSex" class="settingsMenu">
+                                <span flex><span ng-attr-style="background-color: hsl({{settings.msgColors.Sex.hue}},{{settings.msgColors.Sex.sat}}%,{{settings.msgColors.Sex.light}}%)">&nbsp; &nbsp;</span> Sex</span>
+                            </div>
+                            <md-input-container>
+                                <md-select aria-label="Channel Assignment" style="margin:0 !important" ng-model="channels.full[12].tab">
+                                    <md-option ng-repeat="tab in tabs" value="{{tab.id}}">
+                                        {{tab.label}}
+                                    </md-option>
+                                </md-select>
+                            </md-input-container>
+                            Mute: <md-checkbox ng-click="muteChannel('Sex')" aria-label="Sex Channel Mute"></md-checkbox>
+                        </div>
+                        <div ng-show="expandColorSex" layout="row" class="md-padding">
+                            <div layout="column" flex="20">
+                                <span flex>
+                                    Hue
+                                </span>
+                                <span flex>
+                                    Saturation
+                                </span>
+                                <span flex>
+                                    Lightness
+                                </span>
+                            </div>
+                            <div layout="column" flex>
+                                <span flex>
+                                    <md-slider aria-label="channel color slider" flex="" ng-model="settings.msgColors.Sex.hue" min="0" max="259" class="md-primary"></md-slider>
+                                </span>
+                                <span flex>
+                                    <md-slider aria-label="channel color slider" flex="" ng-model="settings.msgColors.Sex.sat" min="0" max="100" class="md-primary"></md-slider>
+                                </span>
+                                <span flex>
+                                    <md-slider aria-label="channel color slider" flex="" ng-model="settings.msgColors.Sex.light" min="0" max="100" class="md-primary"></md-slider>
+                                </span>
+                            </div>
+                        </div>
+                        <div layout="row" layout-align="center center">
+                            <div flex ng-click="expandColorPVP = !expandColorPVP" class="settingsMenu">
+                                <span flex><span ng-attr-style="background-color: hsl({{settings.msgColors.PVP.hue}},{{settings.msgColors.PVP.sat}}%,{{settings.msgColors.PVP.light}}%)">&nbsp; &nbsp;</span> PVP</span>
+                            </div>
+                            <md-input-container>
+                                <md-select aria-label="Channel Assignment" style="margin:0 !important" ng-model="channels.full[13].tab">
+                                    <md-option ng-repeat="tab in tabs" value="{{tab.id}}">
+                                        {{tab.label}}
+                                    </md-option>
+                                </md-select>
+                            </md-input-container>
+                            Mute: <md-checkbox ng-click="muteChannel('PVP')" aria-label="PVP Channel Mute"></md-checkbox>
+                        </div>
+                        <div ng-show="expandColorPVP" layout="row" class="md-padding">
+                            <div layout="column" flex="20">
+                                <span flex>
+                                    Hue
+                                </span>
+                                <span flex>
+                                    Saturation
+                                </span>
+                                <span flex>
+                                    Lightness
+                                </span>
+                            </div>
+                            <div layout="column" flex>
+                                <span flex>
+                                    <md-slider aria-label="channel color slider" flex="" ng-model="settings.msgColors.PVP.hue" min="0" max="259" class="md-primary"></md-slider>
+                                </span>
+                                <span flex>
+                                    <md-slider aria-label="channel color slider" flex="" ng-model="settings.msgColors.PVP.sat" min="0" max="100" class="md-primary"></md-slider>
+                                </span>
+                                <span flex>
+                                    <md-slider aria-label="channel color slider" flex="" ng-model="settings.msgColors.PVP.light" min="0" max="100" class="md-primary"></md-slider>
+                                </span>
+                            </div>
+                        </div>
+                        <div layout="row" layout-align="center center">
+                            <div flex ng-click="expandColorAction = !expandColorAction" class="settingsMenu">
+                                <span flex><span ng-attr-style="background-color: hsl({{settings.msgColors.Action.hue}},{{settings.msgColors.Action.sat}}%,{{settings.msgColors.Action.light}}%)">&nbsp; &nbsp;</span> Action</span>
+                            </div>
+                            <md-input-container>
+                                <md-select aria-label="Channel Assignment" style="margin:0 !important" ng-model="channels.full[14].tab">
+                                    <md-option ng-repeat="tab in tabs" value="{{tab.id}}">
+                                        {{tab.label}}
+                                    </md-option>
+                                </md-select>
+                            </md-input-container>
+                            Mute: <md-checkbox ng-click="muteChannel('Action')" aria-label="Action Channel Mute"></md-checkbox>
+                        </div>
+                        <div ng-show="expandColorAction" layout="row" class="md-padding">
+                            <div layout="column" flex="20">
+                                <span flex>
+                                    Hue
+                                </span>
+                                <span flex>
+                                    Saturation
+                                </span>
+                                <span flex>
+                                    Lightness
+                                </span>
+                            </div>
+                            <div layout="column" flex>
+                                <span flex>
+                                    <md-slider aria-label="channel color slider" flex="" ng-model="settings.msgColors.Action.hue" min="0" max="259" class="md-primary"></md-slider>
+                                </span>
+                                <span flex>
+                                    <md-slider aria-label="channel color slider" flex="" ng-model="settings.msgColors.Action.sat" min="0" max="100" class="md-primary"></md-slider>
+                                </span>
+                                <span flex>
+                                    <md-slider aria-label="channel color slider" flex="" ng-model="settings.msgColors.Action.light" min="0" max="100" class="md-primary"></md-slider>
+                                </span>
+                            </div>
+                        </div>
+                        <div layout="row" layout-align="center center">
+                            <div flex ng-click="expandColorEvent = !expandColorEvent" class="settingsMenu">
+                                <span flex><span ng-attr-style="background-color: hsl({{settings.msgColors.Event.hue}},{{settings.msgColors.Event.sat}}%,{{settings.msgColors.Event.light}}%)">&nbsp; &nbsp;</span> Event</span>
+                            </div>
+                            <md-input-container>
+                                <md-select aria-label="Channel Assignment" style="margin:0 !important" ng-model="channels.full[15].tab">
+                                    <md-option ng-repeat="tab in tabs" value="{{tab.id}}">
+                                        {{tab.label}}
+                                    </md-option>
+                                </md-select>
+                            </md-input-container>
+                            Mute: <md-checkbox ng-click="muteChannel('Event')" aria-label="Event Channel Mute"></md-checkbox>
+                        </div>
+                        <div ng-show="expandColorEvent" layout="row" class="md-padding">
+                            <div layout="column" flex="20">
+                                <span flex>
+                                    Hue
+                                </span>
+                                <span flex>
+                                    Saturation
+                                </span>
+                                <span flex>
+                                    Lightness
+                                </span>
+                            </div>
+                            <div layout="column" flex>
+                                <span flex>
+                                    <md-slider aria-label="channel color slider" flex="" ng-model="settings.msgColors.Event.hue" min="0" max="259" class="md-primary"></md-slider>
+                                </span>
+                                <span flex>
+                                    <md-slider aria-label="channel color slider" flex="" ng-model="settings.msgColors.Event.sat" min="0" max="100" class="md-primary"></md-slider>
+                                </span>
+                                <span flex>
+                                    <md-slider aria-label="channel color slider" flex="" ng-model="settings.msgColors.Event.light" min="0" max="100" class="md-primary"></md-slider>
+                                </span>
+                            </div>
+                        </div>
+                        <div layout="row" layout-align="center center">
+                            <div flex ng-click="expandColorFFA = !expandColorFFA" class="settingsMenu">
+                                <span flex><span ng-attr-style="background-color: hsl({{settings.msgColors.FFA.hue}},{{settings.msgColors.FFA.sat}}%,{{settings.msgColors.FFA.light}}%)">&nbsp; &nbsp;</span> FFA</span>
+                            </div>
+                            <md-input-container>
+                                <md-select aria-label="Channel Assignment" style="margin:0 !important" ng-model="channels.full[16].tab">
+                                    <md-option ng-repeat="tab in tabs" value="{{tab.id}}">
+                                        {{tab.label}}
+                                    </md-option>
+                                </md-select>
+                            </md-input-container>
+                            Mute: <md-checkbox ng-click="muteChannel('FFA')" aria-label="FFA Channel Mute"></md-checkbox>
+                        </div>
+                        <div ng-show="expandColorFFA" layout="row" class="md-padding">
+                            <div layout="column" flex="20">
+                                <span flex>
+                                    Hue
+                                </span>
+                                <span flex>
+                                    Saturation
+                                </span>
+                                <span flex>
+                                    Lightness
+                                </span>
+                            </div>
+                            <div layout="column" flex>
+                                <span flex>
+                                    <md-slider aria-label="channel color slider" flex="" ng-model="settings.msgColors.FFA.hue" min="0" max="259" class="md-primary"></md-slider>
+                                </span>
+                                <span flex>
+                                    <md-slider aria-label="channel color slider" flex="" ng-model="settings.msgColors.FFA.sat" min="0" max="100" class="md-primary"></md-slider>
+                                </span>
+                                <span flex>
+                                    <md-slider aria-label="channel color slider" flex="" ng-model="settings.msgColors.FFA.light" min="0" max="100" class="md-primary"></md-slider>
+                                </span>
+                            </div>
+                        </div>
+                        <div layout="row" layout-align="center center">
+                            <div flex ng-click="expandColorBuild = !expandColorBuild" class="settingsMenu">
+                                <span flex><span ng-attr-style="background-color: hsl({{settings.msgColors.Build.hue}},{{settings.msgColors.Build.sat}}%,{{settings.msgColors.Build.light}}%)">&nbsp; &nbsp;</span> Build</span>
+                            </div>
+                            <md-input-container>
+                                <md-select aria-label="Channel Assignment" style="margin:0 !important" ng-model="channels.full[17].tab">
+                                    <md-option ng-repeat="tab in tabs" value="{{tab.id}}">
+                                        {{tab.label}}
+                                    </md-option>
+                                </md-select>
+                            </md-input-container>
+                            Mute: <md-checkbox ng-click="muteChannel('Build')" aria-label="Build Channel Mute"></md-checkbox>
+                        </div>
+                        <div ng-show="expandColorBuild" layout="row" class="md-padding">
+                            <div layout="column" flex="20">
+                                <span flex>
+                                    Hue
+                                </span>
+                                <span flex>
+                                    Saturation
+                                </span>
+                                <span flex>
+                                    Lightness
+                                </span>
+                            </div>
+                            <div layout="column" flex>
+                                <span flex>
+                                    <md-slider aria-label="channel color slider" flex="" ng-model="settings.msgColors.Build.hue" min="0" max="259" class="md-primary"></md-slider>
+                                </span>
+                                <span flex>
+                                    <md-slider aria-label="channel color slider" flex="" ng-model="settings.msgColors.Build.sat" min="0" max="100" class="md-primary"></md-slider>
+                                </span>
+                                <span flex>
+                                    <md-slider aria-label="channel color slider" flex="" ng-model="settings.msgColors.Build.light" min="0" max="100" class="md-primary"></md-slider>
+                                </span>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div layout="column" layout-fill>
+            <md-toolbar layout="column">
+                <div layout="row">
+                    <md-button class="md-primary md-hue-1 md-raised" ng-click="sidenavActive = ! sidenavActive">
+                        Tools
+                    </md-button>
+                    <span flex ng-if="!player.authed">
+                        Sinfar Webclient
+                    </span>
+                    <md-tabs flex md-selected="selTabIndex" md-border-bottom ng-if="player.authed">
+                        <md-tab ng-repeat="tab in tabs"
+                                md-on-select="tabSelect(tab.id)"
+                                ng-style="{'background-color': tab.newMsgs ? getMaterialColor('sinfarCold','900') : getMaterialColor('sinfarGold','900')}">
+                            <md-tab-label>
+                                <span ng-if="tab.newMsgs">
+                                    <i class="fa fa-commenting"></i>
+                                </span>
+                                {{tab.label}}
+                                <span ng-if="!$first" ng-click="removeTab(tab.id)">
+                                    <i class="fa fa-times-circle"></i>
+                                </span>
+                            </md-tab-label>
+                        </md-tab>
+                        <md-tab ng-if="settings.pmTabs"
+                                ng-repeat="pm in pmTabs"
+                                md-on-select="pmTabSelect(pm)">
+                            <md-tab-label>
+                                <span ng-if="pm.newMsgs">
+                                    <i class="fa fa-commenting"></i>
+                                </span>
+                                {{pm.label}}
+                                <span ng-click="removePMTab(pm)">
+                                    <i class="fa fa-times-circle"></i>
+                                </span>
+                            </md-tab-label>
+                        </md-tab><!--need to notify when player leaves? and they still have a pm tab so it can be cleaned.-->
+                    </md-tabs>
+                    <div ng-if="player.authed" layout="center center"><i class="fa fa-paw fa-2x"></i></div>
+                    <md-button class="md-accent md-raised" ng-click="login()" ng-if="!player.authed">
+                        Login
+                    </md-button>
+                </div>
+            </md-toolbar>
+            <div flex style="background-color:black;" layout="column" layout-fill>
+                <div ng-if="!player.authed" class="md-padding" style="font-family:arial;font-weight:bold;color:#FFF;background-color:#000;overflow-y:auto;" flex layout-fill>
+                    <h2>New Standalone Chat Client:</h2>
+                    <div class="md-padding">
+                        <a class="messageLink" href="windows-x32.zip">Windows 32 bit</a><br />
+                        <a class="messageLink" href="windows-x64.zip">Windows 64 bit</a><br />
+                        <a class="messageLink" href="linux-x32.zip">Linux 32 bit</a><br />
+                        <a class="messageLink" href="linux-x64.zip">Linux 64 bit</a><br />
+                        <a class="messageLink" href="mac-x32.zip">Mac 32 bit</a><br />
+                        <a class="messageLink" href="mac-x64.zip">Mac 64 bit</a>
+                    </div>
+                    <center><h3><font color=#fefe20>Sinfar uses all default chat channels plus many new ones.</font></h3></center>
+                    <br />
+                    <font color=#fefe20>Here's the list of them with:</font><br />
+                    - Who can see and use them<br />
+                    - What can be said in those channels<br />
+                    - Whether they should be considered IC or OOC<br />
+                    <br />
+                    <font color=#feef50>Shout</font><br />
+                    - Only DMs can use it. Everyone can see it, except people with the immersive mode ON.<br />
+                    - Things that DMs want to say publicly, it is a privilege that they have.<br />
+                    - IC and OOC.<br />
+                    <br />
+                    <font color=#f67271>DM</font><br />
+                    - Everyone can use it, Only DMs can see it.<br />
+                    - Send a message in this channel if you need a DM. If a DM is available they will send you a tell.<br />
+                    - OOC<br />
+                    <br />
+                    <font color=#ab23f2>Event</font><br />
+                    - Everyone can use it, Everyone can see it except people busy or with the immersive mode ON.<br />
+                    - This is the player version of the Shout channel. It is to announce important important events. If you didn't plan that even for more than 3 days, it is probably not worth to be posted in this channel. Do not reply in this channel, send them a tell instead.<br />
+                    - IC or OOC<br />
+                    <br />
+                    <font color=#b56a23>Action</font><br />
+                    - Everyone can use it, Everyone looking "for an adventure" can see it.<br />
+                    - This is an alternative to the Event channel, It is the place to say "Level 30 looking for a party" or "Shard run in preparation, send me a tell if you want to join it" or "I am dead, can someone come resurrect me? I am in the crypt - level 1". Do not ever use the Event channel to say something like that, use the /action channel instead.<br />
+                    - OOC<br />
+                    <br />
+                    <font color=#b1a2bd>OOC</font><br />
+                    - Everyone can use it, Everyone "looking for an OOC conversation" can see it.<br />
+                    - This is a place where you can ask a question concerning Sinfar. Replies can be posted in this channel too, but do not get side tracked.<br />
+                    - OOC<br />
+                    <br />
+                    <font color=#fe5f2e>PVP</font><br />
+                    - Everyone can use it, Everyone in an arena or looking for both PvP and an OOC conversation.<br />
+                    - A place where you can talk between power gamers, please keep your PoWeRzOr trick in this channel.<br />
+                    - OOC<br />
+                    <br />
+                    <font color=#f520e1>Sex</font><br />
+                    - Everyone can use it, Everyone looking for an intimate role-play and an OOC conversation can see it.<br />
+                    - Try to use this channel only for serious ERP ideas that you have and would like to RP on Sinfar. I wish that this channel could be used as an alternative to the Action channel (so to propose an intimate role-play event)... it got trolled too much with obscene stuff so now people also need to be looking for an OOC conversation to see it.<br />
+                    - OOC<br />
+                    <br />
+                    <font color=#b7f520>Build</font><br />
+                    - Everyone can use it, builders or players that like to use the Aurora Toolset - and that are looking for an OOC conversation, can see it.<br />
+                    - A good place to ask for a house builder or to discuss how to do something in Toolset.<br />
+                    - OOC<br />
+                    <br />
+                    <font color=#20bff0>FFA</font><br />
+                    - Everyone can use it, only people that set that they want to see the FFA channel will see it.<br />
+                    - It is the place where you can talk about whatever you want. Still, do not spam it or troll it voluntarily.<br />
+                    - OOC<br />
+                    <br />
+                    <font color=#fefefe>Talk</font><br />
+                    - People that are in a listen line of sight (not behind a door for example) and within ~40 meters.<br />
+                    - Use it to make your character talk ICly.<br />
+                    - IC (unless you start your message by //)<br />
+                    <br />
+                    <font color=#b0b0b0>Whisper</font><br />
+                    - People that are in a line of sight and within ~3 meters.<br />
+                    - Use it to make your character whisper ICly.<br />
+                    - IC (unless you start your message by //)<br />
+                    <br />
+                    <font color=#404040>Quiet</font> (/q)<br />
+                    - People that are in a line of sight and within ~1 meter.<br />
+                    - Use it to reach only people that are right next, like on the same bench and even then, some some bench are too wide.<br />
+                    - IC (unless you start your message by //)<br />
+                    <br />
+                    <font color=#303030>Silent</font><br />
+                    - The person that is hugging you (within 0.5 meter).<br />
+                    - Use it to make your character talk to himself or whisper to the person that is hugging them.<br />
+                    - IC (unless you start your message by //)<br />
+                    <br />
+                    <font color=#d92324>Yell</font> (/y)<br />
+                    - People that are in the same area.<br />
+                    - Use it to make your character yell ICly<br />
+                    - IC (unless you start your message by //)<br />
+                    <br />
+                    <font color=#fefefe>Party</font><br />
+                    - Everyone in your party<br />
+                    - Anything related to your party<br />
+                    - OOC<br />
+                    <br />
+                    You can set what you are looking for in your player list account settings menu (Class Radial Menu -&gt; Player Tool 1 -&gt; [Settings] -&gt; [Player List Status] and [Account settings]).<br />
+                    <br />
+                    <font color=#fefe20>Additionally to the conditions above, the following can affect whether you will see a chat channel or not:</font><br />
+                    1) When your immersive mode is ON, you will only see the tells from people that are in the same area.<br />
+                    2) When you are set as "busy", you will only see the Shout and Tell messages.<br />
+                    3) When you are are set to see the FFA channel, you will also see all other public channels.<br />
+                    4) When you are in an OOC area, you are automatically considered as "looking for an OOC conversation".<br />
+                    <br />
+                    <font color=#fefe20>You can use the !WHOSPY command to know if people near you are in your /wisper or /quiet or /silent range.</font>
+                </div>
+                <div ng-if="player.authed"
+                     style="overflow-y:auto;"
+                     layout="column"
+                     flex
+                     scroll-glue>
+                    <blockquote ng-repeat='msg in messages.channelsLog | inArray:currentChannels:"channel" | filter:(onPMTab || "") && pmMatch(pmPlayer) as filtered_messages track by msg.logIndex'
+                                style="padding:0 10px; margin:0 0 5px">
+                        <div layout="row" layout-align="start none">
+                            <!--from line-->
+                            <i class="fa"
+                               ng-class="{'fa-minus-square':!msg.mute, 'fa-plus-square':msg.mute}"
+                               ng-click="msg.mute = !msg.mute" style="color:grey;"></i>
+                            <span ng-if="settings.portraits && !msg.mute">
+                                <img ng-src="http://nwn.sinfar.net{{msg.fromPortrait}}" class="img-circle">
+                            </span>
+                            <span layout={{settings.inlineChat}}>
+                                <footer layout="row" style="display:inline-block;">
+                                    <!--timestamp-->
+                                    <cite ng-show="settings.timestamps" style="color:grey;">
+                                        <span>{{msg.timestamp | date: 'shortTime'}} </span>
+                                    </cite>
+                                    <span style="cursor: pointer;padding-right:5px;padding-left:5px;"
+                                          ng-click="setPM(msg)">
+                                        <span>
+                                            <md-tooltip md-direction="right" ng-if="msg.fromPCName">
+                                                {{msg.fromPlayerName}}
+                                            </md-tooltip>
+                                            <span ng-style="{'color': settings.friends.indexOf(msg.fromPlayerId)!=-1 ? 'gold' : '#d0b6ff'}">
+                                                {{msg.fromName}}
+                                                <span ng-if="msg.toPlayerName">
+                                                    <i> to {{msg.toPlayerName}}</i>
+                                                </span>
+                                            </span>
+                                        </span>
+                                    </span>
+                                </footer>
+                                <!--message-->
+                                <span ng-if="!msg.mute" ng-style=getMsgStyle(msg.channel) ng-bind-html="msg.message" flex></span>
+                            </span>
+                        </div>
+                    </blockquote>
+                </div>
+                <div ng-if="player.authed && !msgSending" layout="row">
+                    <md-input-container>
+                        <label>Channel</label>
+                        <md-select ng-model="settings.channelSelect">
+                            <md-option ng-repeat="channel in channels.full | filter:{dm:false} " value="{{channel.prefix}}">
+                                {{channel.channel}}
+                            </md-option>
+                        </md-select>
+                    </md-input-container>
+                    <md-input-container flex>
+                        <label>Message</label>
+                        <textarea id="msgBox" ng-model="$parent.chatMessageToSend" columns="1" rows="5" md-maxlength="2000" ng-keydown="$event.keyCode === 13 && sChat()"></textarea>
+                    </md-input-container>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="updatedWebclient.js" type="text/javascript"></script>
+</body>
+</html>

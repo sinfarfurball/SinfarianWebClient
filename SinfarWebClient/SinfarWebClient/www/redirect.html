@@ -1,0 +1,29 @@
+<html><head>
+<link rel="canonical" href="http://nwn.sinfar.net/webclient"/>
+<noscript>
+	<meta http-equiv="refresh" content="5;URL=http://nwn.sinfar.net/webclient">
+</noscript>
+<!--[if lt IE 9]><script type="text/javascript">var IE_fix=true;</script><![endif]-->
+<script type="text/javascript">
+	var url = "http://nwn.sinfar.net/webclient";
+	var delay = "5000";
+	window.onload = function ()
+	{
+		setTimeout(GoToURL, delay);
+	}
+	function GoToURL()
+	{
+		if(typeof IE_fix != "undefined") // IE8 and lower fix to pass the http referer
+		{
+			var referLink = document.createElement("a");
+			referLink.href = url;
+			document.body.appendChild(referLink);
+			referLink.click();
+		}
+		else { window.location.replace(url); } // All other browsers
+	}
+</script></head>
+<body>
+Update is now now live at <a href="http://nwn.sinfar.net/webclient"> nwn.sinfar.net/webclient </a>
+</body>
+</html>
