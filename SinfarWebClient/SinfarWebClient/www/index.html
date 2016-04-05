@@ -891,12 +891,12 @@
                 <div ng-if="!player.authed" class="md-padding" style="font-family:arial;font-weight:bold;color:#FFF;background-color:#000;overflow-y:auto;" flex layout-fill>
                     <h2>New Standalone Chat Client:</h2>
                     <div class="md-padding">
-                        <a class="messageLink" href="windows-x32.zip">Windows 32 bit</a><br />
-                        <a class="messageLink" href="windows-x64.zip">Windows 64 bit</a><br />
-                        <a class="messageLink" href="linux-x32.zip">Linux 32 bit</a><br />
-                        <a class="messageLink" href="linux-x64.zip">Linux 64 bit</a><br />
-                        <a class="messageLink" href="mac-x32.zip">Mac 32 bit</a><br />
-                        <a class="messageLink" href="mac-x64.zip">Mac 64 bit</a>
+                        <a class="messageLink" href="windows-x32-v0.2.zip">Windows 32 bit</a><br />
+                        <a class="messageLink" href="windows-x64-v0.2.zip">Windows 64 bit</a><br />
+                        <a class="messageLink" href="linux-x32-v0.2.zip">Linux 32 bit</a><br />
+                        <a class="messageLink" href="linux-x64-v0.2.zip">Linux 64 bit</a><br />
+                        <a class="messageLink" href="mac-x32-v0.2.zip">Mac 32 bit</a><br />
+                        <a class="messageLink" href="mac-x64-v0.2.zip">Mac 64 bit</a>
                     </div>
                     <center><h3><font color=#fefe20>Sinfar uses all default chat channels plus many new ones.</font></h3></center>
                     <br />
@@ -995,7 +995,7 @@
                      layout="column"
                      flex
                      scroll-glue>
-                    <blockquote ng-repeat='msg in messages.channelsLog | inArray:currentChannels:"channel" | filter:(onPMTab || "") && pmMatch(pmPlayer) as filtered_messages track by msg.logIndex'
+                    <div ng-repeat='msg in messages.channelsLog | inArray:currentChannels:"channel" | filter:(onPMTab || "") && pmMatch(pmPlayer) as filtered_messages track by msg.logIndex'
                                 style="padding:0 10px; margin:0 0 5px">
                         <div layout="row" layout-align="start none">
                             <!--from line-->
@@ -1006,11 +1006,11 @@
                                 <img ng-src="http://nwn.sinfar.net{{msg.fromPortrait}}" class="img-circle">
                             </span>
                             <span layout={{settings.inlineChat}}>
-                                <footer layout="row" style="display:inline-block;">
+                                <div layout="row" style="display:inline-block;">
                                     <!--timestamp-->
-                                    <cite ng-show="settings.timestamps" style="color:grey;">
-                                        <span>{{msg.timestamp | date: 'shortTime'}} </span>
-                                    </cite>
+                                    <span ng-show="settings.timestamps" style="color:grey;">
+                                        <span><i>{{msg.timestamp | date: 'shortTime'}} </i></span>
+                                    </span>
                                     <span style="cursor: pointer;padding-right:5px;padding-left:5px;"
                                           ng-click="setPM(msg)">
                                         <span>
@@ -1025,12 +1025,12 @@
                                             </span>
                                         </span>
                                     </span>
-                                </footer>
+                                </div>
                                 <!--message-->
                                 <span ng-if="!msg.mute" ng-style=getMsgStyle(msg.channel) ng-bind-html="msg.message" flex></span>
                             </span>
                         </div>
-                    </blockquote>
+                    </div>
                 </div>
                 <div ng-if="player.authed && !msgSending" layout="row">
                     <md-input-container>

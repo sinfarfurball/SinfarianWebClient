@@ -368,11 +368,11 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
                 }
 
                 do {
-                    if ($scope.messages.channelsLog.length > 500) {
+                    if ($scope.messages.channelsLog.length > 300) {
                         $scope.messages.channelsArchive.push($scope.messages.channelsLog.shift());
                     }
                 }
-                while ($scope.messages.channelsLog.length > 500);
+                while ($scope.messages.channelsLog.length > 300);
 
                 $scope.messages.channelsLog.push(chatmsg);
                 $scope.missedMessgeCount = $scope.missedMessageCount + 1;
