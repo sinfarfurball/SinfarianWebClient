@@ -1003,31 +1003,31 @@
                                ng-class="{'fa-minus-square':!msg.mute, 'fa-plus-square':msg.mute}"
                                ng-click="msg.mute = !msg.mute" style="color:grey;"></i>
                             <span ng-if="settings.portraits && !msg.mute">
-                                <img ng-src="http://nwn.sinfar.net{{msg.fromPortrait}}" class="img-circle">
+                                <img ng-src="http://nwn.sinfar.net{{::msg.fromPortrait}}" class="img-circle">
                             </span>
                             <span layout={{settings.inlineChat}}>
                                 <div layout="row" style="display:inline-block;">
                                     <!--timestamp-->
                                     <span ng-show="settings.timestamps" style="color:grey;">
-                                        <span><i>{{msg.timestamp | date: 'shortTime'}} </i></span>
+                                        <span><i>{{::msg.timestamp | date: 'shortTime'}} </i></span>
                                     </span>
                                     <span style="cursor: pointer;padding-right:5px;padding-left:5px;"
                                           ng-click="setPM(msg)">
                                         <span>
-                                            <md-tooltip md-direction="right" ng-if="msg.fromPCName">
-                                                {{msg.fromPlayerName}}
+                                            <md-tooltip md-direction="right" ng-if="::msg.fromPCName">
+                                                {{::msg.fromPlayerName}}
                                             </md-tooltip>
                                             <span ng-style="{'color': settings.friends.indexOf(msg.fromPlayerId)!=-1 ? 'gold' : '#d0b6ff'}">
-                                                {{msg.fromName}}
-                                                <span ng-if="msg.toPlayerName">
-                                                    <i> to {{msg.toPlayerName}}</i>
+                                                {{::msg.fromName}}
+                                                <span ng-if="::msg.toPlayerName">
+                                                    <i> to {{::msg.toPlayerName}}</i>
                                                 </span>
                                             </span>
                                         </span>
                                     </span>
                                 </div>
                                 <!--message-->
-                                <span ng-if="!msg.mute" ng-style=getMsgStyle(msg.channel) ng-bind-html="msg.message" flex></span>
+                                <span ng-if="!msg.mute" ng-style=getMsgStyle(msg.channel) ng-bind-html="::msg.message" flex></span>
                             </span>
                         </div>
                     </div>
@@ -1036,8 +1036,8 @@
                     <md-input-container>
                         <label>Channel</label>
                         <md-select ng-model="settings.channelSelect">
-                            <md-option ng-repeat="channel in channels.full | filter:{dm:false} " value="{{channel.prefix}}">
-                                {{channel.channel}}
+                            <md-option ng-repeat="channel in ::channels.full | filter:{dm:false} " value="{{channel.prefix}}">
+                                {{::channel.channel}}
                             </md-option>
                         </md-select>
                     </md-input-container>

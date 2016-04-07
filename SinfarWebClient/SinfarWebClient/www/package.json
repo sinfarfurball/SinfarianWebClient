@@ -19,7 +19,7 @@
     "license": "MIT",                                  // There are many software licenses freely available. MIT is the most common. opensource.org/licenses
 
     //YOUR APP SETTINGS
-    "main": "webclient.html",                               // The default page that is displayed on launch
+    "main": "index.html",                               // The default page that is displayed on launch
     "window": {                                        // The main settings for your app
         "title": "Sinfarian Chat Client",              // "Birds with Arms!" This is dynamically used throughout your app.
         "icon": "_img/icon32.png",                     // Your logo
