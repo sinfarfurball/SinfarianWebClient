@@ -1,0 +1,23 @@
+﻿<md-dialog layout="column" style="max-width:50%;max-height:50%;">
+    <md-toolbar flex="noshrink" layout-align="center center">
+        <h1 class="md-title">Player Character List</h1>
+    </md-toolbar>
+    <md-dialog-content class="md-padding" layout="row">
+        <div flex="33" class="md-padding" layout="column" layout-align="center center">
+            <img ng-src="http://nwn.sinfar.net/{{currentChar.portrait}}" />
+            <md-button ng-show="currentChar.dlOption" class="md-raised md-primary" ng-click="dlport()">Download</md-button>
+        </div>
+        <div flex="66" layout="column">
+            <div flex="33" style="overflow-y:auto;">
+                <div ng-repeat="charServer in serverList | filter:{devMasterServer:true}" ng-show="serverCharFilter.length">
+                    <u>{{charServer.name}} Characters</u>
+                    <div ng-repeat="char in serverCharFilter = (charList | filter:{vaultId:charServer.vaultId})" style="cursor:pointer;padding-bottom:5px;padding-left:10px;" ng-click="charSelect(char.pcId)">
+                        {{char.pcName}}
+                    </div>
+                </div>
+            </div>
+            <div ng-if="currentBio" flex="66" style="overflow-y:auto;background-color:hsla(0, 0%, 0%, 0.7);border-radius:15px;" class="md-padding" ng-bind-html="currentBio">
+            </div>
+        </div>
+    </md-dialog-content>
+</md-dialog>

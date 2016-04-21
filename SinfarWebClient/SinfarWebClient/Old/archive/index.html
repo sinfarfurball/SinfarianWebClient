@@ -1,0 +1,385 @@
+<html ng-app="myApp" ng-controller="chatCtrl">
+    <head>
+        <title ng-bind="pgTitle">
+        </title>
+        <link rel="stylesheet" href="css/bootstrap.min.css">
+        <link rel="stylesheet" href="css/ngDialog.css">
+        <link rel="stylesheet" href="css/ngDialog-theme-default.css">
+        <link rel="stylesheet" href="css/font-awesome.min.css" />
+        <link rel="stylesheet" href="css/simple-sidebar.css" />
+        <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/select2/3.4.5/select2.css">
+        <link rel="stylesheet" href="css/select.css" />
+        <link rel="stylesheet" href="css/angularclient.css">
+        
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+        <script src="js/underscore.js" type="text/javascript"></script>
+        <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular.min.js"></script>
+        <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular-sanitize.js"></script>
+        <script src="js/ngStorage.js" type="text/javascript"></script>
+        <script src="js/ngDialog.js" type="text/javascript"></script>
+        <script src="js/ui-bootstrap-tpls-0.14.2.js" type="text/javascript"></script>
+        <script src="js/select.js" type="text/javascript"></script>
+        <script src="js/taffy.js" type="text/javascript"></script>
+        <script src="js/scrollglue.js" type="text/javascript"></script>
+        <script src="js/notify.js" type="text/javascript"></script>
+        <script src="js/FileSaver.min.js" type="text/javascript"></script>
+        <script src="js/jszip.min.js" type="text/javascript"></script>
+    </head>
+    <body>
+        <div id="wrapper" ng-class="{toggled:pltog}">
+            
+            <div id="sidebar-wrapper" style="overflow:hidden;background-color:transparent;">
+                
+                <!--header with settings-->
+                <div class="text-center" style="background-color:black;">
+                    <!--settings toggles-->
+                    <div class="btn-group">
+                        <label class="btn btn-primary" 
+                                ng-class="{'btn-success': portchecked}"
+                                ng-model="portchecked" 
+                                uib-btn-checkbox 
+                                uib-btn-checkbox-true="1" 
+                                uib-btn-checkbox-false="0"
+                                popover-placement="bottom" 
+                                popover-trigger="mouseenter" 
+                                popover="Portraits On/Off" 
+                                popover-append-to-body='true'>
+                            <i class="fa fa-user"></i>
+                        </label>
+                        <label class="btn btn-primary" 
+                               ng-class="{'btn-success': chattimestamp}"
+                               ng-model="chattimestamp" 
+                               uib-btn-checkbox 
+                               uib-btn-checkbox-true="1" 
+                               uib-btn-checkbox-false="0"
+                                popover-placement="bottom" 
+                                popover-trigger="mouseenter" 
+                                popover="Timestamps On/Off" 
+                                popover-append-to-body='true'>
+                            <i class="fa fa-hourglass-half"></i>
+                        </label>
+                        <label class="btn btn-primary" 
+                               ng-class="{'btn-success': bell}"
+                               ng-model="bell" 
+                               uib-btn-checkbox 
+                               uib-btn-checkbox-true="1" 
+                               uib-btn-checkbox-false="0"
+                                popover-placement="bottom" 
+                                popover-trigger="mouseenter" 
+                                popover="PM Bell On/Off" 
+                                popover-append-to-body='true'>
+                            <i class="fa fa-bell-o"></i>
+                        </label>
+                        <label class="btn btn-primary" 
+                               disabled="disabled" 
+                               ng-class="{'btn-success': notifyPermission}"
+                               ng-model="notifyPermission" 
+                               uib-btn-checkbox 
+                               uib-btn-checkbox-true="1" 
+                               uib-btn-checkbox-false="0"
+                                popover-placement="bottom" 
+                                popover-trigger="mouseenter" 
+                                popover="Notifications On/Off" 
+                                popover-append-to-body='true'>
+                            <i class="fa fa-paper-plane-o"></i>
+                        </label>
+                        <label class="btn btn-primary" 
+                               ng-class="{'btn-success': taberiffic}"
+                               ng-model="taberiffic" 
+                               uib-btn-checkbox 
+                               uib-btn-checkbox-true="1" 
+                               uib-btn-checkbox-false="0"
+                                popover-placement="bottom" 
+                                popover-trigger="mouseenter" 
+                                popover="PM Tabs On/Off" 
+                                popover-append-to-body='true'>
+                            <i class="fa fa-bar-chart fa-rotate-180"></i>
+                        </label>
+                        <label style="cursor: pointer;" 
+                               class="btn btn-primary" 
+                               ng-click="exportChatlog()" 
+                                popover-placement="bottom" 
+                                popover-trigger="mouseenter" 
+                                popover="Save chat Log" 
+                                popover-append-to-body='true'>
+                            <i class="fa fa-file-archive-o"></i>
+                        </label>
+                    </div>
+                    
+                    <!--channel mute-->
+                    <ui-select multiple ng-model="channels.muted" theme="select2" ng-disabled="disabled" style="width: 100%;">
+                        <ui-select-match placeholder="Select channels to ignore...">{{$item.channel}}</ui-select-match>
+                        <ui-select-choices repeat="channel.code as channel in channels.full">
+                          <div ng-bind-html="channel.channel"></div>
+                        </ui-select-choices>
+                      </ui-select>
+                    
+                    <!--player list search-->
+                    <input ng-model="searchText" class="form-control" placeholder="Player Search">
+                </div>
+
+                <!--list of players per server-->
+                <div id="plist">
+                    <table width=100% style="background-color:black">
+                        <!--server list-->
+                        <tr ng-repeat-start="server in playerList">
+                            <td style="cursor: pointer;" ng-click="server.expanded = !server.expanded" class="PlayerServer">
+                                {{server.name}} <span class="badge">{{pfilter.length}}</span>
+                            </td>
+                        </tr>
+                        <!--player list-->
+                        <tr ng-show="server.expanded" ng-repeat-end="">
+                            <td>
+                                <div style="max-height:30em;overflow:auto">
+                                    <table width=100%>
+                                        <!--player row-->
+                                        <tr ng-repeat="player in pfilter = (server.players | filter:searchText)" ng-class="{igPlist:player.ignore}">
+                                            <td>
+                                                <!--functions menu-->
+                                                <span uib-dropdown dropdown-append-to-body>
+                                                    <a href id="simple-dropdown" class="plistItem" uib-dropdown-toggle>
+                                                        <i class="fa fa-angle-down"></i>
+                                                    </a>
+                                                  <ul class="uib-dropdown-menu" aria-labelledby="simple-dropdown">
+                                                      <li>
+                                                          <a href="#">
+                                                            <i class="fa fa-commenting-o" style="cursor: pointer;" ng-click="setPM(player)" ng-show="loginshow"> PM</i>
+                                                          </a>
+                                                      </li>
+                                                      <li>
+                                                          <a href="#">
+                                                              <i class="fa fa-search" style="cursor: pointer;" ng-click="showPort(player)" data-toggle="modal" data-target="#bioModal"> Zoom Portrait.</i>
+                                                          </a>
+</li>
+                                                      <li ng-if="player.pcName.length">
+                                                          <a href="#">
+                                                              <i class="fa fa-bars" style="cursor: pointer;" ng-click="showBio(player)" data-toggle="modal" data-target="#bioModal"> View Bio.</i>
+                                                          </a>
+</li>
+                                                      <li ng_if="!player.fnd">
+                                                          <a href="#">
+                                                              <i class="fa fa-heart-o" style="cursor: pointer;" ng-click="addFriend(player)"> Friend</i>
+                                                          </a>
+</li>
+                                                      <li ng_if="player.fnd">
+                                                          <a href="#">
+                                                              <i class="fa fa-heart" style="cursor: pointer;" ng-click="remFriend(player)"> Unfriend</i>
+                                                          </a>
+</li>
+                                                      <li ng_if="!player.ignore">
+                                                          <a href="#">
+                                                              <i class="fa fa-minus" style="cursor: pointer;" ng-click="mutePlayer(player)"> Ignore</i>
+                                                          </a>
+</li>
+                                                      <li ng_if="player.ignore">
+                                                          <a href="#">
+                                                              <i class="fa fa-check" style="cursor: pointer;" ng-click="unmutePlayer(player)"> Un-Ignore</i>
+                                                          </a>
+</li>
+                                                      <li>
+                                                          <a href="#">
+                                                              <i class="fa fa-users" style="cursor: pointer;" ng-click="plist(player)" data-toggle="modal" data-target="#charListModal"> Other Chars.</i>
+                                                          </a>
+</li>
+                                                  </ul>
+                                                </span>
+                                                <!--player/char-->
+                                                <span style="cursor: pointer;"
+                                                      ng-class="{sinfarfriend:player.fnd}" 
+                                                      ng-show="!player.pcName.length" 
+                                                      ng-click="setPM(player)">
+                                                    <!--portrait-->
+                                                    <img ng-src="http://nwn.sinfar.net{{ player.portrait }}" class="img-circle" ng-if="portchecked"/>
+                                                    {{player.playerName}}
+                                                </span>
+                                                <span style="cursor: pointer;"
+                                                    ng-class="{'sinfarfriend':player.fnd}" 
+                                                    ng-click="setPM(player)"
+                                                    ng-if="player.pcName.length" 
+                                                    popover-placement="left" 
+                                                    popover-trigger="mouseenter" 
+                                                    popover="{{player.playerName}}" 
+                                                    popover-append-to-body='true'>
+                                                    {{player.pcName}}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <div id="page-content-wrapper">
+                <!--login form-->
+                <div id="login" ng-show="!loginshow" style="width:40%;margin:auto;top:20%;">
+                    Sinfar Web Client Chat<br>
+                    <input type="text" name="player_name" class="form-control" placeholder="Player Name" ng-model="loginplayer" /><br>
+                    <input id="input-login-password" type="password" name="password" class="form-control" placeholder="Password" ng-model="loginpass" ng-keypress="$event.keyCode === 13 && loginclk()"/><br>
+                    <button type="button" class="btn btn-primary" ng-model="login" style="cursor: pointer;" ng-click="loginclk()">Submit</button>
+                </div>
+
+                <!--chat area-->
+                <div id="messagesdiv" ng-show="loginshow">
+                    <div id="chat" scroll-glue style="min-height:100%;">
+                        <!--chat messages-->
+                        <div scroll-glue style="width:100%;height:94%;overflow:auto;" ng-if="!taberiffic">
+                        <div ng-repeat="m in cmessages" 
+                             class="chat-channel-{{m.channel}}" 
+                             ng-class="{'channel-mute': channels.muted.indexOf({{m.channel}})>-1, 'ignorePlayer':m.igmsg}"
+                             style="width:100%">
+                            <blockquote class="quote-channel-{{m.channel}}" 
+                                        style="padding:0 10px; margin:0 0 5px">
+                                <footer>
+                                    <i class="fa fa-times-circle" id="{{m.$$hashKey}}" remove-Message></i>
+                                    <span style="cursor: pointer;" ng-click="setPM(m)">
+                                        <span ng-show="portchecked">
+                                            <img ng-src="http://nwn.sinfar.net{{m.fromPortrait}}" class="img-circle">
+                                        </span>
+                                        <span class="span-chat-message-from-pc-name">
+                                            <span ng-class="{sinfarfriend:m.fndmsg}" 
+                                                  uib-tooltip="{{m.fromPlayerName}}"
+                                                  tooltip-placement="right"
+                                                  tooltip-trigger="mouseenter"
+                                                  tooltip-enable="m.fromPCName" 
+                                                  ng-bind="m.fromName">
+                                            </span>
+                                        </span>
+                                    </span>
+                                    <cite ng-show="chattimestamp">
+                                        <span ng-bind="m.timestamp"></span>
+                                    </cite>
+                                </footer>
+                                <span class="span-chat-message" ng-bind-html="m.message" style=""></span>
+                            </blockquote>
+                        </div>
+                    </div>
+                        <uib-tabset ng-if="taberiffic">
+                            <uib-tab active="messagesList.chatLog.active" select="chatTabSwitch('NewLog')">
+                              <uib-tab-heading>
+                                Chat Log <span class="badge" ng-show="messagesList.chatLog.count" ng-bind="messagesList.chatLog.count"></span>
+                              </uib-tab-heading>
+                                <div scroll-glue style="width:100%;height:90%;overflow:auto;">
+                                    <!--messages-->
+                                    <div ng-repeat="m in messagesList.chatLog.messages" 
+                                         class="chat-channel-{{m.channel}}" 
+                                         ng-class="{'channel-mute': channels.muted.indexOf({{m.channel}})>-1, 'ignorePlayer':m.igmsg}"
+                                         style="width:100%">
+                                        <blockquote class="quote-channel-{{m.channel}}" 
+                                                    style="padding:0 10px; margin:0 0 5px">
+                                            <!--from line-->
+                                            <footer>
+                                                <i class="fa fa-times-circle" id="{{m.$$hashKey}}" remove-Message></i>
+                                                <span style="cursor: pointer;" ng-click="setPM(m)">
+                                                    <span ng-show="portchecked">
+                                                        <img ng-src="http://nwn.sinfar.net{{m.fromPortrait}}" class="img-circle">
+                                                    </span>
+                                                    <span class="span-chat-message-from-pc-name">
+                                                        <span ng-class="{sinfarfriend:m.fndmsg}" 
+                                                              uib-tooltip="{{m.fromPlayerName}}"
+                                                              tooltip-placement="right"
+                                                              tooltip-trigger="mouseenter"
+                                                              tooltip-enable="m.fromPCName"
+                                                              ng-bind="m.fromName">
+                                                        </span>
+                                                    </span>
+                                                </span>
+                                                <!--timestamp-->
+                                                <cite ng-show="chattimestamp">
+                                                    <span ng-bind="m.timestamp"></span>
+                                                </cite>
+                                            </footer>
+                                            <!--message-->
+                                            <span class="span-chat-message" ng-bind-html="m.message" style=""></span>
+                                        </blockquote>
+                                    </div>
+
+                                </div>
+                            </uib-tab>
+                            <uib-tab ng-repeat="(player, msg) in messagesList.pms" id="{{player}}" active="messagesList.pms[player].active" select="chatTabSwitch(player)">
+                              <uib-tab-heading>
+                                  <span ng-bind="player"></span> 
+                                  <i class="fa fa-times-circle" style="cursor: pointer;" ng-click="removeTab($event, $index, player)"></i>
+                                  <span class="badge" ng-show="messagesList.pms[player].count"ng-bind="messagesList.pms[player].count"></span>
+                              </uib-tab-heading>
+                                <div scroll-glue style="width:100%;height:90%;overflow:auto;">
+                                    <!--messages-->
+                                    <div ng-repeat="m in msg.messages" 
+                                         class="chat-channel-{{m.channel}}" 
+                                         ng-class="{'channel-mute': channels.muted.indexOf({{m.channel}})>-1, 'ignorePlayer':m.igmsg}"
+                                         style="width:100%">
+                                        <blockquote class="quote-channel-{{m.channel}}" 
+                                                    style="padding:0 10px; margin:0 0 5px">
+                                            <!--from line-->
+                                            <footer>
+                                                <i class="fa fa-times-circle" id="{{m.$$hashKey}}" remove-Message></i>
+                                                <span style="cursor: pointer;" ng-click="setPM(m)">
+                                                    <span ng-show="portchecked">
+                                                        <img ng-src="http://nwn.sinfar.net{{m.fromPortrait}}" class="img-circle">
+                                                    </span>
+                                                    <span class="span-chat-message-from-pc-name">
+                                                        <span ng-class="{sinfarfriend:m.fndmsg}" 
+                                                              uib-tooltip="{{m.fromPlayerName}}"
+                                                              tooltip-placement="right"
+                                                              tooltip-trigger="mouseenter"
+                                                              tooltip-enable="m.fromPCName" 
+                                                              ng-bind="m.fromName">
+                                                        </span>
+                                                    </span>
+                                                </span>
+                                                <!--timestamp-->
+                                                <cite ng-show="chattimestamp">
+                                                    <span ng-bind="m.timestamp"></span>
+                                                </cite>
+                                            </footer>
+                                            <!--message-->
+                                            <span class="span-chat-message" ng-bind-html="m.message" style=""></span>
+                                        </blockquote>
+                                    </div>
+
+                                </div>
+                            </uib-tab>
+                        </uib-tabset>
+                        <!--message submit area-->
+                        <table id="table-action-bar" cellspacing="0" cellpadding="0" >
+                            <tr>
+                                <td ng-model="selChannel" id="td-slect-channel">
+                                    <select name="channel" id="select-channel" ng-model="chatMessageChannel">
+                                        <option value="talk">Talk:</option>
+                                        <option value="whisper">Whisper:</option>
+                                        <option value="quiet">Quiet:</option>
+                                        <option value="silent">Silent:</option>
+                                        <option value="yell">Yell:</option>
+                                        <option value="party">Party:</option>
+                                        <option value="dm">DM:</option>
+                                        <option value="ooc">OOC:</option>
+                                        <option value="event">Event:</option> 
+                                        <option value="action">Action:</option> 
+                                        <option value="pvp">PvP:</option>
+                                        <option value="sex">Sex:</option> 
+                                        <option value="ffa">FFA:</option>
+                                        <option value="build">Builders:</option>
+                                    </select>
+                                </td>
+                                <td id="td-chat-bar">
+                                    <div contenteditable id="textarea-chat-bar" ng-keydown="$event.keyCode === 13 && sChat()" ng-keyup="$event.keyCode === 13 && msgReset()"></div>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <!--player list button-->
+                <span id="cd-btn" style="cursor: pointer;" ng-click="pltog=!pltog">
+                    Player List <i class="fa fa-angle-double-right"></i><i class="fa fa-angle-double-down"></i>
+                </span>
+            </div>
+    
+            <audio id="audio1"><source src="http://sinfar.net/sounds/button-9.wav"></source></audio>
+            <!--controler js-->
+            <script src="js/angularclient.js"></script>
+        </div> 
+    </body>
+</html>

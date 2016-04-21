@@ -1,0 +1,51 @@
+{
+    "nodejs": true,
+    "node-main": "_scripts\\node.js",
+    "version": "1.3.8",
+    "window": {
+        "always-on-top": false,
+        "width": 800,
+        "title": "Sinfar Chat Client",
+        "show_in_taskbar": true,
+        "visible": true,
+        "kiosk_emulation": false,
+        "show": true,
+        "exe_icon": "_img\\icon32.png",
+        "transparent": false,
+        "as_desktop": false,
+        "height": 600,
+        "kiosk": false,
+        "position": "center",
+        "frame": true,
+        "resizable": true,
+        "icon": "_img\\icon32.png",
+        "fullscreen": false,
+        "toolbar": false
+    },
+    "single-instance": true,
+    "webexe_settings": {
+        "linux-x32": false,
+        "sdk_build": false,
+        "mac-x32": false,
+        "export_dir": "C:\\Users\\vulpi\\Downloads\\sinfar",
+        "windows-x32": true,
+        "nw_version": "0.12.0",
+        "custom_script": "",
+        "download_dir": "C:/Users/vulpi/AppData/Local/Web2Executable/Web2Executable/files/downloads",
+        "mac-x64": false,
+        "force_download": false,
+        "windows-x64": true,
+        "linux-x64": false,
+        "uncompressed_folder": false,
+        "nw_compression_level": 0
+    },
+    "main": "index.html",
+    "name": "sinfar_chat_client",
+    "additional_trust_anchors": [],
+    "app_name": "Sinfar Chat Client",
+    "webkit": {
+        "page-cache": false,
+        "plugin": true,
+        "java": false
+    }
+}

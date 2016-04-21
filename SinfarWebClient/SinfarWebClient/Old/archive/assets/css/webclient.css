@@ -1,0 +1,583 @@
+
+html, body
+{
+	width:100%;
+	height:100%;
+	margin:0;
+	padding:0;
+	overflow:hidden;
+}
+form
+{
+	margin:0;
+	padding:0;	
+}
+body
+{
+	background-color:#000;
+	color:#FFF;
+	font-family:Tahoma, Geneva, sans-serif;
+}
+#select-channel, #textarea-chat-bar
+{
+	background-color:#000;
+	color:#FFF;
+	font-size:16px;
+	font-family:Tahoma, Geneva, sans-serif;
+	
+	paddign:0;
+	margin:0;
+	border:0;
+	
+	-moz-appearance:none;
+	-webkit-appearance:none;
+	
+	outline:0;
+}
+#select-channel
+{
+}
+#textarea-chat-bar
+{
+	width:100%;
+	height:100%;
+	resize:none;
+	display:block;
+}
+#div-chat-messages
+{
+	position:absolute;
+	bottom:35px;
+	top:7px;
+	overflow:auto;
+  width:100%;
+}
+#div-players-list
+{
+	right:0;
+	width:100%;
+  height:90%;
+	top:0;
+	overflow-y:auto;
+	overflow-x: hidden;
+}
+#table-players-list 
+{
+	width:100%;
+	border:0;
+}
+#table-players-list div[data-player-id] span
+{
+	vertical-align:middle;
+	text-align:left;
+	word-wrap:break-word;
+	max-width:110px;
+}
+#table-players-list div[data-player-id]
+{
+	cursor:pointer;	
+}
+#table-players-list div[data-player-id]:hover
+{
+	opacity:0.7;
+}
+#table-players-list player-list-name
+{
+	width:100%;
+}
+.players-list-category{
+  text-align: center;
+}
+.players-list-category span
+{
+	text-align:center;
+	font-weight:bold;
+}
+#table-chat-messages-container
+{
+	width:100%;
+	height:100%;
+}
+#td-chat-messages-container
+{
+	width:100%;
+	height:100%;
+	vertical-align:bottom;
+}
+#table-action-bar
+{
+	height:35px;
+	width:100%;
+	bottom:0;
+	position:absolute;
+}
+#table-action-bar td
+{
+	border-style:solid;
+	-moz-border-image:url(http://nwn.sinfar.net/images/nwn-border-bg.png) 6 6;
+	-webkit-border-image:url(http://nwn.sinfar.net/images/nwn-border-bg.png) 6 6;
+	-o-border-image:url(http://nwn.sinfar.net/images/nwn-border-bg.png) 6 6;
+	border-image:url(http://nwn.sinfar.net/images/nwn-border-bg.png) 6 6;	
+}
+#td-slect-channel
+{
+	vertical-align:top;
+	
+	border-width:7px;
+	border-right-width:0;
+	
+	padding:0;
+	margin:0;
+	height:0;
+	width:0;
+}
+#td-chat-bar
+{
+	border-width:6px;
+	
+	height:100%;
+	width:100%;
+}
+#td-config
+{
+	border-width:0;
+	height:100%;	
+	vertical-align:middle;
+	text-align:center;
+}
+#btn-config
+{
+	margin:5px;
+	
+	background-image:url(http://nwn.sinfar.net/images/nwn-button-options.png);
+	background-repeat:no-repeat;
+	background-position:center;
+	background-size:45px;
+	
+	/*border-width:6px;
+	border-style:solid;
+	-moz-border-image:url(images/nwn-border-bg.png) 6 6;
+	-webkit-border-image:url(images/nwn-border-bg.png) 6 6;
+	-o-border-image:url(images/nwn-border-bg.png) 6 6;
+	border-image:url(images/nwn-border-bg.png) 6 6;*/
+}
+#btn-config:hover
+{
+	background-image:url(http://nwn.sinfar.net/images/nwn-button-options-hover.png);
+}
+#btn-config:active
+{
+	background-image:url(http://nwn.sinfar.net/images/nwn-button-options-active.png);
+}
+.img-chat-message
+{
+	height:50px;
+	width:32px;
+	vertical-align: middle;
+	padding:1px;
+}
+.img-chat-message:hover
+{
+	padding:0;
+	border-width:1px;
+	border-color:#FFF;
+}
+.td-chat-message
+{
+	width:100%;	
+}
+.translated-chat-message
+{
+	font-style:italic;
+	font-size:12px;
+}
+.span-chat-message-from-pc-name /*player name in message*/
+{
+	color:#8F7FFF;	
+}
+.chat-channel-2, .chat-channel-18 /*Shout - Non mute*/
+{
+	color:#FFEF50;	
+}
+.chat-channel-3, .chat-channel-19 /*Whisper*/
+{
+	color:#808080;	
+}
+.chat-channel-4, .chat-channel-20 /*tells*/
+{
+	color:#20FF20;	
+}
+.chat-channel-30 /*Yell*/
+{
+	color:#D92324;	
+}
+.chat-channel-31 /*Quiet*/
+{
+	color:#404040;	
+}
+.chat-channel-32 /*Silent*/
+{
+	color:#303030;	
+}
+.chat-channel-101 /*DM*/
+{
+	color:#f67271;	
+}
+.chat-channel-102 /*Build*/
+{
+	color:#b7f520;	
+}
+.chat-channel-104 /*Event*/
+{
+	color:#ab23f2;	
+}
+.chat-channel-108 /*Sex*/
+{
+	color:#f520e1;	
+}
+.chat-channel-132 /*FFA*/
+{
+	color:#20bff0;	
+}
+.chat-channel-116 /*Action*/
+{
+	color:#b56a23;	
+}
+.chat-channel-164 /*OOC*/
+{
+	color:#b1a2bd;	
+}
+.chat-channel-228 /*PVP*/
+{
+	color:#fe5f2e;	
+}
+#settins-dialog-box
+{
+	display:none;
+}
+#select-translate-to
+{
+
+}
+.chat-message-info
+{
+	color:#0F0;	
+}
+.chat-message-error
+{
+	color:#F00;	
+}
+.chat-channel-ignore{
+	display: none;
+}
+#container{
+	text-align: left;
+	/*need to adjust link properties. fontsize changes when hovering over a portrait, causing chat message visual jitter.*/
+}
+#panel .content{
+	padding-top: 35px;
+	width: 100%;
+}
+
+
+
+
+
+
+
+
+
+.cd-panel {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  visibility: hidden;
+  -webkit-transition: visibility 0s 0.6s;
+  -moz-transition: visibility 0s 0.6s;
+  transition: visibility 0s 0.6s;
+  z-index: 1000;
+}
+.cd-panel::after {
+  /* overlay layer */
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  cursor: pointer;
+  -webkit-transition: background 0.3s 0.3s;
+  -moz-transition: background 0.3s 0.3s;
+  transition: background 0.3s 0.3s;
+}
+.cd-panel.is-visible {
+  visibility: visible;
+  -webkit-transition: visibility 0s 0s;
+  -moz-transition: visibility 0s 0s;
+  transition: visibility 0s 0s;
+}
+.cd-panel.is-visible::after {
+  background: rgba(0, 0, 0, 0.6);
+  -webkit-transition: background 0.3s 0s;
+  -moz-transition: background 0.3s 0s;
+  transition: background 0.3s 0s;
+}
+.cd-panel.is-visible .cd-panel-close::before {
+  -webkit-animation: cd-close-1 0.6s 0.3s;
+  -moz-animation: cd-close-1 0.6s 0.3s;
+  animation: cd-close-1 0.6s 0.3s;
+}
+.cd-panel.is-visible .cd-panel-close::after {
+  -webkit-animation: cd-close-2 0.6s 0.3s;
+  -moz-animation: cd-close-2 0.6s 0.3s;
+  animation: cd-close-2 0.6s 0.3s;
+}
+
+@-webkit-keyframes cd-close-1 {
+  0%, 50% {
+    -webkit-transform: rotate(0);
+  }
+  100% {
+    -webkit-transform: rotate(45deg);
+  }
+}
+@-moz-keyframes cd-close-1 {
+  0%, 50% {
+    -moz-transform: rotate(0);
+  }
+  100% {
+    -moz-transform: rotate(45deg);
+  }
+}
+@keyframes cd-close-1 {
+  0%, 50% {
+    -webkit-transform: rotate(0);
+    -moz-transform: rotate(0);
+    -ms-transform: rotate(0);
+    -o-transform: rotate(0);
+    transform: rotate(0);
+  }
+  100% {
+    -webkit-transform: rotate(45deg);
+    -moz-transform: rotate(45deg);
+    -ms-transform: rotate(45deg);
+    -o-transform: rotate(45deg);
+    transform: rotate(45deg);
+  }
+}
+@-webkit-keyframes cd-close-2 {
+  0%, 50% {
+    -webkit-transform: rotate(0);
+  }
+  100% {
+    -webkit-transform: rotate(-45deg);
+  }
+}
+@-moz-keyframes cd-close-2 {
+  0%, 50% {
+    -moz-transform: rotate(0);
+  }
+  100% {
+    -moz-transform: rotate(-45deg);
+  }
+}
+@keyframes cd-close-2 {
+  0%, 50% {
+    -webkit-transform: rotate(0);
+    -moz-transform: rotate(0);
+    -ms-transform: rotate(0);
+    -o-transform: rotate(0);
+    transform: rotate(0);
+  }
+  100% {
+    -webkit-transform: rotate(-45deg);
+    -moz-transform: rotate(-45deg);
+    -ms-transform: rotate(-45deg);
+    -o-transform: rotate(-45deg);
+    transform: rotate(-45deg);
+  }
+}
+.cd-panel-header {
+  position: fixed;
+  width: 90%;
+  height: 50px;
+  background: rgba(255, 255, 255, 0.96);
+  z-index: 2;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.08);
+  -webkit-transition: top 0.3s 0s;
+  -moz-transition: top 0.3s 0s;
+  transition: top 0.3s 0s;
+}
+.cd-panel-header h1 {
+  font-weight: bold;
+  color: #89ba2c;
+  padding-left: 5%;
+}
+.from-right .cd-panel-header, .from-left .cd-panel-header {
+  top: -50px;
+}
+.from-right .cd-panel-header {
+  right: 0;
+}
+.from-left .cd-panel-header {
+  left: 0;
+}
+.is-visible .cd-panel-header {
+  top: 0;
+  -webkit-transition: top 0.3s 0.3s;
+  -moz-transition: top 0.3s 0.3s;
+  transition: top 0.3s 0.3s;
+}
+  .cd-panel-header {
+    width: 30%;
+  }
+
+.cd-panel-close {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: 60px;
+  /* image replacement */
+  display: inline-block;
+  overflow: hidden;
+  text-indent: 100%;
+  white-space: nowrap;
+}
+.cd-panel-close::before, .cd-panel-close::after {
+  /* close icon created in CSS */
+  position: absolute;
+  top: 22px;
+  left: 20px;
+  height: 3px;
+  width: 20px;
+  background-color: #424f5c;
+  /* this fixes a bug where pseudo elements are slighty off position */
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+.cd-panel-close::before {
+  -webkit-transform: rotate(45deg);
+  -moz-transform: rotate(45deg);
+  -ms-transform: rotate(45deg);
+  -o-transform: rotate(45deg);
+  transform: rotate(45deg);
+}
+.cd-panel-close::after {
+  -webkit-transform: rotate(-45deg);
+  -moz-transform: rotate(-45deg);
+  -ms-transform: rotate(-45deg);
+  -o-transform: rotate(-45deg);
+  transform: rotate(-45deg);
+}
+.no-touch .cd-panel-close:hover {
+  background-color: #424f5c;
+}
+.no-touch .cd-panel-close:hover::before, .no-touch .cd-panel-close:hover::after {
+  background-color: #ffffff;
+  -webkit-transition-property: -webkit-transform;
+  -moz-transition-property: -moz-transform;
+  transition-property: transform;
+  -webkit-transition-duration: 0.3s;
+  -moz-transition-duration: 0.3s;
+  transition-duration: 0.3s;
+}
+.no-touch .cd-panel-close:hover::before {
+  -webkit-transform: rotate(220deg);
+  -moz-transform: rotate(220deg);
+  -ms-transform: rotate(220deg);
+  -o-transform: rotate(220deg);
+  transform: rotate(220deg);
+}
+.no-touch .cd-panel-close:hover::after {
+  -webkit-transform: rotate(135deg);
+  -moz-transform: rotate(135deg);
+  -ms-transform: rotate(135deg);
+  -o-transform: rotate(135deg);
+  transform: rotate(135deg);
+}
+
+.cd-panel-container {
+  position: fixed;
+  width: 90%;
+  height: 100%;
+  top: 0;
+  background: #272727;
+  z-index: 1;
+  -webkit-transition-property: -webkit-transform;
+  -moz-transition-property: -moz-transform;
+  transition-property: transform;
+  -webkit-transition-duration: 0.3s;
+  -moz-transition-duration: 0.3s;
+  transition-duration: 0.3s;
+  -webkit-transition-delay: 0.3s;
+  -moz-transition-delay: 0.3s;
+  transition-delay: 0.3s;
+}
+.from-right .cd-panel-container {
+  right: 0;
+  -webkit-transform: translate3d(100%, 0, 0);
+  -moz-transform: translate3d(100%, 0, 0);
+  -ms-transform: translate3d(100%, 0, 0);
+  -o-transform: translate3d(100%, 0, 0);
+  transform: translate3d(100%, 0, 0);
+}
+.from-left .cd-panel-container {
+  left: 0;
+  -webkit-transform: translate3d(-100%, 0, 0);
+  -moz-transform: translate3d(-100%, 0, 0);
+  -ms-transform: translate3d(-100%, 0, 0);
+  -o-transform: translate3d(-100%, 0, 0);
+  transform: translate3d(-100%, 0, 0);
+}
+.is-visible .cd-panel-container {
+  -webkit-transform: translate3d(0, 0, 0);
+  -moz-transform: translate3d(0, 0, 0);
+  -ms-transform: translate3d(0, 0, 0);
+  -o-transform: translate3d(0, 0, 0);
+  transform: translate3d(0, 0, 0);
+  -webkit-transition-delay: 0s;
+  -moz-transition-delay: 0s;
+  transition-delay: 0s;
+}
+  .cd-panel-container {
+    width: 30%;
+  }
+
+.cd-panel-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  padding: 70px 5%;
+  overflow: auto;
+  /* smooth scrolling on touch devices */
+  -webkit-overflow-scrolling: touch;
+}
+.cd-panel-content p {
+  font-size: 14px;
+  font-size: 0.875rem;
+  font-family: "Droid Serif", serif;
+  color: #424f5c;
+  line-height: 1.4;
+  margin: 2em 0;
+}
+.cd-panel-content p:first-of-type {
+  margin-top: 0;
+}
+@media only screen and (min-width: 768px) {
+  .cd-panel-content p {
+    font-size: 16px;
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+}
+#cd-btn{
+  position: absolute;
+  top:7px;
+  right:10px;
+  height:50px;
+}

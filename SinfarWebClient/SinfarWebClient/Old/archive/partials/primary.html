@@ -1,0 +1,27 @@
+﻿<div layout="column">
+    <md-toolbar layout="row" flex>
+        <md-button ng-click="toggleSidenav('primaryNav')" class="md-icon-button">
+            <md-icon aria-label="Menu Toggle">
+                <i class="fa fa-bars"></i>
+            </md-icon>
+        </md-button>
+        <span flex>Sinfar Chat: {{playerName}}</span>
+        <md-button ng-click="toggleSidenav('playerListNav')" class="md-icon-button" ng-if="pNav='chat'">
+            <md-icon aria-label="Player List Toggle">
+                <i class="fa fa-bars"></i>
+            </md-icon>
+        </md-button>
+    </md-toolbar>
+    <div layout="row" flex>
+        <md-sidenav flex layout="column" class="md-sidenav-left" md-component-id="primaryNav">
+            <md-button class="md-accent" ng-click="pNav='settings'">Settings</md-button>
+            <md-button class="md-accent" ng-click="pNav='chat'">Chat Log</md-button>
+            <md-button class="md-accent" ng-repeat="(player,msg) in messagesList.pms">{{player}}</md-button>
+        </md-sidenav>
+        <div layout="column" flex ng-switch on="pNav">
+            <div class="animate-switch" ng-switch-when="settings" settings-view></div>
+            <div class="animate-switch" ng-switch-when="pm" pm-view></div>
+            <div class="animate-switch" ng-switch-default chat-view></div>
+        </div>
+    </div>
+</div>

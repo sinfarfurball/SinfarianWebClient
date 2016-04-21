@@ -1,6 +1,418 @@
 ﻿var linkPrefix = "http://nwn.sinfar.net/";
-var theme;
 //var linkPrefix = "./";
+var theme;
+var gui;
+var win;
+var path;
+var nwDir;
+var profanityFilter;
+function is_nwjs(){
+    try{
+        return (typeof require('nw.gui') !== "undefined");
+    } catch (e){
+        return false;
+    }
+}
+if (is_nwjs()) {
+    gui = require('nw.gui');
+    win = gui.Window.get();
+    path = require('path');
+    nwDir = path.dirname(process.execPath);
+    var chatMenu = new gui.Menu({ type: 'menubar' });
+    var toggleMenu = new gui.Menu();
+    toggleMenu.append(new gui.MenuItem({
+        type: 'checkbox',
+        label: 'Sync 1'
+    }));
+    toggleMenu.append(new gui.MenuItem({
+        type: 'checkbox',
+        label: 'Sync 2'
+    }));
+    chatMenu.append(new gui.MenuItem({
+        type: 'normal',
+        label: 'Toggles',
+        submenu: toggleMenu
+    }));
+    chatMenu.append(new gui.MenuItem({
+        type: 'normal',
+        label: 'Screenshot',
+        click: function () {
+            win.capturePage(function (img) {
+                var base64Data = img.replace(/^data:image\/(png|jpg|jpeg);base64,/, "");
+                require("fs").writeFile("E:\out.png", base64Data, 'base64', function (err) {
+                    console.log(err);
+                });
+            }, 'png');
+        },
+        key: 's',
+        modifiers: 'alt',
+        tooltip: 'Alt+S'
+    }));
+    chatMenu.append(new gui.MenuItem({
+        type: "normal",
+        label: "Toggle Fullscreen",
+        click: function () {
+            win.toggleFullscreen();
+        },
+        key: 'f',
+        modifiers: 'alt',
+        tooltip: 'Alt+F'
+    }));
+    chatMenu.append(new gui.MenuItem({
+        type: "normal",
+        label: "Reload Client",
+        click: function () {
+            win.reload;
+        },
+        key: 'r',
+        modifiers: 'alt',
+        tooltip: 'Alt+R'
+    }));
+    gui.Window.get().menu = chatMenu;
+    win.showDevTools();
+    profanityFilter = require('badwords');
+    messageCleaner = new profanityFilter({
+        "list": [
+        "4r5e",
+        "50 yard cunt punt",
+        "5h1t",
+        "5hit",
+        "a_s_s",
+        "a2m",
+        "a55",
+        "a55hole",
+        "ahole",
+        "alligatorbait",
+        "angie",
+        "ar5e",
+        "arsehole",
+        "ass",
+        "ass fuck",
+        "ass hole",
+        "assbagger",
+        "assbang",
+        "assbanged",
+        "assbangs",
+        "assblaster",
+        "assclown",
+        "asscowboy",
+        "asses",
+        "assfuck",
+        "assfucker",
+        "ass-fucker",
+        "assfukka",
+        "assh0le",
+        "asshat",
+        "assho1e",
+        "asshole",
+        "assholes",
+        "asshore",
+        "assjockey",
+        "asskiss",
+        "asskisser",
+        "assklown",
+        "asslick",
+        "asslicker",
+        "asslover",
+        "assman",
+        "assmaster",
+        "assmonkey",
+        "assmucus",
+        "assmunch",
+        "assmuncher",
+        "asspacker",
+        "asspirate",
+        "asspuppies",
+        "assranger",
+        "asswhole",
+        "asswhore",
+        "asswipe",
+        "asswipes",
+        "azz",
+        "b!tch",
+        "b17ch",
+        "b1tch",
+        "badfuck",
+        "bastard",
+        "bastard",
+        "bastards",
+        "bitch",
+        "bitcher",
+        "bitchers",
+        "bitches",
+        "bitchez",
+        "bitchin",
+        "bitching",
+        "bitchslap",
+        "bitchy",
+        "blow job",
+        "blow me",
+        "blow mud",
+        "blowjob",
+        "blowjobs",
+        "bull shit",
+        "bulldike",
+        "bulldyke",
+        "bullshit",
+        "bullshits",
+        "bullshitted",
+        "bumblefuck",
+        "bumfuck",
+        "butchdike",
+        "butchdyke",
+        "butt fuck",
+        "buttfuck",
+        "butt-fuck",
+        "buttfucker",
+        "butt-fucker",
+        "buttfuckers",
+        "butt-fuckers",
+        "byatch",
+        "damn",
+        "dumass",
+        "dumbass",
+        "dumbasses",
+        "dumbbitch",
+        "dumbfuck",
+        "dyke",
+        "dykes",
+        "f u c k",
+        "f u c k e r",
+        "f.u.c.k",
+        "f_u_c_k",
+        "facefucker",
+        "fack",
+        "fag",
+        "fagg",
+        "fagged",
+        "fagging",
+        "faggit",
+        "faggitt",
+        "faggot",
+        "faggs",
+        "fagot",
+        "fagots",
+        "fags",
+        "fatass",
+        "fatfuck",
+        "fatfucker",
+        "fcuk",
+        "fcuker",
+        "fcuking",
+        "feck",
+        "fecker",
+        "fucck",
+        "fuck",
+        "f-u-c-k",
+        "fucka",
+        "fuckbag",
+        "fuckedup",
+        "fucker",
+        "fuckers",
+        "fuckface",
+        "fuckfest",
+        "fuckfreak",
+        "fuckfriend",
+        "fuckhead",
+        "fuckheads",
+        "fuckher",
+        "fuckin",
+        "fuckina",
+        "fucking",
+        "fuckingbitch",
+        "fuckings",
+        "fuckingshitmotherfucker",
+        "fuckinnuts",
+        "fuckinright",
+        "fuckit",
+        "fuckknob",
+        "fuckme",
+        "fuckmeat",
+        "fuckmehard",
+        "fuckmonkey",
+        "fucknugget",
+        "fucknut",
+        "fuckoff",
+        "fuckpig",
+        "fucks",
+        "fucktard",
+        "fuck-tard",
+        "fucktoy",
+        "fuckup",
+        "fuckwad",
+        "fuckwhit",
+        "fuckwhore",
+        "fuckwit",
+        "fuckyou",
+        "fuk",
+        "fuker",
+        "fukker",
+        "fukkin",
+        "fuks",
+        "fukwhit",
+        "fukwit",
+        "fuuck",
+        "fux",
+        "fux0r",
+        "fvck",
+        "fxck",
+        "god damn",
+        "godammit",
+        "godamn",
+        "godamnit",
+        "goddam",
+        "god-dam",
+        "goddamit",
+        "goddammit",
+        "goddamn",
+        "goddamned",
+        "god-damned",
+        "goddamnes",
+        "goddamnit",
+        "goddamnmuthafucker",
+        "jackass",
+        "jackshit",
+        "mothafuck",
+        "mothafucka",
+        "mothafuckas",
+        "mothafuckaz",
+        "mothafucked",
+        "mothafucker",
+        "mothafuckers",
+        "mothafuckin",
+        "mothafucking",
+        "mothafuckings",
+        "mothafucks",
+        "mother fucker",
+        "mother fucker",
+        "motherfuck",
+        "motherfucka",
+        "motherfucked",
+        "motherfucker",
+        "motherfuckers",
+        "motherfuckin",
+        "motherfucking",
+        "motherfuckings",
+        "motherfuckka",
+        "motherfucks",
+        "mtherfucker",
+        "mthrfucker",
+        "mthrfucking",
+        "muthafecker",
+        "muthafuckaz",
+        "muthafucker",
+        "muthafuckker",
+        "muther",
+        "mutherfucker",
+        "mutherfucking",
+        "muthrfucking",
+        "nigg",
+        "nigg3r",
+        "nigg4h",
+        "nigga",
+        "niggah",
+        "niggaracci",
+        "niggard",
+        "niggarded",
+        "niggarding",
+        "niggardliness",
+        "niggardliness's",
+        "niggardly",
+        "niggards",
+        "niggard's",
+        "niggas",
+        "niggaz",
+        "nigger",
+        "niggerhead",
+        "niggerhole",
+        "niggers",
+        "nigger's",
+        "niggers",
+        "niggle",
+        "niggled",
+        "niggles",
+        "niggling",
+        "nigglings",
+        "niggor",
+        "niggur",
+        "nigr",
+        "nigra",
+        "nigre",
+        "phuck",
+        "phuk",
+        "phuked",
+        "phuking",
+        "phukked",
+        "phukking",
+        "phuks",
+        "phungky",
+        "phuq",
+        "reetard",
+        "retard",
+        "retarded",
+        "rtard",
+        "r-tard",
+        "s.h.i.t.",
+        "s_h_i_t",
+        "sh!+",
+        "sh!t",
+        "sh1t",
+        "s-h-1-t",
+        "shhit",
+        "shi+",
+        "shinola",
+        "shit",
+        "s-h-i-t",
+        "shit fucker",
+        "shitcan",
+        "shitdick",
+        "shite",
+        "shiteater",
+        "shited",
+        "shitey",
+        "shitface",
+        "shitfaced",
+        "shitfit",
+        "shitforbrains",
+        "shitfuck",
+        "shitfucker",
+        "shitfull",
+        "shithapens",
+        "shithappens",
+        "shithead",
+        "shithole",
+        "shithouse",
+        "shiting",
+        "shitings",
+        "shitlist",
+        "shitola",
+        "shitoutofluck",
+        "shits",
+        "shitstain",
+        "shitt",
+        "shitted",
+        "shitter",
+        "shitters",
+        "shitting",
+        "shittings",
+        "shitty",
+        "shitty",
+        "shiz",
+        "stupidfuck",
+        "stupidfucker",
+        "suckmyass",
+        "suckmydick",
+        "suckmytit",
+        "suckoff",
+        "sumofabiatch",
+        "tw4t",
+        "twat",
+        "twathead",
+        "twats",
+        "twatty"
+        ]
+    });
+}
 var app = angular.module('sinfarWebclient', ['ngMaterial', 'ngSanitize', 'ngStorage', 'luegg.directives', 'ngFileUpload']);
 app.run(function ($rootScope) {
     $rootScope._ = window._;
@@ -27,20 +439,16 @@ function componentToHex(c) {
 
 /* Need to fix
  * ----------
- * Dolphin -Android LGV10 Chrome - message display size issues
+ * relogin/reconnect button in standalone?
+ * hak syncing
+ * list of chars (friends list?) to always download and sync new portraits for
  * 
  * When uploading a portrait, need to refresh the one in the char list... also need to error check for bad uploads
  * 
  * Friend login/out notifications - hold for later update
- * profanity filter - hold for later update
  * rp notes - hold for later update
- * option to only show players from certian servers?
- * 
- * group player chars by server
  * 
  * devautologin cookie setup
- * 
- * character encoding issues for in game client
  */
 
 app.config(function ($mdThemingProvider, $mdIconProvider) {
@@ -159,6 +567,7 @@ app.factory('audio', function ($document) {
 });
 
 app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, $timeout, $window, $filter, $mdMedia, $mdDialog, $mdToast, $mdSidenav, $localStorage, Upload, audio) {
+    $scope.isnwjs = is_nwjs();
     var chatFailCount = 0;
     //callbacks
         function flattenSettings (data) {
@@ -229,28 +638,6 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
                     });
 
             }
-        }
-        function tblScrape(table) {
-            var rows = table.rows;
-            var propCells = rows[0].cells;
-            var propNames = [];
-            var results = []
-            var obj, row, cells;
-
-            for (var i = 0, iLen = propCells.length; i < iLen; i++) {
-                propNames.push(propCells[i].textContent || propCells[i].innerText);
-            }
-
-            for (var j = 1, jLen = rows.length; j < jLen; j++) {
-                cells = rows[j].cells;
-                obj = {};
-
-                for (var k = 0; k < iLen; k++) {
-                    obj[propNames[k]] = cells[k].textContent || cells[k].innerText;
-                }
-                results.push(obj);
-            }
-            return results;
         }
         function getOnlinePlayers() {
             $http.get(linkPrefix + "getonlineplayers.php?nocache=" + new Date().getTime())
@@ -326,6 +713,10 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
                 chatmsg.timestamp = new Date();
                 chatmsg.logIndex = $scope.messages.messageIndex;
                 $scope.messages.messageIndex = $scope.messages.messageIndex + 1;
+                if ($scope.isnwjs) {
+                    console.log
+                    chatmsg.filteredmessage = Autolinker.link(messageCleaner.clean(chatmsg.message), { className: "messageLink" });
+                }
                 chatmsg.message = Autolinker.link(chatmsg.message, { className: "messageLink" });
 
                 var msgChannelSettings = $filter('filter')($scope.channels.full, { code: chatmsg.channel }, true)[0]
@@ -359,6 +750,9 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
                     }
                     if (!windowFocused && $scope.settings.bell) {
                         audio.play($scope.settings.pmBell);
+                    }
+                    if (!windowFocused && $scope.isnwjs) {
+                        win.requestAttention(true);
                     }
                 }
                 if ($scope.settings.ignores.indexOf(chatmsg.fromPlayerId) > -1 && $scope.channels.oocList.indexOf(chatmsg.channel)>-1) {
@@ -550,6 +944,11 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
         $scope.messages.messageIndex = 1;
         if (!$localStorage.sinfarSettings) { $localStorage.sinfarSettings = {};}
         $scope.settings = $localStorage.sinfarSettings;
+        if ($scope.isnwjs) {
+            if (!$localStorage.standalone) { $localStorage.standalone = {}; }
+            $scope.standalone = $localStorage.standalone;
+        }
+        if (!$scope.standalone) { $scope.standalone = {};}
         $scope.playerList = {}; //online players. {chatClient:serverPort:[{playerId:playerID,pcId:charID,playerName:playerLogin,pcName:charName,portrait:imageLinkPartial}]
         $scope.servers = [{ id: 1, port: 'web', prefix: 'web', name: "Web Client", expanded: false }]; //list of current servers offered. {id:index (not used),port:serverPort,prefix:shortName (not used),name:serverName}
         $scope.channels = {}; //array for channel lists
@@ -619,12 +1018,17 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
             $scope.settings.awayPMMessage = "I'm currently away, but will respond when I return. Thank you.";
         }
         $scope.onPMTab = false;
+        $scope.filterMouse = false
 
     //inital values
         $scope.player.name = $localStorage.sinfarPlayerName;
         $scope.player.pwd = $localStorage.sinfarPassword;
         $scope.player.rememberMe = $localStorage.sinfarRemember;
         $scope.player.authed = false;
+
+        if (!$scope.standalone.gameLocation) { $scope.standalone.gameLocation = nwDir; }
+        if (!$scope.standalone.server) { $scope.standalone.server = 5121;}
+        
         $http.get(linkPrefix + "get_servers.php?nocache=" + new Date().getTime())
         .then(function (response) {
             if (angular.isArray(response.data)) {
@@ -649,10 +1053,155 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
         var windowFocused = true;
         angular.element($window).bind('focus', function () {
             windowFocused = true;
+            if ($scope.isnwjs) {
+                win.requestAttention(false);
+            }
         }).bind('blur', function () {
             windowFocused = false;
         });
+
     //scoped functions
+        $scope.pmMatch = function (player) {
+            return function (item) {
+                if (item.toPlayerName === player.label || item.fromPlayerName === player.label) {
+                    return item;
+                }
+            };
+        };
+        $scope.login = function () { loginCallback(); }
+        $scope.toggleSidenav = function (nav) {
+            $mdSidenav(nav).toggle();
+        }
+        $scope.tabSelect = function (id) {
+            $scope.channels.currentTab = id;
+            $scope.tabs[id].newMsgs = false;
+            $scope.currentChannels = _.map($filter('filter')($scope.channels.full, { tab: $scope.channels.currentTab, mute: false }), 'code');
+            $scope.onPMTab = false;
+            $scope.chatMessageToSend = "";
+        }
+        $scope.removeTab = function (id) {
+            var tabChannels = _.map($filter('filter')($scope.channels.full, { tab: id }), 'code');
+            angular.forEach(tabChannels, function (channelCode, key) {
+                angular.forEach($filter('filter')($scope.channels.full, { code: channelCode }), function (channel, key) {
+                    channel.tab = 0;
+                });
+            });
+            $scope.channels.currentTab = 0;/*need to check if on remove tab before setting this*/
+            for (var i = 0; i < $scope.tabs.length; i++) {
+                if ($scope.tabs[i].id == id) {
+                    $scope.tabs.splice(i, 1);
+                    break;
+                }
+            }
+        }
+        $scope.removePMTab = function (player) {
+            $scope.onPMTab = false;
+            $scope.channels.currentTab = 0;/*need to check if on remove tab before setting this*/
+            $scope.pmTabs.splice($scope.pmTabs.indexOf(player), 1);
+        }
+        $scope.pmTabSelect = function (player) {
+            $scope.currentChannels = ['4'];
+            $scope.pmPlayer = player;
+            player.newMsgs = false;
+            $scope.onPMTab = true;
+            $scope.chatMessageToSend = '/tp "' + player.label + '"';
+        }
+
+        //chat
+        $scope.getMsgStyle = function (channelcode, messageType) {
+            var style = {};
+            channel = $filter('filter')($scope.channels.full, { code: channelcode })[0].channel;
+            if ($scope.settings.msgColors[channel]) {
+                cval = tinycolor('hsl(' + $scope.settings.msgColors[channel].hue + ',' + $scope.settings.msgColors[channel].sat + '%,' + $scope.settings.msgColors[channel].light + '%)').toHex();
+            } else {
+                cval = 'FFFFFF'
+            }
+            style.color = '#' + cval;
+            switch (messageType) {
+                case 'standard':
+                    if ($scope.standalone.profanityfilter) {
+                        if ($scope.filterMouse) {
+                            style.display = 'auto';
+                        } else {
+                            style.display = 'none';
+                        }
+                    } else {
+                        style.display = 'auto';
+                    }
+                    break;
+                case 'filtered':
+                    if ($scope.standalone.profanityfilter) {
+                        if ($scope.filterMouse) {
+                            style.display = 'none';
+                        } else {
+                            style.display = 'auto';
+                        }
+                    } else {
+                        style.display = 'none';
+                    }
+                    break;
+                default:
+                    style.display = 'auto';
+            }
+            return style;
+        }
+        $scope.setPM = function (player) {
+            var p = "";
+            if ("fromPlayerName" in player) {
+                p = player.fromPlayerName;
+            } else {
+                p = player.playerName;
+            }
+            $scope.chatMessageToSend = '/tp "' + p + '" ';
+            angular.element('#msgBox').focus();
+        }
+        $scope.sChat = function () {//need to add channel from selector (if channel not specified in the post)
+            $scope.msgSending = true;
+            var msgTxt = $scope.chatMessageToSend;
+            if (msgTxt.slice(0, 1) != '/') {
+                msgTxt = $scope.settings.channelSelect + " " + msgTxt;
+            }
+            $http({
+                method: 'POST',
+                url: linkPrefix + "sendchat.php",
+                data: $httpParamSerializerJQLike({ "chat-message": msgTxt, "channel": $scope.settings.channelSelect }),
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+            }).then(
+                function (response) {
+                    //check if message accepted. if not display error. if accepted clear and reset inputs
+                    $scope.chatMessageToSend = "";
+                    if ($scope.onPMTab) {
+                        $scope.chatMessageToSend = '/tp "' + $scope.pmPlayer.label + '"';
+                    }
+                    $scope.msgSending = false;
+                    $timeout(function () { angular.element('#msgBox').focus(); }, 500);
+                },
+                function () {
+                    //transmission error
+                    addAlert('warn', 'Error sending message. Try again.');
+                    $scope.msgSending = false;
+                }
+            );
+        }
+
+        //settings
+        $scope.syncSettings = function () {
+            var settingsTxt = flattenSettings($scope.settings);
+            if (!$scope.settings.pmTabs) { $scope.pmTabs = []; }
+            $http({
+                method: 'POST',
+                url: linkPrefix + "save_settings.php",
+                data: $httpParamSerializerJQLike({ newChat: settingsTxt }),
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+            }).then(
+                    function (response) {
+                        $localStorage.sinfarSettings = $scope.settings;
+                    },
+                    function () {
+                        addAlert('warn', 'Error saving settings.');
+                    }
+                );
+        };
         $scope.exportChatlog = function () {//adjust to join messages and archival messages for export.
             var zip = new JSZip();
             var channel = "";
@@ -710,64 +1259,6 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
             var content = zip.generate({ type: "blob" });
             saveAs(content, "SinfarChatLog.zip");
         }
-        $scope.pmMatch = function( player ) {
-          return function( item ) {
-              if (item.toPlayerName === player.label || item.fromPlayerName === player.label) {
-                  return item;
-              }
-          };
-        };
-        $scope.login = function () { loginCallback(); }
-        $scope.sChat = function () {//need to add channel from selector (if channel not specified in the post)
-            $scope.msgSending = true;
-            var msgTxt = $scope.chatMessageToSend;
-            if(msgTxt.slice(0,1) != '/'){
-                msgTxt = $scope.settings.channelSelect + " " + msgTxt;
-            }
-            $http({
-                method: 'POST',
-                url: linkPrefix + "sendchat.php",
-                data: $httpParamSerializerJQLike({ "chat-message": msgTxt, "channel": $scope.settings.channelSelect }),
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-            }).then(
-                function (response) {
-                    //check if message accepted. if not display error. if accepted clear and reset inputs
-                    $scope.chatMessageToSend = "";
-                    if ($scope.onPMTab) {
-                        $scope.chatMessageToSend = '/tp "' + $scope.pmPlayer.label + '"';
-                    }
-                    $scope.msgSending = false;
-                    $timeout(function () { angular.element('#msgBox').focus(); }, 500);
-                },
-                function () {
-                    //transmission error
-                    addAlert('warn', 'Error sending message. Try again.');
-                    $scope.msgSending = false;
-                }
-            );
-        }
-        $scope.toggleSidenav = function (nav) {
-            $mdSidenav(nav).toggle();
-        }
-        $scope.getMsgStyle = function (channelcode) {
-            channel = $filter('filter')($scope.channels.full, { code: channelcode })[0].channel;
-            if ($scope.settings.msgColors[channel]) {
-                cval = tinycolor('hsl(' + $scope.settings.msgColors[channel].hue + ',' + $scope.settings.msgColors[channel].sat + '%,' + $scope.settings.msgColors[channel].light + '%)').toHex();
-            } else {
-                cval = 'FFFFFF'
-            }
-            return {
-                "color": '#'+cval
-            };
-        }
-        $scope.saveBio = function () {
-            $http({
-                method: 'POST',
-                url: linkPrefix + "char_desc_save.php",
-                data: $httpParamSerializerJQLike({ pc_id: $scope.player.selectedChar.pcID, description: $scope.player.selectedChar.DescriptionOverr[1] }),
-                headers: { 'Content-type': 'application/x-www-form-urlencoded' }
-            }).then(function (response) { console.log(response.data); });
-        }
         $scope.muteChannel = function (muter) {
             $filter('filter')($scope.channels.full, { channel: muter },true)[0].mute = !$filter('filter')($scope.channels.full, { channel: muter }, true)[0].mute;
             $scope.channels.muted = _.map($filter('filter')($scope.channels.full, { tab: $scope.channels.currentTab, mute: true }), 'code');
@@ -777,50 +1268,8 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
             $scope.tabs.push({ id: $scope.tabs.length, label: $scope.customChannelTitle, newMsgs: false });
             $scope.customChannelTitle = '';
         }
-        $scope.tabSelect = function (id) {
-            $scope.channels.currentTab = id;
-            $scope.tabs[id].newMsgs = false;
-            $scope.currentChannels = _.map($filter('filter')($scope.channels.full, { tab: $scope.channels.currentTab, mute: false }), 'code');
-            $scope.onPMTab = false;
-            $scope.chatMessageToSend = "";
-        }
-        $scope.removeTab = function (id) {
-            var tabChannels = _.map($filter('filter')($scope.channels.full, { tab: id}), 'code');
-            angular.forEach(tabChannels, function (channelCode, key) {
-                angular.forEach($filter('filter')($scope.channels.full, { code: channelCode }), function (channel, key) {
-                    channel.tab = 0;
-                });
-            });
-            $scope.channels.currentTab = 0;/*need to check if on remove tab before setting this*/
-            for (var i = 0; i < $scope.tabs.length; i++) {
-                if ($scope.tabs[i].id == id) {
-                    $scope.tabs.splice(i, 1);
-                    break;
-                }
-            }
-        }
-        $scope.removePMTab = function (player) {
-            $scope.onPMTab = false;
-            $scope.channels.currentTab = 0;/*need to check if on remove tab before setting this*/
-            $scope.pmTabs.splice($scope.pmTabs.indexOf(player), 1);
-        }
-        $scope.pmTabSelect = function (player) {
-            $scope.currentChannels = ['4'];
-            $scope.pmPlayer = player;
-            player.newMsgs = false;
-            $scope.onPMTab = true;
-            $scope.chatMessageToSend = '/tp "' + player.label + '"';
-        }
-        $scope.setPM = function (player) {
-            var p = "";
-            if ("fromPlayerName" in player) {
-                p = player.fromPlayerName;
-            } else {
-                p = player.playerName;
-            }
-            $scope.chatMessageToSend = '/tp "' + p + '" ';
-            angular.element('#msgBox').focus();
-        }
+
+        //player menu functions
         $scope.openMenu = function ($mdOpenMenu, ev) {
             $mdOpenMenu(ev);
         };
@@ -836,8 +1285,124 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
         $scope.unmutePlayer = function (id) {
             $scope.settings.ignores.splice($scope.settings.ignores.indexOf(id), 1);
         }
+
+        //more info functions
+        $scope.charInfo = function (pc) {
+            var diagScope = {};
+            diagScope.useFullScreen = ($mdMedia('sm') || $mdMedia('xs'));
+            diagScope.serverList = angular.copy($scope.servers);
+            $http.get(linkPrefix + "getpcs.php?player_id=" + pc.playerId)
+            .then(function (response) {
+                diagScope.charList = response.data.pcs;
+                angular.forEach(diagScope.charList, function (char, key) {
+                    char.portrait = char.portrait.slice(0, -5) + "h.jpg";
+                });
+
+                $mdDialog.show({
+                    fullscreen: diagScope.useFullScreen,
+                    locals: diagScope,
+                    templateUrl: 'partials/moreInfo.html',
+                    clickOutsideToClose: true,
+                    controller: function DialogController($scope, $mdDialog, charList, serverList) {
+                        $scope.charList = charList;
+                        $scope.serverList = serverList;
+                        $scope.currentChar = charList[0];
+                        $scope.charSelect = function (id) {
+                            $scope.currentChar = $filter('filter')($scope.charList, { pcId: id })[0];
+                            var portTest = $scope.currentChar.portrait.split("/").slice(-1)[0].slice(0, 3);
+                            if (portTest == 'po_') {
+                                $scope.currentChar.dlOption = false;
+                            } else {
+                                $scope.currentChar.dlOption = true;
+                            }
+                            $http.get(linkPrefix + "getcharbio.php?pc_id=" + $scope.currentChar.pcId).then(
+                                function (response) {
+                                    $scope.currentBio = response.data;
+                                },
+                                function () {
+                                    $scope.currentBio = "Error getting character description. Try Again.";
+                                }
+                            );
+                        }
+                        $scope.dlport = function () {
+                            var linker = $scope.currentChar.portrait.split("/").slice(-1)[0].slice(0, -5);
+                            //needs to be reworked to handle through angular... window popup = bad juju
+                            $window.open(linkPrefix + "portraits_download_one.php?resref=" + linker);
+                        }
+                    },
+                });
+
+            }, function () {
+                addAlert('warn', 'Error, please try again.');
+            });
+        }
+
+        //player settings functions
+        $scope.pcCharSelect = function (pcid) {
+            $http.get(linkPrefix + "get_character_json.php?pc_id=" + pcid).then(function (pcinfo) {
+                var classQry = [];
+                var featQry = [];
+                var spellQry = [];
+                $scope.player.selectedChar = pcinfo.data[1];
+
+                $scope.player.selectedChar.pcID = pcid;
+                $scope.player.selectedChar.selRace = $scope.sinfarRaces[$scope.player.selectedChar.Race[1]];
+
+                $scope.player.selectedChar.dynClasses = [];
+                $scope.player.selectedChar.dynSkills = [];
+                $scope.player.selectedChar.dynFeats = [];
+                $scope.player.selectedChar.dynSpells = [];
+
+                angular.forEach($scope.player.selectedChar.ClassList[1], function (value, key) {
+                    classQry.push({ charclass: value[1].Class[1], level: value[1].ClassLevel[1] });
+                    angular.forEach(value[1], function (array, keyname) {
+                        if (angular.isArray(array[1]) && array[1][0][1].Spell) {
+                            angular.forEach(array[1], function (spell, spellkey) {
+                                if (spellQry.indexOf(spell[1].Spell[1]) == -1) {
+                                    spellQry.push(spell[1].Spell[1]);
+                                }
+                            });
+                        }
+                    });
+                });
+                $http.get(linkPrefix + "get_classes_info.php?rows=" + angular.toJson(_.map(classQry, 'charclass'))).then(function (response) {
+                    angular.forEach(response.data, function (value, key) {
+                        $scope.player.selectedChar.dynClasses.push({ label: value.name, level: $filter('filter')(classQry, { charclass: key })[0].level });
+                    });
+                });
+                $http.get(linkPrefix + "get_spells_info.php?rows=" + angular.toJson(spellQry)).then(function (response) {
+                    angular.forEach(response.data, function (value, key) {
+                        $scope.player.selectedChar.dynSpells.push({ label: value.name });
+                    });
+                });
+
+                angular.forEach($scope.player.selectedChar.FeatList[1], function (value, key) {
+                    featQry.push({ label: value[1].Feat[1] });
+                });
+                $http.get(linkPrefix + "get_feats_info.php?rows=" + angular.toJson(_.map(featQry, 'label'))).then(function (response) {
+                    angular.forEach(response.data, function (value, key) {
+                        $scope.player.selectedChar.dynFeats.push({ label: value.name });
+                    });
+                });
+
+                $http.get(linkPrefix + "get_skills_info.php").then(function (response) {
+                    angular.forEach(response.data, function (value, key) {
+                        $scope.player.selectedChar.dynSkills.push({ label: value.name, rank: $scope.player.selectedChar.SkillList[1][key][1].Rank[1] });
+                    });
+                });
+
+            });
+        }
         $scope.downloadChar = function (id) {
             $window.open(linkPrefix + "get_character.php?pc_id=" + id);
+        }
+        $scope.saveBio = function () {
+            $http({
+                method: 'POST',
+                url: linkPrefix + "char_desc_save.php",
+                data: $httpParamSerializerJQLike({ pc_id: $scope.player.selectedChar.pcID, description: $scope.player.selectedChar.DescriptionOverr[1] }),
+                headers: { 'Content-type': 'application/x-www-form-urlencoded' }
+            }).then(function (response) { console.log(response.data); });
         }
         $scope.clearPortrait = function () {
             $http({
@@ -868,126 +1433,12 @@ app.controller('mainCtrl', function ($scope, $http, $httpParamSerializerJQLike, 
                     });
             }
         }
-        $scope.charInfo = function (pc) {
-            var diagScope = {};
-            diagScope.useFullScreen = ($mdMedia('sm') || $mdMedia('xs'));
-            diagScope.serverList = angular.copy($scope.servers);
-            $http.get(linkPrefix + "getpcs.php?player_id=" + pc.playerId)
-            .then(function (response) {
-                diagScope.charList = response.data.pcs;
-                angular.forEach(diagScope.charList, function (char, key) {
-                    char.portrait = char.portrait.slice(0, -5) + "h.jpg";
-                });
 
-                $mdDialog.show({
-                    fullscreen: diagScope.useFullScreen,
-                    locals: diagScope,
-                    templateUrl: 'partials/moreInfo.html',
-                    clickOutsideToClose: true,
-                    controller: function DialogController($scope, $mdDialog, charList, serverList) {
-                        $scope.charList = charList;
-                        $scope.serverList = serverList;
-                        $scope.currentChar = charList[0];
-                        $scope.charSelect = function (id) {
-                            $scope.currentChar = $filter('filter')($scope.charList, { pcId: id })[0];
-                            var portTest = $scope.currentChar.portrait.split("/").slice(-1)[0].slice(0, 3);
-                            if (portTest == 'po_'){
-                                $scope.currentChar.dlOption = false;
-                            } else {
-                                $scope.currentChar.dlOption = true;
-                            }
-                            $http.get(linkPrefix + "getcharbio.php?pc_id=" + $scope.currentChar.pcId).then(
-                                function (response) {
-                                    $scope.currentBio = response.data;
-                                },
-                                function () {
-                                    $scope.currentBio = "Error getting character description. Try Again.";
-                                }
-                            );
-                        }
-                        $scope.dlport = function () {
-                            var linker = $scope.currentChar.portrait.split("/").slice(-1)[0].slice(0, -5);
-                            //needs to be reworked to handle through angular... window popup = bad juju
-                            $window.open(linkPrefix + "portraits_download_one.php?resref=" + linker);
-                        }
-                    },
-                });
-
-            },function(){
-                addAlert('warn','Error, please try again.');
-            });
+        //standalone functions
+        $scope.gameLaunch = function () {
+            //need to check for trailing slash
+            //gui.Shell.openItem($scope.standalone.gameLocation + "sinfarx.exe +connect nwn.sinfar.net:" + $scope.standalone.serverSelect);
+            var exec = require('child_process').exec;
+            var game = exec($scope.standalone.gameLocation + "sinfarx.exe +connect nwn.sinfar.net:" + $scope.standalone.serverSelect);
         }
-        $scope.pcCharSelect = function (pcid) {
-            $http.get(linkPrefix + "get_character_json.php?pc_id=" + pcid).then(function (pcinfo) {
-                var classQry = [];
-                var featQry = [];
-                var spellQry = [];
-                $scope.player.selectedChar = pcinfo.data[1];
-
-                $scope.player.selectedChar.pcID = pcid;
-                $scope.player.selectedChar.selRace = $scope.sinfarRaces[$scope.player.selectedChar.Race[1]];
-
-                $scope.player.selectedChar.dynClasses = [];
-                $scope.player.selectedChar.dynSkills = [];
-                $scope.player.selectedChar.dynFeats = [];
-                $scope.player.selectedChar.dynSpells = [];
-
-                angular.forEach($scope.player.selectedChar.ClassList[1], function (value, key) {
-                    classQry.push({ charclass: value[1].Class[1], level: value[1].ClassLevel[1] });
-                    angular.forEach(value[1], function (array, keyname) {
-                        if (angular.isArray(array[1]) && array[1][0][1].Spell) {
-                            angular.forEach(array[1], function (spell, spellkey) {
-                                if (spellQry.indexOf(spell[1].Spell[1]) == -1) {
-                                    spellQry.push(spell[1].Spell[1]);
-                                }
-                            });
-                        }
-                    });
-                });
-                $http.get(linkPrefix + "get_classes_info.php?rows=" + angular.toJson(_.map(classQry,'charclass'))).then(function (response) {
-                    angular.forEach(response.data,function(value,key){
-                        $scope.player.selectedChar.dynClasses.push({ label: value.name, level: $filter('filter')(classQry, {charclass:key})[0].level});
-                    });
-                });
-                $http.get(linkPrefix + "get_spells_info.php?rows=" + angular.toJson(spellQry)).then(function (response) {
-                    angular.forEach(response.data, function (value, key) {
-                        $scope.player.selectedChar.dynSpells.push({ label: value.name });
-                    });
-                });
-
-                angular.forEach($scope.player.selectedChar.FeatList[1], function (value, key) {
-                    featQry.push({ label: value[1].Feat[1] });
-                });
-                $http.get(linkPrefix + "get_feats_info.php?rows=" + angular.toJson(_.map(featQry, 'label'))).then(function (response) {
-                    angular.forEach(response.data, function (value, key) {
-                        $scope.player.selectedChar.dynFeats.push({ label: value.name });
-                    });
-                });
-
-                $http.get(linkPrefix + "get_skills_info.php").then(function (response) {
-                    angular.forEach(response.data, function (value, key) {
-                        $scope.player.selectedChar.dynSkills.push({ label: value.name, rank: $scope.player.selectedChar.SkillList[1][key][1].Rank[1] });
-                    });
-                });
-
-            });
-        }
-    //watches
-        $scope.syncSettings = function(){
-            var settingsTxt = flattenSettings($scope.settings);
-            if (!$scope.settings.pmTabs) { $scope.pmTabs = []; }
-            $http({
-                method: 'POST',
-                url: linkPrefix + "save_settings.php",
-                data: $httpParamSerializerJQLike({ newChat: settingsTxt }),
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-                }).then(
-                    function (response) {
-                        $localStorage.sinfarSettings = $scope.settings;
-                    },
-                    function () {
-                        addAlert('warn', 'Error saving settings.');
-                    }
-                );
-        };
 });
